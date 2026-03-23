@@ -3,3 +3,4 @@
 @.claude/rules/architecture.md
 @.claude/rules/project.md
 @.claude/rules/uiux.md
+@.claude/rules/git.md
