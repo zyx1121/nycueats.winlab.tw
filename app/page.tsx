@@ -1,65 +1,92 @@
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { createClient } from "@/lib/supabase/server";
+import { HeartIcon } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+interface Props {
+  searchParams: Promise<{ area?: string }>;
+}
+
+export default async function HomePage({ searchParams }: Props) {
+  const { area } = await searchParams;
+  const supabase = await createClient();
+
+  if (!area) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("area_id")
+        .eq("id", user.id)
+        .single();
+      if (profile?.area_id) redirect(`/?area=${profile.area_id}`);
+    }
+  }
+
+  // 撈該區域的商家（透過 vendor_areas 關聯）
+  let query = supabase
+    .from("vendors")
+    .select("id, name, description, tags, image_url, rating_good, rating_bad, is_open, vendor_areas!inner(area_id)")
+    .eq("is_active", true);
+
+  if (area) {
+    query = query.eq("vendor_areas.area_id", area);
+  }
+
+  const { data: vendors } = await query.order("name");
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="min-h-[calc(100dvh-4rem)] flex flex-col items-center">
+      <div className="max-w-6xl w-full p-4">
+        {vendors && vendors.length === 0 && (
+          <p className="text-muted-foreground text-center py-16">
+            {area ? "此校區目前沒有合作商家" : "請先選擇校區"}
           </p>
+        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {(vendors ?? []).map((vendor) => {
+            const total = vendor.rating_good + vendor.rating_bad;
+            const rating = total > 0
+              ? ((vendor.rating_good / total) * 5).toFixed(1)
+              : null;
+
+            return (
+              <Link key={vendor.id} href={`/menu/${vendor.id}`}>
+                <div className="hover:scale-[1.02] transition-all duration-200 w-full flex flex-col gap-3">
+                  <AspectRatio className="bg-muted rounded-lg overflow-hidden" ratio={16 / 9}>
+                    {vendor.image_url && (
+                      <Image src={vendor.image_url} alt={vendor.name} fill className="object-cover" />
+                    )}
+                  </AspectRatio>
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-md font-medium">{vendor.name}</p>
+                      {!vendor.is_open && (
+                        <span className="text-xs text-muted-foreground border rounded-full px-2 py-0.5">暫停營業</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {rating && (
+                        <span className="text-sm text-muted-foreground flex items-center gap-1">
+                          <HeartIcon className="size-3" />
+                          {rating} ({total})
+                        </span>
+                      )}
+                      {vendor.tags.map((tag) => (
+                        <span key={tag} className="text-xs text-muted-foreground border rounded-full px-2 py-0.5">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }
