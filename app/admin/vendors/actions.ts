@@ -1,10 +1,10 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { requireRole } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export async function approveVendor(vendorId: string, areaIds: string[]) {
-  const supabase = await createClient();
+  const { supabase } = await requireRole("admin");
   const { error } = await supabase
     .from("vendors")
     .update({ status: "approved", is_active: true })
@@ -24,7 +24,7 @@ export async function approveVendor(vendorId: string, areaIds: string[]) {
 }
 
 export async function rejectVendor(vendorId: string) {
-  const supabase = await createClient();
+  const { supabase } = await requireRole("admin");
   const { error } = await supabase
     .from("vendors")
     .update({ status: "rejected", is_active: false })
@@ -36,7 +36,7 @@ export async function rejectVendor(vendorId: string) {
 }
 
 export async function suspendVendor(vendorId: string) {
-  const supabase = await createClient();
+  const { supabase } = await requireRole("admin");
   const { error } = await supabase
     .from("vendors")
     .update({ status: "suspended", is_active: false })
@@ -48,7 +48,7 @@ export async function suspendVendor(vendorId: string) {
 }
 
 export async function reactivateVendor(vendorId: string) {
-  const supabase = await createClient();
+  const { supabase } = await requireRole("admin");
   const { error } = await supabase
     .from("vendors")
     .update({ status: "approved", is_active: true })
@@ -60,7 +60,7 @@ export async function reactivateVendor(vendorId: string) {
 }
 
 export async function updateVendorAreas(vendorId: string, areaIds: string[]) {
-  const supabase = await createClient();
+  const { supabase } = await requireRole("admin");
   await supabase.from("vendor_areas").delete().eq("vendor_id", vendorId);
   if (areaIds.length > 0) {
     await supabase

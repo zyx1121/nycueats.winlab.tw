@@ -1,12 +1,10 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { requireRole } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export async function updateVendorInfo(formData: FormData) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "未登入" };
+  const { user, supabase } = await requireRole("vendor");
 
   const name = (formData.get("name") as string).trim();
   const description = (formData.get("description") as string).trim();
@@ -28,9 +26,7 @@ export async function updateVendorInfo(formData: FormData) {
 }
 
 export async function updateVendorSchedule(isOpen: boolean, operatingDays: number[]) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "未登入" };
+  const { user, supabase } = await requireRole("vendor");
 
   await supabase
     .from("vendors")
@@ -43,9 +39,7 @@ export async function updateVendorSchedule(isOpen: boolean, operatingDays: numbe
 }
 
 export async function updateVendorImage(imageUrl: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "未登入" };
+  const { user, supabase } = await requireRole("vendor");
 
   await supabase.from("vendors").update({ image_url: imageUrl }).eq("owner_id", user.id);
   revalidatePath("/vendor/profile");

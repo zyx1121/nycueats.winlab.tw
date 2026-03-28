@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { requireRole } from "@/lib/auth";
 
 export type DashboardStats = {
   thisMonth: { orders: number; revenue: number };
@@ -20,7 +20,7 @@ function monthRange(year: number, month: number): { start: string; end: string }
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const supabase = await createClient();
+  const { supabase } = await requireRole("admin");
   const now = new Date();
   const thisMonth = monthRange(now.getFullYear(), now.getMonth());
   const lastMonth = monthRange(now.getFullYear(), now.getMonth() - 1);
@@ -67,7 +67,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 }
 
 export async function getOrderTrend(days: number): Promise<DailyOrderCount[]> {
-  const supabase = await createClient();
+  const { supabase } = await requireRole("admin");
   const now = new Date();
   const start = new Date(now.getTime() - (days - 1) * 86400000).toISOString().slice(0, 10);
 
@@ -92,7 +92,7 @@ export async function getOrderTrend(days: number): Promise<DailyOrderCount[]> {
 }
 
 export async function getTopVendors(limit: number): Promise<RankedItem[]> {
-  const supabase = await createClient();
+  const { supabase } = await requireRole("admin");
 
   const { data } = await supabase
     .from("order_items")
@@ -123,7 +123,7 @@ export async function getTopVendors(limit: number): Promise<RankedItem[]> {
 }
 
 export async function getTopMenuItems(limit: number): Promise<RankedItem[]> {
-  const supabase = await createClient();
+  const { supabase } = await requireRole("admin");
 
   const { data } = await supabase
     .from("order_items")
