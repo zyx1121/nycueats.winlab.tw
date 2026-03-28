@@ -44,34 +44,40 @@ export async function getOrders(
   const hasMore = orders.length > limit;
   const pageOrders = hasMore ? orders.slice(0, limit) : orders;
 
-  const result: OrderSummary[] = [];
-  for (const order of pageOrders) {
-    const { data: items } = await supabase
-      .from("order_items")
-      .select(
-        "id, date, qty, unit_price, picked_up, menu_items(name, vendors(name)), order_item_options(name, price_delta)"
-      )
-      .eq("order_id", order.id)
-      .order("date");
+  const orderIds = pageOrders.map((o) => o.id);
 
-    result.push({
-      id: order.id,
-      status: order.status,
-      created_at: order.created_at,
-      items: (items ?? []).map((i) => ({
-        id: i.id,
-        date: i.date,
-        qty: i.qty,
-        unit_price: i.unit_price,
-        picked_up: i.picked_up,
-        menu_item_name: (i.menu_items as { name: string } | null)?.name ?? "",
-        vendor_name:
-          (i.menu_items as { vendors: { name: string } | null } | null)
-            ?.vendors?.name ?? "",
-        options: (i.order_item_options as { name: string; price_delta: number }[]) ?? [],
-      })),
-    });
+  const { data: allItems } = await supabase
+    .from("order_items")
+    .select(
+      "id, date, qty, unit_price, picked_up, order_id, menu_items(name, vendors(name)), order_item_options(name, price_delta)"
+    )
+    .in("order_id", orderIds)
+    .order("date");
+
+  const itemsByOrder = new Map<string, typeof allItems>();
+  for (const item of allItems ?? []) {
+    const list = itemsByOrder.get(item.order_id) ?? [];
+    list.push(item);
+    itemsByOrder.set(item.order_id, list);
   }
+
+  const result: OrderSummary[] = pageOrders.map((order) => ({
+    id: order.id,
+    status: order.status,
+    created_at: order.created_at,
+    items: (itemsByOrder.get(order.id) ?? []).map((i) => ({
+      id: i.id,
+      date: i.date,
+      qty: i.qty,
+      unit_price: i.unit_price,
+      picked_up: i.picked_up,
+      menu_item_name: (i.menu_items as { name: string } | null)?.name ?? "",
+      vendor_name:
+        (i.menu_items as { vendors: { name: string } | null } | null)
+          ?.vendors?.name ?? "",
+      options: (i.order_item_options as { name: string; price_delta: number }[]) ?? [],
+    })),
+  }));
 
   return { orders: result, hasMore };
 }

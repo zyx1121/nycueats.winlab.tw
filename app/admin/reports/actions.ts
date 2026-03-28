@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { requireRole } from "@/lib/auth";
 
 export type VendorReport = {
   vendor_id: string;
@@ -10,7 +10,7 @@ export type VendorReport = {
 };
 
 export async function getMonthlyReport(year: number, month: number): Promise<VendorReport[]> {
-  const supabase = await createClient();
+  const { supabase } = await requireRole("admin");
 
   const startDate = new Date(year, month - 1, 1).toISOString();
   const endDate = new Date(year, month, 0, 23, 59, 59).toISOString();
