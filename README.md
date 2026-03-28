@@ -1,20 +1,52 @@
 # NYCU Eats
 
-陽明交大校園訂餐平台，供員工向合作廠商預約訂餐。
+陽明交大校園訂餐平台 — 員工向合作商家預約外送餐點，解決廠區用餐疲勞問題。
 
 ## Tech Stack
 
-- **Next.js 16** — App Router
-- **Tailwind CSS 4** + **shadcn/ui**
+- **Next.js 16** — App Router, Server Components
+- **Tailwind CSS 4** + **shadcn/ui** (Radix UI)
 - **Supabase** — Auth (Google OAuth + Email) · Postgres · RLS · Storage
 
-## 功能
+## 已實作功能
 
-- 依校區瀏覽合作廠商與菜單
-- 每日限量預約（Postgres trigger 防止超量）
-- 餐點自訂選項（加購、口味等）
-- 購物車與訂單管理
-- 廠商後台：店家資訊、菜單管理、訂單檢視
+### 員工端
+- 依校區（area）篩選合作商家
+- 瀏覽商家菜單、每日剩餘名額
+- 餐點自訂選項（單選 / 多選，價格加減）
+- 購物車管理（依日期分組、移除品項）
+- 建立預約訂單（Postgres trigger 原子扣量，防止超賣）
+- 個人資料管理（姓名、所屬區域）
+- Google OAuth / Email 登入
+
+### 商家端
+- 店家資訊編輯（名稱、描述、圖片、營業狀態、營業日）
+- 菜單管理（新增 / 編輯 / 刪除 / 上下架）
+- 每日限量名額設定（未來 7 天）
+- 自訂選項組管理（選項群組 + 個別選項）
+- 訂單匯總檢視（依日期彙整數量與金額）
+- 圖片上傳（商家頭圖 + 餐點圖片，存 Supabase Storage）
+
+### 基礎建設
+- Server / Client Component 分離，Server Actions 處理資料異動
+- RLS 控管資料存取
+- 每個路由都有 `loading.tsx` skeleton
+- 角色系統（user / vendor / admin，一人可多角色）
+- 商家路由守衛（role-based layout）
+
+## 尚未實作
+
+| 分類 | 功能 | 對應需求 |
+|------|------|----------|
+| 員工端 | 訂單紀錄頁（歷史訂單查詢） | 基本需求 |
+| 員工端 | 結帳確認流程（pending → confirmed） | 基本需求 |
+| 員工端 | 餐點推薦引擎（天氣 / 銷量 / 營養） | 基本需求 |
+| 領餐 | 配送標籤產生 + 員工證掃碼領餐 | 基本需求 |
+| 管理員 | 福委會後台（商家審核、營運數據） | 進階需求 |
+| 管理員 | 多廠區商家服務範圍管理 | 進階需求 |
+| 帳務 | 月結帳款報表 + 薪資扣款整合 | 進階需求 |
+| 品質 | 測試（unit / integration / e2e） | 評分 25% |
+| 品質 | 錯誤處理 + 監控 | 評分 10% |
 
 ## 開始開發
 
@@ -31,16 +63,18 @@ bun run dev
 
 ```
 app/
-  (user)/     # 一般用戶：首頁、菜單、購物車
-  (vendor)/   # 廠商後台：店家資訊、菜單、訂單
-  login/      # 登入頁
-  auth/       # Supabase OAuth callback
+  (user)/           # 員工端：首頁、菜單、購物車、個人資料
+  (vendor)/         # 商家後台：店家資訊、菜單管理、訂單檢視
+  (admin)/          # 管理員後台（尚未實作）
+  login/            # 登入頁
+  auth/callback/    # Supabase OAuth callback
 components/
-  ui/         # shadcn/ui 元件
+  ui/               # shadcn/ui 元件
+  header.tsx        # 全域 header
 lib/
-  supabase/   # browser & server client
+  supabase/         # browser & server client
 types/
-  supabase.ts # 自動生成的 DB 型別
+  supabase.ts       # Supabase 自動生成 DB 型別
 ```
 
 ## 範例帳號
