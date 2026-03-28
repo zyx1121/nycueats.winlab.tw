@@ -12,7 +12,7 @@ export type RecommendedItem = {
   vendor_name: string;
 };
 
-export async function getTrendingItems(limit = 8): Promise<RecommendedItem[]> {
+export async function getTrendingItems(limit = 8, areaId?: string): Promise<RecommendedItem[]> {
   const supabase = await createClient();
   const since = new Date(new Date().getTime() - 7 * 86400000).toISOString();
 
@@ -36,11 +36,19 @@ export async function getTrendingItems(limit = 8): Promise<RecommendedItem[]> {
 
   if (topIds.length === 0) return [];
 
-  const { data: items } = await supabase
+  const select = areaId
+    ? "id, name, price, description, tags, calories, protein, vendor_id, vendors!inner(name, vendor_areas!inner(area_id))"
+    : "id, name, price, description, tags, calories, protein, vendor_id, vendors(name)";
+
+  let query = supabase
     .from("menu_items")
-    .select("id, name, price, description, tags, calories, protein, vendor_id, vendors(name)")
+    .select(select)
     .in("id", topIds)
     .eq("is_available", true);
+
+  if (areaId) query = query.eq("vendors.vendor_areas.area_id", areaId);
+
+  const { data: items } = await query;
 
   if (!items) return [];
 
@@ -64,16 +72,24 @@ export async function getTrendingItems(limit = 8): Promise<RecommendedItem[]> {
     .filter((x): x is RecommendedItem => x !== null);
 }
 
-export async function getNutritionPicks(limit = 8): Promise<RecommendedItem[]> {
+export async function getNutritionPicks(limit = 8, areaId?: string): Promise<RecommendedItem[]> {
   const supabase = await createClient();
 
-  const { data: items } = await supabase
+  const select = areaId
+    ? "id, name, price, description, tags, calories, protein, vendor_id, vendors!inner(name, vendor_areas!inner(area_id))"
+    : "id, name, price, description, tags, calories, protein, vendor_id, vendors(name)";
+
+  let query = supabase
     .from("menu_items")
-    .select("id, name, price, description, tags, calories, protein, vendor_id, vendors(name)")
+    .select(select)
     .eq("is_available", true)
     .not("protein", "is", null)
     .order("protein", { ascending: false })
     .limit(limit);
+
+  if (areaId) query = query.eq("vendors.vendor_areas.area_id", areaId);
+
+  const { data: items } = await query;
 
   if (!items) return [];
 
@@ -93,7 +109,7 @@ export async function getNutritionPicks(limit = 8): Promise<RecommendedItem[]> {
   });
 }
 
-export async function getRandomPicks(userId: string | null, limit = 8): Promise<RecommendedItem[]> {
+export async function getRandomPicks(userId: string | null, limit = 8, areaId?: string): Promise<RecommendedItem[]> {
   const supabase = await createClient();
 
   let excludeIds: string[] = [];
@@ -107,11 +123,17 @@ export async function getRandomPicks(userId: string | null, limit = 8): Promise<
     }
   }
 
+  const select = areaId
+    ? "id, name, price, description, tags, calories, protein, vendor_id, vendors!inner(name, vendor_areas!inner(area_id))"
+    : "id, name, price, description, tags, calories, protein, vendor_id, vendors(name)";
+
   let query = supabase
     .from("menu_items")
-    .select("id, name, price, description, tags, calories, protein, vendor_id, vendors(name)")
+    .select(select)
     .eq("is_available", true)
     .order("created_at");
+
+  if (areaId) query = query.eq("vendors.vendor_areas.area_id", areaId);
 
   if (excludeIds.length > 0) {
     query = query.not("id", "in", `(${excludeIds.join(",")})`);
