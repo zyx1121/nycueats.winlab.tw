@@ -45,7 +45,7 @@ test.describe("訂單流程", () => {
     await confirmDialog.locator("button", { hasText: "確認結帳" }).click();
 
     await page.waitForURL("/orders", { timeout: 10000 });
-    await expect(page.locator("text=已確認")).toBeVisible({ timeout: 10000 });
+    await expect(page.locator("text=已確認").first()).toBeVisible({ timeout: 10000 });
   });
 
   test("清空購物車", async ({ page }) => {
