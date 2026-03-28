@@ -19,7 +19,7 @@ export default async function VendorMenuPage() {
   }
 
   const today = new Date().toISOString().split("T")[0];
-  const sevenDaysLater = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0];
+  const sevenDaysLater = new Date(new Date().getTime() + 7 * 86400000).toISOString().split("T")[0];
 
   const { data: items } = await supabase
     .from("menu_items")
