@@ -1,4 +1,6 @@
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import RecommendationSection from "@/components/recommendation-section";
+import { getTrendingItems, getNutritionPicks, getRandomPicks } from "@/lib/recommendation";
 import { createClient } from "@/lib/supabase/server";
 import { HeartIcon } from "lucide-react";
 import Image from "next/image";
@@ -13,8 +15,9 @@ export default async function HomePage({ searchParams }: Props) {
   const { area } = await searchParams;
   const supabase = await createClient();
 
+  const { data: { user } } = await supabase.auth.getUser();
+
   if (!area) {
-    const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       const { data: profile } = await supabase
         .from("profiles")
@@ -35,11 +38,21 @@ export default async function HomePage({ searchParams }: Props) {
     query = query.eq("vendor_areas.area_id", area);
   }
 
-  const { data: vendors } = await query.order("name");
+  const [{ data: vendors }, trending, nutritionPicks, randomPicks] = await Promise.all([
+    query.order("name"),
+    getTrendingItems(8),
+    getNutritionPicks(8),
+    getRandomPicks(user?.id ?? null, 8),
+  ]);
 
   return (
     <main className="min-h-[calc(100dvh-4rem)] flex flex-col items-center">
-      <div className="max-w-6xl w-full p-4">
+      <div className="max-w-6xl w-full p-4 flex flex-col gap-8">
+        <div className="flex flex-col gap-6">
+          <RecommendationSection title="🔥 熱銷排行" items={trending} />
+          <RecommendationSection title="💪 營養推薦" items={nutritionPicks} />
+          <RecommendationSection title="🎲 隨機探索" items={randomPicks} />
+        </div>
         {vendors && vendors.length === 0 && (
           <p className="text-muted-foreground text-center py-16">
             {area ? "此校區目前沒有合作商家" : "請先選擇校區"}

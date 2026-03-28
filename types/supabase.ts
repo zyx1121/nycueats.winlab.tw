@@ -161,6 +161,7 @@ export type Database = {
           protein: number | null
           sodium: number | null
           sugar: number | null
+          tags: string[]
           vendor_id: string
         }
         Insert: {
@@ -176,6 +177,7 @@ export type Database = {
           protein?: number | null
           sodium?: number | null
           sugar?: number | null
+          tags?: string[]
           vendor_id: string
         }
         Update: {
@@ -191,6 +193,7 @@ export type Database = {
           protein?: number | null
           sodium?: number | null
           sugar?: number | null
+          tags?: string[]
           vendor_id?: string
         }
         Relationships: [

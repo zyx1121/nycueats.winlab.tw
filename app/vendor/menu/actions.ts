@@ -13,6 +13,7 @@ export async function upsertMenuItem(data: {
   protein?: number;
   sodium?: number;
   sugar?: number;
+  tags?: string[];
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

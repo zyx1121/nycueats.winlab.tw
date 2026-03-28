@@ -23,7 +23,7 @@ export default async function VendorMenuPage() {
 
   const { data: items } = await supabase
     .from("menu_items")
-    .select("id, name, description, price, is_available, default_max_qty, image_url, calories, protein, sodium, sugar, daily_slots(id, date, max_qty, reserved_qty), item_option_groups(id, name, required, max_select, sort_order, item_options(id, name, price_delta, sort_order))")
+    .select("id, name, description, price, is_available, default_max_qty, image_url, calories, protein, sodium, sugar, tags, daily_slots(id, date, max_qty, reserved_qty), item_option_groups(id, name, required, max_select, sort_order, item_options(id, name, price_delta, sort_order))")
     .eq("vendor_id", vendor.id)
     .order("name");
 
