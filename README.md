@@ -33,6 +33,7 @@
 - 每個路由都有 `loading.tsx` skeleton
 - 角色系統（user / vendor / admin，一人可多角色）
 - 商家路由守衛（role-based layout）
+- 管理員後台（商家審核、營運數據 Dashboard、多廠區服務範圍管理）
 - 錯誤處理（error.tsx / global-error.tsx / not-found.tsx）
 - CI pipeline（GitHub Actions：lint + build + e2e test）
 - Playwright e2e 測試（首頁、菜單、訂單流程）
@@ -43,8 +44,6 @@
 |------|------|----------|
 | 員工端 | 餐點推薦引擎（天氣 / 銷量 / 營養） | 基本需求 |
 | 領餐 | 配送標籤列印（多種印表機格式） | 基本需求 |
-| 管理員 | 福委會後台（商家審核、營運數據） | 進階需求 |
-| 管理員 | 多廠區商家服務範圍管理 | 進階需求 |
 | 帳務 | 月結帳款報表 + 薪資扣款整合 | 進階需求 |
 
 ## 開始開發
@@ -73,7 +72,7 @@ CI 會在每個 PR 自動執行 lint + build + e2e test（見 `.github/workflows
 app/
   (user)/           # 員工端：首頁、菜單、購物車、個人資料
   (vendor)/         # 商家後台：店家資訊、菜單管理、訂單檢視
-  (admin)/          # 管理員後台（尚未實作）
+  (admin)/          # 管理員後台：營運總覽、商家管理
   login/            # 登入頁
   auth/callback/    # Supabase OAuth callback
 components/
