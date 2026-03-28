@@ -33,7 +33,7 @@
 - 每個路由都有 `loading.tsx` skeleton
 - 角色系統（user / vendor / admin，一人可多角色）
 - 商家路由守衛（role-based layout）
-- 管理員後台（商家審核、營運數據 Dashboard、多廠區服務範圍管理）
+- 管理員後台（商家審核、營運數據 Dashboard、多廠區服務範圍管理、月結報表 CSV 匯出）
 - 錯誤處理（error.tsx / global-error.tsx / not-found.tsx）
 - CI pipeline（GitHub Actions：lint + build + e2e test）
 - Playwright e2e 測試（首頁、菜單、訂單流程）
@@ -44,7 +44,6 @@
 |------|------|----------|
 | 員工端 | 餐點推薦引擎（天氣 / 銷量 / 營養） | 基本需求 |
 | 領餐 | 配送標籤列印（多種印表機格式） | 基本需求 |
-| 帳務 | 月結帳款報表 + 薪資扣款整合 | 進階需求 |
 
 ## 開始開發
 

@@ -26,6 +26,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link href="/admin/vendors">
             <Button variant="outline" size="sm">商家管理</Button>
           </Link>
+          <Link href="/admin/reports">
+            <Button variant="outline" size="sm">月結報表</Button>
+          </Link>
         </nav>
         {children}
       </div>
