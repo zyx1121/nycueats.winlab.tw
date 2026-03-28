@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { addDays, format } from "date-fns";
-import { useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { deleteMenuItem, setDailySlot, toggleMenuItem, upsertMenuItem } from "./actions";
 import { OptionGroupsEditor } from "./option-groups-editor";
 
@@ -38,6 +38,7 @@ type Item = {
   protein: number | null;
   sodium: number | null;
   sugar: number | null;
+  tags: string[];
   daily_slots: Slot[];
   item_option_groups: OptionGroup[];
 };
@@ -50,6 +51,8 @@ interface Props {
 
 export function MenuItemEditDialog({ item, open, onOpenChange }: Props) {
   const [isPending, startTransition] = useTransition();
+  const [tags, setTags] = useState<string[]>(item.tags ?? []);
+  const tagInputRef = useRef<HTMLInputElement>(null);
 
   const today = new Date();
   const dates = Array.from({ length: 7 }, (_, i) =>
@@ -75,9 +78,23 @@ export function MenuItemEditDialog({ item, open, onOpenChange }: Props) {
         protein: toNum("protein"),
         sodium: toNum("sodium"),
         sugar: toNum("sugar"),
+        tags,
       });
       onOpenChange(false);
     });
+  }
+
+  function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    const value = (e.currentTarget.value ?? "").trim();
+    if (!value || tags.includes(value)) return;
+    setTags([...tags, value]);
+    e.currentTarget.value = "";
+  }
+
+  function removeTag(tag: string) {
+    setTags(tags.filter((t) => t !== tag));
   }
 
   function handleQtyChange(date: string, value: string) {
@@ -136,6 +153,33 @@ export function MenuItemEditDialog({ item, open, onOpenChange }: Props) {
                   <Label htmlFor="sugar">糖 (g)</Label>
                   <Input id="sugar" name="sugar" type="number" min={0} step={0.1} defaultValue={item.sugar ?? ""} placeholder="—" />
                 </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label>標籤</Label>
+                <div className="flex flex-wrap gap-1 min-h-[2rem]">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-xs px-2 py-0.5 rounded-full border flex items-center gap-1"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="leading-none hover:text-destructive"
+                        aria-label={`移除 ${tag}`}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <Input
+                  ref={tagInputRef}
+                  placeholder="輸入標籤後按 Enter 新增"
+                  onKeyDown={handleTagKeyDown}
+                />
               </div>
             </form>
 

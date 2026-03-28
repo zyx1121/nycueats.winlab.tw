@@ -16,6 +16,7 @@ type Item = {
   protein: number | null;
   sodium: number | null;
   sugar: number | null;
+  tags: string[];
   daily_slots: { id: string; date: string; max_qty: number; reserved_qty: number }[];
   item_option_groups: {
     id: string; name: string; required: boolean; max_select: number; sort_order: number;
