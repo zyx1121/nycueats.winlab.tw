@@ -9,9 +9,26 @@ async function addItemToCart(page: Page) {
 
   // Wait for client components to hydrate before clicking
   await page.waitForLoadState("networkidle");
+
+  // Debug: screenshot before clicking
+  await page.screenshot({ path: "test-results/debug-before-click.png" });
+
+  // Log all buttons found
+  const allButtons = page.locator("main .grid button");
+  const count = await allButtons.count();
+  console.log(`Found ${count} buttons in grid`);
+  for (let i = 0; i < Math.min(count, 3); i++) {
+    const disabled = await allButtons.nth(i).getAttribute("disabled");
+    const text = await allButtons.nth(i).textContent();
+    console.log(`Button ${i}: disabled=${disabled}, text=${text?.slice(0, 50)}`);
+  }
+
   const enabledItem = page.locator("main .grid button:not([disabled])").first();
   await expect(enabledItem).toBeVisible({ timeout: 10000 });
   await enabledItem.click();
+
+  // Debug: screenshot after clicking
+  await page.screenshot({ path: "test-results/debug-after-click.png" });
 
   const dialog = page.locator("[role='dialog']");
   await expect(dialog).toBeVisible({ timeout: 10000 });
