@@ -43,7 +43,7 @@ export function ImageUpload({ bucket, path, currentUrl, onUploaded, aspectRatio 
     <div className={`${aspectRatio} relative`}>
       {/* 圖片 / 佔位區 */}
       <div className="absolute inset-0 bg-muted rounded-lg overflow-hidden">
-        {preview && <Image src={preview} alt="圖片" fill className="object-cover rounded-lg" />}
+        {preview && <Image src={preview} alt="圖片" fill sizes="(max-width: 768px) 100vw, 400px" className="object-cover rounded-lg" />}
 
         {/* 無圖片時的預設狀態 */}
         {!preview && !uploading && (
