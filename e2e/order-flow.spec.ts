@@ -7,28 +7,13 @@ async function addItemToCart(page: Page) {
   await vendorGrid.locator("a[href^='/menu/']").first().click();
   await expect(page).toHaveURL(/\/menu\/.+/, { timeout: 10000 });
 
-  // Wait for client components to hydrate before clicking
+  // Wait for page to be ready
   await page.waitForLoadState("networkidle");
 
-  // Debug: screenshot before clicking
-  await page.screenshot({ path: "test-results/debug-before-click.png" });
-
-  // Log all buttons found
-  const allButtons = page.locator("main .grid button");
-  const count = await allButtons.count();
-  console.log(`Found ${count} buttons in grid`);
-  for (let i = 0; i < Math.min(count, 3); i++) {
-    const disabled = await allButtons.nth(i).getAttribute("disabled");
-    const text = await allButtons.nth(i).textContent();
-    console.log(`Button ${i}: disabled=${disabled}, text=${text?.slice(0, 50)}`);
-  }
-
-  const enabledItem = page.locator("main .grid button:not([disabled])").first();
-  await expect(enabledItem).toBeVisible({ timeout: 10000 });
-  await enabledItem.click();
-
-  // Debug: screenshot after clicking
-  await page.screenshot({ path: "test-results/debug-after-click.png" });
+  // Click a menu item that is NOT sold out (no "本週已售完" text)
+  const availableItem = page.locator("main .grid button:not(:has-text('本週已售完'))").first();
+  await expect(availableItem).toBeVisible({ timeout: 10000 });
+  await availableItem.click();
 
   const dialog = page.locator("[role='dialog']");
   await expect(dialog).toBeVisible({ timeout: 10000 });
