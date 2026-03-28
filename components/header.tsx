@@ -17,6 +17,7 @@ export async function Header() {
     : null;
 
   const isVendor = profile?.role?.includes("vendor") ?? false;
+  const isAdmin = profile?.role?.includes("admin") ?? false;
 
   // 依 city 分組
   type AreaRow = { id: string; name: string; city: string };
@@ -38,6 +39,11 @@ export async function Header() {
         {isVendor && (
           <Link href="/vendor">
             <Button variant="outline" size="sm">商家後台</Button>
+          </Link>
+        )}
+        {isAdmin && (
+          <Link href="/admin">
+            <Button variant="outline" size="sm">管理後台</Button>
           </Link>
         )}
         <Link href="/orders">
