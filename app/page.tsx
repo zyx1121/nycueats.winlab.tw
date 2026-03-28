@@ -57,7 +57,7 @@ export default async function HomePage({ searchParams }: Props) {
                 <div className="hover:scale-[1.02] transition-all duration-200 w-full flex flex-col gap-3">
                   <AspectRatio className="bg-muted rounded-lg overflow-hidden" ratio={16 / 9}>
                     {vendor.image_url && (
-                      <Image src={vendor.image_url} alt={vendor.name} fill className="object-cover" />
+                      <Image src={vendor.image_url} alt={vendor.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" priority />
                     )}
                   </AspectRatio>
                   <div className="flex flex-col gap-1">

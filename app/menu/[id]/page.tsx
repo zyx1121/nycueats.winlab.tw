@@ -43,7 +43,7 @@ export default async function MenuPage({ params }: Props) {
       <div className="max-w-6xl w-full p-4 flex flex-col gap-2">
         <AspectRatio className="bg-muted rounded-lg overflow-hidden" ratio={16 / 5}>
           {vendor.image_url && (
-            <Image src={vendor.image_url} alt={vendor.name} fill className="object-cover" priority />
+            <Image src={vendor.image_url} alt={vendor.name} fill sizes="(max-width: 1152px) 100vw, 1152px" className="object-cover" priority />
           )}
         </AspectRatio>
         <div className="flex items-center gap-3 mt-4">
