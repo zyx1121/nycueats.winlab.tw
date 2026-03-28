@@ -20,7 +20,7 @@ export async function getTrendingItems(limit = 8, areaId?: string): Promise<Reco
     .from("order_items")
     .select("menu_item_id, qty, orders!inner(status, created_at)")
     .neq("orders.status", "pending")
-    .gte("created_at", since);
+    .gte("orders.created_at", since);
 
   if (!orderItems || orderItems.length === 0) return [];
 
@@ -130,8 +130,7 @@ export async function getRandomPicks(userId: string | null, limit = 8, areaId?: 
   let query = supabase
     .from("menu_items")
     .select(select)
-    .eq("is_available", true)
-    .order("created_at");
+    .eq("is_available", true);
 
   if (areaId) query = query.eq("vendors.vendor_areas.area_id", areaId);
 
@@ -139,7 +138,8 @@ export async function getRandomPicks(userId: string | null, limit = 8, areaId?: 
     query = query.not("id", "in", `(${excludeIds.join(",")})`);
   }
 
-  const { data: items } = await query;
+  // 撈 limit * 3 筆再 shuffle，避免撈整張表
+  const { data: items } = await query.limit(limit * 3);
 
   if (!items || items.length === 0) return [];
 

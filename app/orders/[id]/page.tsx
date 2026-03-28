@@ -59,11 +59,7 @@ export default async function OrderDetailPage({
   const shortId = order.id.replace(/-/g, "").slice(0, 8);
   const totalItems = orderItems.reduce((sum, i) => sum + i.qty, 0);
   const totalPrice = orderItems.reduce(
-    (sum, i) =>
-      sum +
-      i.qty *
-        (i.unit_price +
-          i.options.reduce((s, o) => s + o.price_delta, 0)),
+    (sum, i) => sum + i.qty * i.unit_price,
     0
   );
 
@@ -90,10 +86,7 @@ export default async function OrderDetailPage({
 
         <div className="flex flex-col gap-3">
           {orderItems.map((item) => {
-            const itemTotal =
-              item.qty *
-              (item.unit_price +
-                item.options.reduce((s, o) => s + o.price_delta, 0));
+            const itemTotal = item.qty * item.unit_price;
             const showQr =
               order.status === "confirmed" && !item.picked_up;
 

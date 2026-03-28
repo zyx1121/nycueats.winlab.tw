@@ -5,6 +5,18 @@ import { revalidatePath } from "next/cache";
 
 export async function removeOrderItem(orderItemId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "未登入" };
+
+  const { data: item } = await supabase
+    .from("order_items")
+    .select("id, orders!inner(user_id)")
+    .eq("id", orderItemId)
+    .single();
+
+  if (!item || (item.orders as { user_id: string } | null)?.user_id !== user.id)
+    return { error: "權限不足" };
+
   const { error } = await supabase
     .from("order_items")
     .delete()
@@ -29,6 +41,13 @@ export async function confirmOrder(orderId: string) {
 
   if (!order) return { error: "找不到預約單" };
   if (order.status !== "pending") return { error: "預約單狀態不符" };
+
+  const { data: items } = await supabase
+    .from("order_items")
+    .select("id")
+    .eq("order_id", orderId)
+    .limit(1);
+  if (!items || items.length === 0) return { error: "預約單沒有品項" };
 
   const { error } = await supabase
     .from("orders")
