@@ -40,19 +40,21 @@ export default async function HomePage({ searchParams }: Props) {
 
   const [{ data: vendors }, trending, nutritionPicks, randomPicks] = await Promise.all([
     query.order("name"),
-    getTrendingItems(8),
-    getNutritionPicks(8),
-    getRandomPicks(user?.id ?? null, 8),
+    getTrendingItems(8, area),
+    getNutritionPicks(8, area),
+    getRandomPicks(user?.id ?? null, 8, area),
   ]);
 
   return (
     <main className="min-h-[calc(100dvh-4rem)] flex flex-col items-center">
       <div className="max-w-6xl w-full p-4 flex flex-col gap-8">
-        <div className="flex flex-col gap-6">
-          <RecommendationSection title="🔥 熱銷排行" items={trending} />
-          <RecommendationSection title="💪 營養推薦" items={nutritionPicks} />
-          <RecommendationSection title="🎲 隨機探索" items={randomPicks} />
-        </div>
+        {(trending.length > 0 || nutritionPicks.length > 0 || randomPicks.length > 0) && (
+          <div className="flex flex-col gap-6">
+            {trending.length > 0 && <RecommendationSection title="🔥 熱銷排行" items={trending} />}
+            {nutritionPicks.length > 0 && <RecommendationSection title="💪 營養推薦" items={nutritionPicks} />}
+            {randomPicks.length > 0 && <RecommendationSection title="🎲 隨機探索" items={randomPicks} />}
+          </div>
+        )}
         {vendors && vendors.length === 0 && (
           <p className="text-muted-foreground text-center py-16">
             {area ? "此校區目前沒有合作商家" : "請先選擇校區"}
