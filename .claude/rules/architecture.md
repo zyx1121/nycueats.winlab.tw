@@ -1,50 +1,58 @@
 # Architecture
 
-**架構發生改變時立即更新此檔案，確保 agent 永遠有最新資訊。**
+**Update this file immediately when architecture changes so agents always have the latest info.**
 
-## 目前架構（2026-03-23）
+## Current Architecture (2026-03-28)
 
 ### Tech Stack
 - Next.js 16 — App Router
 - Tailwind CSS 4
 - shadcn/ui (Radix UI primitives)
-- Supabase — Auth (Google OAuth) + Postgres + RLS
+- Supabase — Auth (Google OAuth) + Postgres + RLS + Storage
 
-### 目錄結構
+### Directory Structure
 ```
 app/
-  (user)/           # 一般用戶路由 (/, /menu/[id], /cart, /orders)
-  (vendor)/         # 商家後台 (/vendor, /vendor/menu, /vendor/orders)
-  (admin)/          # 管理員後台 (空殼)
-  login/            # 登入頁
+  (user)/           # User routes (/, /menu/[id], /cart, /orders, /profile)
+  (vendor)/         # Vendor dashboard (/vendor, /vendor/menu, /vendor/orders, /vendor/profile)
+  (admin)/          # Admin dashboard (/admin, /admin/vendors, /admin/reports)
+  login/            # Login page
   auth/callback/    # Supabase OAuth callback
+  api/pickup/       # QR code pickup endpoint
 components/
-  ui/               # shadcn/ui 元件
-  header.tsx        # 全域 header（含區域選擇、購物車、用戶頭像）
+  ui/               # shadcn/ui components
+  header.tsx        # Global header (area selector, cart, user avatar)
+  image-upload.tsx  # Image upload with type/size validation
 lib/
+  auth.ts           # Shared requireRole() helper for Server Action guards
+  recommendation.ts # Recommendation engine (trending, nutrition, random)
   supabase/
-    client.ts       # browser client
-    server.ts       # server client (SSR)
+    client.ts       # Browser client
+    server.ts       # Server client (SSR)
   utils.ts
 types/
-  supabase.ts       # 自動生成的 DB 型別
+  supabase.ts       # Auto-generated DB types
 ```
 
 ### DB Tables
-- `areas` — 區域（新竹光復校區等）
-- `profiles` — 用戶資料（role: text[]）
-- `vendors` — 商家
-- `vendor_areas` — 商家服務區域 (many-to-many)
-- `menu_items` — 餐點
-- `daily_slots` — 每日名額（限量核心，有 CHECK constraint）
-- `orders` — 預約單
-- `order_items` — 預約明細
+- `areas` — Campus areas (e.g. Hsinchu Guangfu)
+- `profiles` — User profiles (role: text[])
+- `vendors` — Vendor stores
+- `vendor_areas` — Vendor-area mapping (many-to-many)
+- `menu_items` — Menu items
+- `item_option_groups` — Option groups per menu item
+- `item_options` — Individual options within a group
+- `daily_slots` — Daily quotas (core slot-limiting mechanism, has CHECK constraint)
+- `orders` — Orders
+- `order_items` — Order line items
+- `order_item_options` — Selected options per order item
 
-### 角色
-- `user` — 一般員工
-- `vendor` — 商家老闆
-- `admin` — 福委會（後續實作）
-- 一人可多角色（profiles.role: text[]）
+### Roles
+- `user` — Employee
+- `vendor` — Vendor owner
+- `admin` — Welfare committee
+- One person can have multiple roles (profiles.role: text[])
+- Auth enforced at two layers: layout guards + Server Action `requireRole()` checks
 
-### 限量機制
-`daily_slots.reserved_qty` 由 Postgres trigger 原子更新，`CHECK (reserved_qty <= max_qty)` 防止超量。
+### Slot-Limiting Mechanism
+`daily_slots.reserved_qty` is atomically updated by a Postgres trigger. `CHECK (reserved_qty <= max_qty)` prevents overselling.

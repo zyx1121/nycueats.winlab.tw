@@ -33,7 +33,7 @@
 - RLS 控管資料存取
 - 每個路由都有 `loading.tsx` skeleton
 - 角色系統（user / vendor / admin，一人可多角色）
-- 商家路由守衛（role-based layout）
+- 角色守衛（layout + Server Action 雙層驗證）
 - 管理員後台（商家審核、營運數據 Dashboard、多廠區服務範圍管理、月結報表 CSV 匯出）
 - 錯誤處理（error.tsx / global-error.tsx / not-found.tsx）
 - CI pipeline（GitHub Actions：lint + build + e2e test）
