@@ -413,6 +413,7 @@ export type Database = {
           owner_id: string | null
           rating_bad: number
           rating_good: number
+          status: string
           tags: string[]
         }
         Insert: {
@@ -427,6 +428,7 @@ export type Database = {
           owner_id?: string | null
           rating_bad?: number
           rating_good?: number
+          status?: string
           tags?: string[]
         }
         Update: {
@@ -441,6 +443,7 @@ export type Database = {
           owner_id?: string | null
           rating_bad?: number
           rating_good?: number
+          status?: string
           tags?: string[]
         }
         Relationships: [
@@ -458,7 +461,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
+      is_vendor_order: { Args: { order_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
