@@ -19,9 +19,23 @@ export function ImageUpload({ bucket, path, currentUrl, onUploaded, aspectRatio 
   const [preview, setPreview] = useState<string | null>(currentUrl ?? null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      alert("僅支援 JPG、PNG、WebP、GIF 格式");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > MAX_SIZE) {
+      alert("檔案大小不可超過 5MB");
+      e.target.value = "";
+      return;
+    }
 
     const ext = file.name.split(".").pop();
     const filePath = `${path}/${Date.now()}.${ext}`;

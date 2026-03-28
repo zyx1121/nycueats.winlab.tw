@@ -24,7 +24,12 @@ export async function pickUpOrderItem(orderItemId: string) {
   if (!item || (item.menu_items as { vendor_id: string } | null)?.vendor_id !== vendor.id)
     return { error: "此品項不屬於您" };
 
-  await supabase.from("order_items").update({ picked_up: true }).eq("id", orderItemId);
+  const { error: updateError } = await supabase
+    .from("order_items")
+    .update({ picked_up: true })
+    .eq("id", orderItemId);
+
+  if (updateError) return { error: "更新失敗" };
 
   const { data: remaining } = await supabase
     .from("order_items")
@@ -37,12 +42,15 @@ export async function pickUpOrderItem(orderItemId: string) {
   }
 
   revalidatePath("/vendor/orders");
-  return { success: true };
+  return { success: true, order_id: item.order_id };
 }
 
 export async function batchPickUp(orderItemIds: string[]) {
-  const results = await Promise.all(orderItemIds.map(pickUpOrderItem));
-  const errors = results.filter((r) => r.error);
+  const errors: string[] = [];
+  for (const id of orderItemIds) {
+    const result = await pickUpOrderItem(id);
+    if (result.error) errors.push(result.error);
+  }
   if (errors.length > 0) return { error: `${errors.length} 筆失敗` };
   return { success: true };
 }
