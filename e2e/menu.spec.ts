@@ -3,7 +3,9 @@ import { test, expect } from "@playwright/test";
 test.describe("菜單頁", () => {
   test("點擊商家進入菜單頁，顯示餐點", async ({ page }) => {
     await page.goto("/");
-    const firstVendor = page.locator("main a[href^='/menu/']").first();
+    // Use the vendor grid (not recommendation section) to find vendor cards
+    const vendorGrid = page.locator("main .grid");
+    const firstVendor = vendorGrid.locator("a[href^='/menu/']").first();
     const vendorName = await firstVendor.locator("p").first().textContent();
     await firstVendor.click();
 
@@ -17,7 +19,8 @@ test.describe("菜單頁", () => {
 
   test("點擊餐點彈出加入預約 dialog", async ({ page }) => {
     await page.goto("/");
-    await page.locator("main a[href^='/menu/']").first().click();
+    const vendorGrid = page.locator("main .grid");
+    await vendorGrid.locator("a[href^='/menu/']").first().click();
     await expect(page).toHaveURL(/\/menu\/.+/);
 
     await page.locator("main button").first().click();
