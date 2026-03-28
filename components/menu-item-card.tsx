@@ -1,8 +1,5 @@
 "use client";
 
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import Image from "next/image";
-
 type Item = {
   name: string;
   description: string | null;

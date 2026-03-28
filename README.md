@@ -59,6 +59,15 @@ bun run dev
 
 環境變數請參考 `.env.example`（需 Supabase 專案設定）。
 
+## 測試
+
+```bash
+bun run test        # 跑 e2e 測試（Playwright）
+bun run test:ui     # Playwright UI 模式
+```
+
+CI 會在每個 PR 自動執行 lint + build + e2e test（見 `.github/workflows/ci.yml`）。
+
 ## 目錄結構
 
 ```

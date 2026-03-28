@@ -16,7 +16,7 @@ export default async function MenuPage({ params }: Props) {
   const supabase = await createClient();
 
   const today = new Date().toISOString().split("T")[0];
-  const sevenDaysLater = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0];
+  const sevenDaysLater = new Date(new Date().getTime() + 7 * 86400000).toISOString().split("T")[0];
 
   const [{ data: vendor }, { data: menuItems }] = await Promise.all([
     supabase

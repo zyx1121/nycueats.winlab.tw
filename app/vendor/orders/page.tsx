@@ -40,7 +40,7 @@ export default async function VendorOrdersPage({
   if (!vendor) return <p className="text-muted-foreground">尚未綁定商家帳號。</p>;
 
   const today = new Date().toISOString().split("T")[0];
-  const sevenDaysLater = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0];
+  const sevenDaysLater = new Date(new Date().getTime() + 7 * 86400000).toISOString().split("T")[0];
 
   const { data: orderItems } = await supabase
     .from("order_items")

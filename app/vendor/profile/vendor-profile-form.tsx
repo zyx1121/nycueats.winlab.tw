@@ -49,7 +49,7 @@ export function VendorProfileForm({ vendor, areas }: Props) {
   function toggleDay(day: number) {
     setSaved(false);
     const next = new Set(operatingDays);
-    next.has(day) ? next.delete(day) : next.add(day);
+    if (next.has(day)) { next.delete(day); } else { next.add(day); }
     setOperatingDays(next);
   }
 
@@ -65,7 +65,7 @@ export function VendorProfileForm({ vendor, areas }: Props) {
         bucket="vendor-images"
         path={`vendors/${vendor.id}`}
         currentUrl={vendor.image_url}
-        onUploaded={(url) => { updateVendorImage(url); }}
+        onUploaded={(url) => void updateVendorImage(url)}
         aspectRatio="aspect-video"
       />
 
