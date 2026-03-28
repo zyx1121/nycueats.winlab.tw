@@ -47,7 +47,7 @@ export default async function VendorOrdersPage({
     .select(`
       id, date, qty, unit_price, picked_up,
       menu_items!inner(name, vendor_id),
-      orders!inner(id, status, profiles:user_id(name)),
+      orders!inner(id, status, user_id),
       order_item_options(name)
     `)
     .eq("menu_items.vendor_id", vendor.id)
@@ -56,14 +56,21 @@ export default async function VendorOrdersPage({
     .eq("orders.status", status)
     .order("date");
 
+
+  // Fetch user names in a second query to avoid complex join issues
+  const userIds = [...new Set((orderItems ?? []).map((i) => (i.orders as { user_id: string } | null)?.user_id).filter(Boolean))] as string[];
+  const { data: profiles } = userIds.length > 0
+    ? await supabase.from("profiles").select("id, name").in("id", userIds)
+    : { data: [] };
+  const nameMap = new Map((profiles ?? []).map((p) => [p.id, p.name ?? "匿名"]));
+
   // Group by date → menu item name
   const byDate: Record<string, Record<string, MenuGroup>> = {};
 
   for (const item of orderItems ?? []) {
     const menuName = (item.menu_items as { name: string } | null)?.name ?? "";
-    const orderData = item.orders as Record<string, unknown> | null;
-    const profileData = orderData?.profiles as Record<string, string> | null;
-    const userName = profileData?.name ?? "匿名";
+    const orderData = item.orders as { user_id: string } | null;
+    const userName = nameMap.get(orderData?.user_id ?? "") ?? "匿名";
     const options = (item.order_item_options as { name: string }[] | null)
       ?.map((o) => o.name)
       .join("、") ?? "";
