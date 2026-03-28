@@ -2,13 +2,18 @@ import { test, expect, type Page } from "@playwright/test";
 
 async function addItemToCart(page: Page) {
   await page.goto("/");
-  await page.locator("main a[href^='/menu/']").first().click();
+  // Use the vendor grid to avoid clicking recommendation cards
+  const vendorGrid = page.locator("main .grid");
+  await vendorGrid.locator("a[href^='/menu/']").first().click();
   await expect(page).toHaveURL(/\/menu\/.+/, { timeout: 10000 });
 
-  // Find an enabled (not disabled/opacity-50) menu item button
-  const enabledItem = page.locator("main button:not([disabled])").first();
-  await expect(enabledItem).toBeVisible({ timeout: 10000 });
-  await enabledItem.click();
+  // Wait for page to be ready
+  await page.waitForLoadState("networkidle");
+
+  // Click a menu item that is NOT sold out (no "本週已售完" text)
+  const availableItem = page.locator("main .grid button:not(:has-text('本週已售完'))").first();
+  await expect(availableItem).toBeVisible({ timeout: 10000 });
+  await availableItem.click();
 
   const dialog = page.locator("[role='dialog']");
   await expect(dialog).toBeVisible({ timeout: 10000 });

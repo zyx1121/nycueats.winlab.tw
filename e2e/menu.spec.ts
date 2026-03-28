@@ -23,10 +23,16 @@ test.describe("菜單頁", () => {
     await vendorGrid.locator("a[href^='/menu/']").first().click();
     await expect(page).toHaveURL(/\/menu\/.+/);
 
-    await page.locator("main button").first().click();
+    // Wait for page to be ready
+    await page.waitForLoadState("networkidle");
+
+    // Click a menu item that is NOT sold out
+    const menuItem = page.locator("main .grid button:not(:has-text('本週已售完'))").first();
+    await expect(menuItem).toBeVisible({ timeout: 10000 });
+    await menuItem.click();
 
     const dialog = page.locator("dialog, [role='dialog']");
-    await expect(dialog).toBeVisible();
+    await expect(dialog).toBeVisible({ timeout: 10000 });
     await expect(dialog.locator("text=選擇日期")).toBeVisible();
   });
 });
