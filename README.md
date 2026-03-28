@@ -1,6 +1,6 @@
 # NYCU Eats
 
-陽明交大校園訂餐平台 — 員工向合作商家預約外送餐點，解決廠區用餐疲勞問題。
+Campus meal ordering platform for NYCU — employees pre-order meals from partnered vendors, solving mealtime fatigue across campus sites.
 
 ## Tech Stack
 
@@ -8,82 +8,85 @@
 - **Tailwind CSS 4** + **shadcn/ui** (Radix UI)
 - **Supabase** — Auth (Google OAuth + Email) · Postgres · RLS · Storage
 
-## 已實作功能
+## Implemented Features
 
-### 員工端
-- 依校區（area）篩選合作商家
-- 瀏覽商家菜單、每日剩餘名額
-- 餐點自訂選項（單選 / 多選，價格加減）
-- 購物車管理（依日期分組、移除品項）
-- 建立預約訂單（Postgres trigger 原子扣量，防止超賣）
-- 餐點推薦（熱銷排行、營養推薦、隨機探索）
-- 個人資料管理（姓名、所屬區域）
-- Google OAuth / Email 登入
+### Employee
 
-### 商家端
-- 店家資訊編輯（名稱、描述、圖片、營業狀態、營業日）
-- 菜單管理（新增 / 編輯 / 刪除 / 上下架）
-- 每日限量名額設定（未來 7 天）
-- 自訂選項組管理（選項群組 + 個別選項）
-- 訂單匯總檢視（依日期彙整數量與金額）
-- 圖片上傳（商家頭圖 + 餐點圖片，存 Supabase Storage）
+- Filter partnered vendors by campus area
+- Browse vendor menus with daily remaining quotas
+- Customizable meal options (single / multi-select, price adjustments)
+- Shopping cart management (grouped by date, remove items)
+- Place pre-orders (Postgres trigger for atomic quota deduction, prevents overselling)
+- Meal recommendations (trending, nutrition picks, random discovery)
+- Profile management (name, area)
+- Google OAuth / Email login
 
-### 基礎建設
-- Server / Client Component 分離，Server Actions 處理資料異動
-- RLS 控管資料存取
-- 每個路由都有 `loading.tsx` skeleton
-- 角色系統（user / vendor / admin，一人可多角色）
-- 角色守衛（layout + Server Action 雙層驗證）
-- 管理員後台（商家審核、營運數據 Dashboard、多廠區服務範圍管理、月結報表 CSV 匯出）
-- 錯誤處理（error.tsx / global-error.tsx / not-found.tsx）
-- CI pipeline（GitHub Actions：lint + build + e2e test）
-- Playwright e2e 測試（首頁、菜單、訂單流程）
+### Vendor
 
-## 尚未實作
+- Store info editing (name, description, image, open status, operating days)
+- Menu management (create / edit / delete / toggle availability)
+- Daily quota settings (next 7 days)
+- Custom option group management (option groups + individual options)
+- Order summary view (aggregated by date with quantity and amount)
+- Image upload (store banner + menu item images, stored in Supabase Storage)
 
-| 分類 | 功能 | 對應需求 |
-|------|------|----------|
-| 員工端 | LLM 智慧推薦（自然語言偏好輸入） | 進階 |
-| 領餐 | 配送標籤列印（多種印表機格式） | 基本需求 |
+### Infrastructure
 
-## 開始開發
+- Server / Client Component separation, Server Actions for data mutations
+- RLS for data access control
+- Every route has a `loading.tsx` skeleton
+- Role system (user / vendor / admin, one person can have multiple roles)
+- Auth guards (layout + Server Action dual-layer verification)
+- Admin dashboard (vendor approval, operations dashboard, multi-area management, monthly report CSV export)
+- Error handling (error.tsx / global-error.tsx / not-found.tsx)
+- CI pipeline (GitHub Actions: lint + build + e2e test)
+- Playwright e2e tests (homepage, menu, order flow)
+
+## Not Yet Implemented
+
+| Category | Feature | Priority |
+|----------|---------|----------|
+| Employee | LLM smart recommendations (natural language preference input) | Advanced |
+| Pickup | Delivery label printing (multiple printer formats) | Basic |
+
+## Getting Started
 
 ```bash
 bun install
 bun run dev
 ```
 
-開啟 [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000)
 
-環境變數請參考 `.env.example`（需 Supabase 專案設定）。
+See `.env.example` for required environment variables (Supabase project config).
 
-## 測試
+## Testing
 
 ```bash
-bun run test        # 跑 e2e 測試（Playwright）
-bun run test:ui     # Playwright UI 模式
+bun run test        # Run e2e tests (Playwright)
+bun run test:ui     # Playwright UI mode
 ```
 
-CI 會在每個 PR 自動執行 lint + build + e2e test（見 `.github/workflows/ci.yml`）。
+CI runs lint + build + e2e test on every PR (see `.github/workflows/ci.yml`).
 
-## 目錄結構
+## Directory Structure
 
 ```
 app/
-  (user)/           # 員工端：首頁、菜單、購物車、個人資料
-  (vendor)/         # 商家後台：店家資訊、菜單管理、訂單檢視
-  (admin)/          # 管理員後台：營運總覽、商家管理
-  login/            # 登入頁
+  (user)/           # Employee: homepage, menu, cart, profile
+  (vendor)/         # Vendor dashboard: store info, menu management, orders
+  (admin)/          # Admin dashboard: operations overview, vendor management
+  login/            # Login page
   auth/callback/    # Supabase OAuth callback
 components/
-  ui/               # shadcn/ui 元件
-  header.tsx        # 全域 header
+  ui/               # shadcn/ui components
+  header.tsx        # Global header
 lib/
-  supabase/         # browser & server client
+  supabase/         # Browser & server client
 types/
-  supabase.ts       # Supabase 自動生成 DB 型別
+  supabase.ts       # Auto-generated Supabase DB types
 ```
 
-## 範例帳號
+## Example Accounts
 
-詳見 [EXAMPLES.md](./EXAMPLES.md)，所有範例帳號密碼均為 `password123`。
+See [EXAMPLES.md](./EXAMPLES.md) — all example account passwords are `password123`.
