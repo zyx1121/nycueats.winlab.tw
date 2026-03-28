@@ -1,3 +1,4 @@
+import { CartActions } from "@/app/cart/cart-actions";
 import { RemoveButton } from "@/app/cart/remove-button";
 import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/server";
@@ -71,13 +72,14 @@ export default async function CartPage() {
           </div>
         ))}
 
-        {dates.length > 0 && (
+        {dates.length > 0 && order && (
           <>
             <Separator />
             <div className="flex justify-between items-center">
               <p className="text-sm text-muted-foreground">共 {items.length} 項</p>
               <p className="text-lg font-bold">合計 ${total.toFixed(0)}</p>
             </div>
+            <CartActions orderId={order.id} total={total} itemCount={items.length} />
           </>
         )}
       </div>

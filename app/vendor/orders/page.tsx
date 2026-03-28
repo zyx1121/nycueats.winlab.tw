@@ -2,8 +2,31 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import { OrderDetail } from "@/app/vendor/orders/order-detail";
 
-export default async function VendorOrdersPage() {
+type ItemDetail = {
+  id: string;
+  qty: number;
+  unit_price: number;
+  picked_up: boolean;
+  user_name: string;
+  options: string;
+};
+
+type MenuGroup = {
+  name: string;
+  count: number;
+  revenue: number;
+  items: ItemDetail[];
+};
+
+export default async function VendorOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const { status = "confirmed" } = await searchParams;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -21,46 +44,91 @@ export default async function VendorOrdersPage() {
 
   const { data: orderItems } = await supabase
     .from("order_items")
-    .select(`id, date, qty, unit_price, menu_items!inner(name, vendor_id), orders!inner(status, user_id)`)
+    .select(`
+      id, date, qty, unit_price, picked_up,
+      menu_items!inner(name, vendor_id),
+      orders!inner(id, status, user_id),
+      order_item_options(name)
+    `)
     .eq("menu_items.vendor_id", vendor.id)
     .gte("date", today)
     .lte("date", sevenDaysLater)
-    .eq("orders.status", "pending")
+    .eq("orders.status", status)
     .order("date");
 
-  // 按日期分組，再按餐點彙整
-  const byDate: Record<string, Record<string, { name: string; count: number; revenue: number }>> = {};
+
+  // Fetch user names in a second query to avoid complex join issues
+  const userIds = [...new Set((orderItems ?? []).map((i) => (i.orders as { user_id: string } | null)?.user_id).filter(Boolean))] as string[];
+  const { data: profiles } = userIds.length > 0
+    ? await supabase.from("profiles").select("id, name").in("id", userIds)
+    : { data: [] };
+  const nameMap = new Map((profiles ?? []).map((p) => [p.id, p.name ?? "匿名"]));
+
+  // Group by date → menu item name
+  const byDate: Record<string, Record<string, MenuGroup>> = {};
+
   for (const item of orderItems ?? []) {
-    const name = item.menu_items?.name ?? "";
-    (byDate[item.date] ??= {})[name] ??= { name, count: 0, revenue: 0 };
-    byDate[item.date][name].count += item.qty;
-    byDate[item.date][name].revenue += item.qty * item.unit_price;
+    const menuName = (item.menu_items as { name: string } | null)?.name ?? "";
+    const orderData = item.orders as { user_id: string } | null;
+    const userName = nameMap.get(orderData?.user_id ?? "") ?? "匿名";
+    const options = (item.order_item_options as { name: string }[] | null)
+      ?.map((o) => o.name)
+      .join("、") ?? "";
+
+    (byDate[item.date] ??= {})[menuName] ??= { name: menuName, count: 0, revenue: 0, items: [] };
+    byDate[item.date][menuName].count += item.qty;
+    byDate[item.date][menuName].revenue += item.qty * item.unit_price;
+    byDate[item.date][menuName].items.push({
+      id: item.id,
+      qty: item.qty,
+      unit_price: item.unit_price,
+      picked_up: item.picked_up,
+      user_name: userName,
+      options,
+    });
   }
 
   const dates = Object.keys(byDate).sort();
+  const tabClass = (tab: string) =>
+    `px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+      status === tab
+        ? "bg-foreground text-background"
+        : "text-muted-foreground hover:text-foreground"
+    }`;
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">訂單彙整</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">訂單彙整</h1>
+        <div className="flex items-center gap-1 border rounded-full p-1">
+          <a href="?status=confirmed" className={tabClass("confirmed")}>進行中</a>
+          <a href="?status=completed" className={tabClass("completed")}>已完成</a>
+        </div>
+      </div>
+
       {dates.length === 0 && (
         <p className="text-muted-foreground text-center py-8">未來 7 天無訂單</p>
       )}
+
       {dates.map((date) => {
-        const items = Object.values(byDate[date]);
-        const dayTotal = items.reduce((s, i) => s + i.revenue, 0);
+        const groups = Object.values(byDate[date]);
+        const dayTotal = groups.reduce((s, g) => s + g.revenue, 0);
         return (
           <div key={date} className="flex flex-col gap-2">
             <p className="text-sm font-medium text-muted-foreground">
               {format(new Date(date), "MM月dd日 EEEE", { locale: zhTW })}
             </p>
             <div className="border rounded-lg divide-y">
-              {items.map((item) => (
-                <div key={item.name} className="flex items-center justify-between p-4">
-                  <p className="font-medium">{item.name}</p>
-                  <div className="flex items-center gap-6">
-                    <p className="text-sm text-muted-foreground">x{item.count} 份</p>
-                    <p className="text-sm font-medium">${item.revenue.toFixed(0)}</p>
+              {groups.map((group) => (
+                <div key={group.name} className="flex flex-col gap-2 p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium">{group.name}</p>
+                    <div className="flex items-center gap-6">
+                      <p className="text-sm text-muted-foreground">x{group.count} 份</p>
+                      <p className="text-sm font-medium">${group.revenue.toFixed(0)}</p>
+                    </div>
                   </div>
+                  <OrderDetail items={group.items} />
                 </div>
               ))}
               <div className="flex justify-between items-center p-4 bg-muted/30">

@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/server";
-import { ShoppingBasket } from "lucide-react";
+import { ClipboardList, ShoppingBasket } from "lucide-react";
 import Link from "next/link";
 
 export async function Header() {
@@ -50,6 +50,11 @@ export async function Header() {
             <Button variant="outline" size="sm">商家後台</Button>
           </Link>
         )}
+        <Link href="/orders">
+          <Button variant="outline">
+            <ClipboardList className="size-4" />
+          </Button>
+        </Link>
         <Link href="/cart">
           <Button variant="outline">
             <ShoppingBasket className="size-4" />
