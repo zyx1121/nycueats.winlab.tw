@@ -22,6 +22,7 @@ export function MenuItemCard({ item, onClick, status, disabled }: Props) {
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       className={`hover:scale-[1.02] transition-all duration-200 h-full border rounded-lg flex justify-between max-h-64 cursor-pointer text-left w-full ${disabled ? "opacity-50" : ""}`}
     >
       <div className="flex flex-col p-4 gap-2 flex-1 min-w-0">
