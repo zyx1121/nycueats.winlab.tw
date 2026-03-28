@@ -87,6 +87,62 @@ types/
   supabase.ts       # Auto-generated Supabase DB types
 ```
 
+## Development with Claude Code
+
+This project is maintained with [Claude Code](https://claude.com/claude-code). The agent automatically reads project rules and conventions on every session.
+
+### Auto-Loaded Rules
+
+| File | Purpose |
+|------|---------|
+| `CLAUDE.md` | Entry point — references all rule files below |
+| `AGENTS.md` | Next.js 16 breaking change warnings |
+| `.claude/rules/architecture.md` | Current architecture, directory structure, DB schema |
+| `.claude/rules/coding-style.md` | Code style (minimal, type-safe, Server Component first) |
+| `.claude/rules/project.md` | Stack versions, doc-lookup rules, conventions |
+| `.claude/rules/uiux.md` | UI/UX design system (spacing, colors, loading states) |
+| `.claude/rules/git.md` | Branch naming, commit format, PR conventions, versioning |
+
+### Recommended Plugins
+
+Plugins used during development and maintenance of this project:
+
+```bash
+# Core — DB, hosting, docs
+claude plugins add supabase@claude-plugins-official      # Supabase MCP (migrations, SQL, advisors)
+claude plugins add vercel@claude-plugins-official         # Vercel deployment & platform skills
+claude plugins add context7@claude-plugins-official       # Auto-fetch latest docs for any library
+
+# Code quality
+claude plugins add code-review@claude-plugins-official    # Code review agent
+claude plugins add pr-review-toolkit@claude-plugins-official  # PR review, type analysis, test coverage
+claude plugins add superpowers@claude-plugins-official    # TDD, planning, debugging workflows
+claude plugins add commit-commands@claude-plugins-official  # Git commit/PR helpers
+
+# Development
+claude plugins add feature-dev@claude-plugins-official    # Guided feature development
+claude plugins add frontend-design@claude-plugins-official  # UI design with high design quality
+claude plugins add playwright@claude-plugins-official     # Browser automation & e2e testing
+
+# DX
+claude plugins add explanatory-output-style@claude-plugins-official  # Educational insights
+claude plugins add learning-output-style@claude-plugins-official     # Interactive learning mode
+```
+
+### Useful Phrases
+
+| Phrase | What it triggers |
+|--------|-----------------|
+| `review the project` | Full codebase review (bugs, security, performance) |
+| `check Supabase Performance Advisor` | Run DB performance linter via MCP |
+| `/ship` | Ship workflow (tests → review → PR) |
+| `/qa` | QA test the site and fix bugs found |
+| `/browse <url>` | Headless browser for testing |
+| `/investigate` | Systematic debugging with root cause analysis |
+| `/design-review` | Visual QA and design consistency check |
+| `create an issue for ...` | Create GitHub issue via `gh` CLI |
+| `fix and merge` | Fix → commit → PR → merge → cleanup |
+
 ## Example Accounts
 
 See [EXAMPLES.md](./EXAMPLES.md) — all example account passwords are `password123`.
