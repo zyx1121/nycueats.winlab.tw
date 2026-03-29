@@ -43,7 +43,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   function sumRevenue(orders: typeof thisMonthOrders["data"]) {
     if (!orders) return 0;
     return orders
-      .filter((o) => o.status === "completed")
+      .filter((o) => o.status === "confirmed" || o.status === "completed")
       .reduce((total, order) => {
         const items = Array.isArray(order.order_items) ? order.order_items : [];
         return total + items.reduce((s, i) => s + (i.qty ?? 0) * (i.unit_price ?? 0), 0);
