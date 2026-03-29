@@ -31,12 +31,17 @@ export async function GET(request: NextRequest) {
 
   const { data: orderItem } = await supabase
     .from("order_items")
-    .select("id, picked_up, order_id, menu_items!inner(vendor_id)")
+    .select("id, picked_up, order_id, menu_items!inner(vendor_id), orders!inner(status)")
     .eq("id", itemId)
     .single();
 
-  if (!orderItem || orderItem.menu_items?.vendor_id !== vendor.id) {
+  if (!orderItem || (orderItem.menu_items as { vendor_id: string } | null)?.vendor_id !== vendor.id) {
     return new Response("此品項不屬於您的商店", { status: 403 });
+  }
+
+  const orderStatus = (orderItem.orders as { status: string } | null)?.status;
+  if (orderStatus !== "confirmed") {
+    return new Response("此訂單狀態不允許領餐", { status: 400 });
   }
 
   if (orderItem.picked_up) {

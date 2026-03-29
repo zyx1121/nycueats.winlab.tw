@@ -4,11 +4,12 @@ import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/server";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import { redirect } from "next/navigation";
 
 export default async function CartPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
+  if (!user) redirect("/login");
 
   const { data: order } = await supabase
     .from("orders")

@@ -68,7 +68,7 @@ export function MenuItemEditDialog({ item, open, onOpenChange }: Props) {
       return isNaN(v) ? undefined : v;
     };
     startTransition(async () => {
-      await upsertMenuItem({
+      const result = await upsertMenuItem({
         id: item.id,
         name: fd.get("name") as string,
         description: (fd.get("description") as string) || undefined,
@@ -80,7 +80,11 @@ export function MenuItemEditDialog({ item, open, onOpenChange }: Props) {
         sugar: toNum("sugar"),
         tags,
       });
-      onOpenChange(false);
+      if (result?.error) {
+        alert(result.error);
+      } else {
+        onOpenChange(false);
+      }
     });
   }
 
