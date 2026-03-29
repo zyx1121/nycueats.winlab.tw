@@ -18,14 +18,16 @@ export async function addToOrder(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "請先登入" };
 
-  // 找或建立 pending order
+  // 找或建立 pending order（用 limit(1) 避免多筆 pending 時 .single() 報錯）
   let orderId: string;
   const { data: existing } = await supabase
     .from("orders")
     .select("id")
     .eq("user_id", user.id)
     .eq("status", "pending")
-    .single();
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   if (existing) {
     orderId = existing.id;

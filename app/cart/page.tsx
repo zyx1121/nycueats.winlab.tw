@@ -15,7 +15,9 @@ export default async function CartPage() {
     .select("id")
     .eq("user_id", user.id)
     .eq("status", "pending")
-    .single();
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   const items = order
     ? (await supabase
