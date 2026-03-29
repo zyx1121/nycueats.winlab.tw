@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { requireRole } from "@/lib/auth";
 import { Separator } from "@/components/ui/separator";
 import { VendorActions } from "./vendor-actions";
 import { format } from "date-fns";
@@ -20,7 +20,7 @@ export default async function VendorDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
+  const { supabase } = await requireRole("admin");
 
   const [{ data: vendor }, { data: areas }] = await Promise.all([
     supabase
