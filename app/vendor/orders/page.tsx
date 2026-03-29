@@ -23,9 +23,9 @@ type MenuGroup = {
 export default async function VendorOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; msg?: string }>;
 }) {
-  const { status = "confirmed" } = await searchParams;
+  const { status = "confirmed", msg } = await searchParams;
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -96,8 +96,18 @@ export default async function VendorOrdersPage({
         : "text-muted-foreground hover:text-foreground"
     }`;
 
+  const msgLabels: Record<string, string> = {
+    "picked-up": "✓ 領餐成功",
+    "already-picked-up": "此品項已領取過",
+  };
+
   return (
     <div className="flex flex-col gap-4">
+      {msg && msgLabels[msg] && (
+        <div className={`text-sm px-4 py-2 rounded-lg ${msg === "picked-up" ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"}`}>
+          {msgLabels[msg]}
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">訂單彙整</h1>
         <div className="flex items-center gap-1 border rounded-full p-1">

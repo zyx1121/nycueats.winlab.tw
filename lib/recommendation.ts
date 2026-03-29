@@ -19,7 +19,7 @@ export async function getTrendingItems(limit = 8, areaId?: string): Promise<Reco
   const { data: orderItems } = await supabase
     .from("order_items")
     .select("menu_item_id, qty, orders!inner(status, created_at)")
-    .neq("orders.status", "pending")
+    .in("orders.status", ["confirmed", "completed"])
     .gte("orders.created_at", since);
 
   if (!orderItems || orderItems.length === 0) return [];
