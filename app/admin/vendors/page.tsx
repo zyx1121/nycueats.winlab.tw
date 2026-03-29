@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { requireRole } from "@/lib/auth";
 
 const statusConfig = {
   pending: { label: "待審核", className: "text-yellow-600 bg-yellow-50" },
@@ -21,7 +21,7 @@ export default async function AdminVendorsPage({
   const filterStatus: StatusKey =
     status && status in statusConfig ? (status as StatusKey) : "pending";
 
-  const supabase = await createClient();
+  const { supabase } = await requireRole("admin");
   const { data: vendors } = await supabase
     .from("vendors")
     .select(
