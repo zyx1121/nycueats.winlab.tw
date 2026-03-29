@@ -38,7 +38,8 @@ export default async function VendorDetailPage({
   const { data: vendorAreas } = await supabase
     .from("vendor_areas")
     .select("area_id")
-    .eq("vendor_id", id);
+    .eq("vendor_id", id)
+    .order("area_id");
 
   const selectedAreaIds = vendorAreas?.map((va) => va.area_id) ?? [];
 

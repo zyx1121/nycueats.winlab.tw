@@ -26,7 +26,7 @@ export function VendorActions({
   return (
     <>
       <AreaEditor
-        key={selectedAreaIds.join(",")}
+        key={[...selectedAreaIds].sort().join(",")}
         vendorId={vendorId}
         areas={areas}
         selectedAreaIds={selectedAreaIds}
