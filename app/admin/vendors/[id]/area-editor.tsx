@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { updateVendorAreas } from "../actions";
 import type { Database } from "@/types/supabase";
 
+type SaveStatus = "idle" | "success" | "error";
+
 type Area = Database["public"]["Tables"]["areas"]["Row"];
 
 interface AreaEditorProps {
@@ -26,6 +28,7 @@ export function AreaEditor({
     new Set(initialSelected)
   );
   const [isPending, startTransition] = useTransition();
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
 
   const byCity = areas.reduce<Record<string, Area[]>>((acc, area) => {
     (acc[area.city] ??= []).push(area);
@@ -43,8 +46,10 @@ export function AreaEditor({
   }
 
   function handleSave() {
+    setSaveStatus("idle");
     startTransition(async () => {
-      await updateVendorAreas(vendorId, [...selected]);
+      const result = await updateVendorAreas(vendorId, [...selected]);
+      setSaveStatus(result.success ? "success" : "error");
     });
   }
 
@@ -75,14 +80,22 @@ export function AreaEditor({
         </div>
       ))}
       {showSaveButton && (
-        <Button
-          onClick={handleSave}
-          disabled={isPending}
-          variant="outline"
-          className="w-fit"
-        >
-          {isPending ? "儲存中…" : "儲存服務區域"}
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={handleSave}
+            disabled={isPending}
+            variant="outline"
+            className="w-fit"
+          >
+            {isPending ? "儲存中…" : "儲存服務區域"}
+          </Button>
+          {saveStatus === "success" && (
+            <p className="text-sm text-green-600">已儲存</p>
+          )}
+          {saveStatus === "error" && (
+            <p className="text-sm text-red-500">儲存失敗，請重試</p>
+          )}
+        </div>
       )}
     </div>
   );
