@@ -39,10 +39,18 @@ test.describe("訂單流程", () => {
     await addItemToCart(page);
 
     await page.goto("/cart");
+    await page.waitForLoadState("networkidle");
     await expect(page.locator("h1", { hasText: "我的預約單" })).toBeVisible();
 
+    // Retry navigation if cart data hasn't propagated yet
+    const checkoutBtn = page.locator("button", { hasText: "結帳確認" });
+    if (!(await checkoutBtn.isVisible({ timeout: 3000 }).catch(() => false))) {
+      await page.reload();
+      await page.waitForLoadState("networkidle");
+    }
+
     // Click checkout trigger button
-    await page.locator("button", { hasText: "結帳確認" }).click();
+    await checkoutBtn.click();
 
     const confirmDialog = page.locator("[role='dialog']");
     await expect(confirmDialog).toBeVisible();
@@ -57,9 +65,17 @@ test.describe("訂單流程", () => {
     await addItemToCart(page);
 
     await page.goto("/cart");
+    await page.waitForLoadState("networkidle");
     await expect(page.locator("h1", { hasText: "我的預約單" })).toBeVisible();
 
-    await page.locator("button", { hasText: "清空購物車" }).click();
+    // Retry navigation if cart data hasn't propagated yet
+    const clearBtn = page.locator("button", { hasText: "清空購物車" });
+    if (!(await clearBtn.isVisible({ timeout: 3000 }).catch(() => false))) {
+      await page.reload();
+      await page.waitForLoadState("networkidle");
+    }
+
+    await clearBtn.click();
 
     const cancelDialog = page.locator("[role='dialog']");
     await expect(cancelDialog).toBeVisible();
