@@ -1,5 +1,6 @@
 "use server";
 
+import { buildOrderSummaries } from "@/app/orders/order-summary";
 import { createClient } from "@/lib/supabase/server";
 
 export type OrderSummary = {
@@ -54,30 +55,10 @@ export async function getOrders(
     .in("order_id", orderIds)
     .order("date");
 
-  const itemsByOrder = new Map<string, typeof allItems>();
-  for (const item of allItems ?? []) {
-    const list = itemsByOrder.get(item.order_id) ?? [];
-    list.push(item);
-    itemsByOrder.set(item.order_id, list);
-  }
-
-  const result: OrderSummary[] = pageOrders.map((order) => ({
-    id: order.id,
-    status: order.status,
-    created_at: order.created_at,
-    items: (itemsByOrder.get(order.id) ?? []).map((i) => ({
-      id: i.id,
-      date: i.date,
-      qty: i.qty,
-      unit_price: i.unit_price,
-      picked_up: i.picked_up,
-      menu_item_name: (i.menu_items as { name: string } | null)?.name ?? "",
-      vendor_name:
-        (i.menu_items as { vendors: { name: string } | null } | null)
-          ?.vendors?.name ?? "",
-      options: (i.order_item_options as { name: string; price_delta: number }[]) ?? [],
-    })),
-  }));
+  const result = buildOrderSummaries(
+    pageOrders,
+    (allItems as Parameters<typeof buildOrderSummaries>[1] | null) ?? []
+  );
 
   return { orders: result, hasMore };
 }
