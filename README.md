@@ -146,3 +146,7 @@ claude plugins add learning-output-style@claude-plugins-official     # Interacti
 ## Example Accounts
 
 See [EXAMPLES.md](./EXAMPLES.md) — all example account passwords are `password123`.
+
+## License
+
+[MIT](LICENSE.md) — Bon appétit.
