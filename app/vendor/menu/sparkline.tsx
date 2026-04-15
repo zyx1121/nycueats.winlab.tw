@@ -1,5 +1,3 @@
-"use client";
-
 interface SparklineProps {
   data: number[];
   width?: number;
