@@ -1,5 +1,11 @@
 # 範例帳號與店家資料
 
+## 使用者帳號
+
+| Email | 密碼 |
+| ----- | -- |
+| testuser@nycueats.dev | password123 |
+
 ## 🥣 晨光早餐 Morning Bites
 
 | 欄位 | 內容 |
