@@ -1,7 +1,24 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { AddMenuItemButton } from "./add-menu-item-button";
-import { VendorMenuItemCard } from "./menu-item-card";
+import { VendorMenuItemCard, type SlotStatus } from "./menu-item-card";
+
+function getSlotStatus(slots: { max_qty: number; reserved_qty: number }[]): SlotStatus {
+  if (slots.length === 0) {
+    return "none";
+  }
+  const totalSlots = slots.reduce((sum, s) => sum + s.max_qty, 0);
+  const totalReserved = slots.reduce((sum, s) => sum + s.reserved_qty, 0);
+  const remaining = totalSlots - totalReserved;
+
+  if (remaining === 0) {
+    return "none";
+  }
+  if (remaining <= Math.ceil(totalSlots * 0.2)) {
+    return "expiring";
+  }
+  return "ok";
+}
 
 export default async function VendorMenuPage() {
   const supabase = await createClient();
@@ -42,7 +59,11 @@ export default async function VendorMenuPage() {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {itemsWithSlots.map((item) => (
-          <VendorMenuItemCard key={item.id} item={item} />
+          <VendorMenuItemCard
+            key={item.id}
+            item={item}
+            slotStatus={getSlotStatus(item.daily_slots)}
+          />
         ))}
         {itemsWithSlots.length === 0 && (
           <p className="text-muted-foreground text-center py-8">尚無餐點，請新增</p>
