@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { AddMenuItemButton } from "./add-menu-item-button";
 import { VendorMenuItemCard } from "./menu-item-card";
 
 export default async function VendorMenuPage() {
@@ -38,7 +38,7 @@ export default async function VendorMenuPage() {
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">{vendor.name} — 菜單管理</h1>
-        <Button size="sm">新增餐點</Button>
+        <AddMenuItemButton />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {itemsWithSlots.map((item) => (
