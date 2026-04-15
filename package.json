@@ -7,8 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "playwright test",
-    "test:ui": "playwright test --ui"
+    "test": "vitest run && playwright test",
+    "test:e2e": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:unit": "vitest run"
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",
@@ -37,7 +39,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.2"
   },
   "ignoreScripts": [
     "sharp",

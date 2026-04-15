@@ -50,6 +50,10 @@ Campus meal ordering platform for NYCU — employees pre-order meals from partne
 - Admin dashboard (vendor approval, operations dashboard, multi-area management, monthly report CSV export)
 - Error handling (error.tsx / global-error.tsx / not-found.tsx)
 - CI pipeline (GitHub Actions: lint + build + e2e test)
+- Layered test setup:
+  - Vitest for unit tests
+  - Vitest + mocks for Server Action / query-flow integration tests
+  - Playwright for end-to-end user flows
 - Playwright e2e tests (homepage, menu, order flow)
 
 ## Not Yet Implemented
@@ -74,11 +78,32 @@ Open [http://localhost:3000](http://localhost:3000)
 ## Testing
 
 ```bash
-bun run test        # Run e2e tests (Playwright)
+bun run test        # Run Vitest first, then Playwright e2e
+bun run test:unit   # Run unit tests + mock integration tests with Vitest
+bun run test:e2e    # Run Playwright e2e tests
 bun run test:ui     # Playwright UI mode
 ```
 
-CI runs lint + build + e2e test on every PR (see `.github/workflows/ci.yml`).
+### Current Test Coverage
+
+- `app/cart/cart-view.test.ts`: cart grouping, sorting, totals
+- `app/orders/order-summary.test.ts`: order summary normalization
+- `app/cart/actions.test.ts`: mocked Server Action coverage for cart flows
+- `app/orders/actions.test.ts`: mocked order query + pagination coverage
+- `e2e/home.spec.ts`, `e2e/menu.spec.ts`, `e2e/order-flow.spec.ts`: real browser flows
+
+### E2E Requirements
+
+Playwright global setup logs in with the credentials from `.env` before tests run.
+
+Required environment variables:
+
+```bash
+E2E_EMAIL=...
+E2E_PASSWORD=...
+```
+
+CI currently runs lint + build + e2e test on every PR (see `.github/workflows/ci.yml`).
 
 ## Directory Structure
 

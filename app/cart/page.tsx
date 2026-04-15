@@ -1,4 +1,5 @@
 import { CartActions } from "@/app/cart/cart-actions";
+import { buildCartViewModel } from "@/app/cart/cart-view";
 import { RemoveButton } from "@/app/cart/remove-button";
 import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/server";
@@ -29,14 +30,7 @@ export default async function CartPage() {
       ).data ?? []
     : [];
 
-  // 按日期分組
-  const byDate = items.reduce<Record<string, typeof items>>((acc, item) => {
-    (acc[item.date] ??= []).push(item);
-    return acc;
-  }, {});
-
-  const total = items.reduce((sum, i) => sum + i.unit_price * i.qty, 0);
-  const dates = Object.keys(byDate).sort();
+  const { byDate, dates, itemCount, total } = buildCartViewModel(items);
 
   return (
     <main className="min-h-[calc(100dvh-4rem)] flex flex-col items-center">
@@ -79,10 +73,10 @@ export default async function CartPage() {
           <>
             <Separator />
             <div className="flex justify-between items-center">
-              <p className="text-sm text-muted-foreground">共 {items.length} 項</p>
+              <p className="text-sm text-muted-foreground">共 {itemCount} 項</p>
               <p className="text-lg font-bold">合計 ${total.toFixed(0)}</p>
             </div>
-            <CartActions orderId={order.id} total={total} itemCount={items.length} />
+            <CartActions orderId={order.id} total={total} itemCount={itemCount} />
           </>
         )}
       </div>
