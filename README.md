@@ -119,24 +119,24 @@ Plugins used during development and maintenance of this project:
 
 ```bash
 # Core — DB, hosting, docs
-claude plugins add supabase@claude-plugins-official      # Supabase MCP (migrations, SQL, advisors)
-claude plugins add vercel@claude-plugins-official         # Vercel deployment & platform skills
-claude plugins add context7@claude-plugins-official       # Auto-fetch latest docs for any library
+claude plugins install supabase@claude-plugins-official      # Supabase MCP (migrations, SQL, advisors)
+claude plugins install vercel@claude-plugins-official         # Vercel deployment & platform skills
+claude plugins install context7@claude-plugins-official       # Auto-fetch latest docs for any library
 
 # Code quality
-claude plugins add code-review@claude-plugins-official    # Code review agent
-claude plugins add pr-review-toolkit@claude-plugins-official  # PR review, type analysis, test coverage
-claude plugins add superpowers@claude-plugins-official    # TDD, planning, debugging workflows
-claude plugins add commit-commands@claude-plugins-official  # Git commit/PR helpers
+claude plugins install code-review@claude-plugins-official    # Code review agent
+claude plugins install pr-review-toolkit@claude-plugins-official  # PR review, type analysis, test coverage
+claude plugins install superpowers@claude-plugins-official    # TDD, planning, debugging workflows
+claude plugins install commit-commands@claude-plugins-official  # Git commit/PR helpers
 
 # Development
-claude plugins add feature-dev@claude-plugins-official    # Guided feature development
-claude plugins add frontend-design@claude-plugins-official  # UI design with high design quality
-claude plugins add playwright@claude-plugins-official     # Browser automation & e2e testing
+claude plugins install feature-dev@claude-plugins-official    # Guided feature development
+claude plugins install frontend-design@claude-plugins-official  # UI design with high design quality
+claude plugins install playwright@claude-plugins-official     # Browser automation & e2e testing
 
 # DX
-claude plugins add explanatory-output-style@claude-plugins-official  # Educational insights
-claude plugins add learning-output-style@claude-plugins-official     # Interactive learning mode
+claude plugins install explanatory-output-style@claude-plugins-official  # Educational insights
+claude plugins install learning-output-style@claude-plugins-official     # Interactive learning mode
 ```
 
 ### Useful Phrases
