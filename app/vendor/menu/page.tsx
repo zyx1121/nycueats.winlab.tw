@@ -42,10 +42,10 @@ export default async function VendorMenuPage() {
 
   // Compute slot status per item
   const slotStatuses = new Map<string, SlotStatus>();
-  const availableItems = allItems.filter((i) => i.is_available);
   let expiringCount = 0;
 
   for (const item of allItems) {
+    // Unavailable items can't be ordered; skip slot-expiry check
     if (!item.is_available) {
       slotStatuses.set(item.id, "ok");
       continue;
@@ -76,12 +76,14 @@ export default async function VendorMenuPage() {
   }));
 
   // Prepare data for bulk dialog (all slots, only available items)
-  const bulkDialogItems: BulkSlotItem[] = availableItems.map((item) => ({
-    id: item.id,
-    name: item.name,
-    default_max_qty: item.default_max_qty,
-    daily_slots: item.daily_slots ?? [],
-  }));
+  const bulkDialogItems: BulkSlotItem[] = allItems
+    .filter((i) => i.is_available)
+    .map((item) => ({
+      id: item.id,
+      name: item.name,
+      default_max_qty: item.default_max_qty,
+      daily_slots: item.daily_slots ?? [],
+    }));
 
   return (
     <div className="flex flex-col gap-4">
@@ -129,7 +131,7 @@ async function fetchSalesData(
 
   const validStatuses = new Set(["confirmed", "completed", "picked_up"]);
   const filtered = (salesRaw ?? []).filter(
-    (r) => validStatuses.has((r.orders as unknown as { status: string }).status)
+    (r) => r.orders && validStatuses.has(r.orders.status)
   );
 
   // Group by menu_item_id → date → total qty
