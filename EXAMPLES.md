@@ -1,5 +1,16 @@
 # 範例帳號與店家資料
 
+## 🔑 測試帳號
+
+| 角色 | Email | 密碼 | 說明 |
+|------|-------|------|------|
+| 輔委會（admin） | `admin.test@nycueats.dev` | `Admin1234!` | 可進入 /admin 後台 |
+| 商家 + 輔委會 | `morning.bites@nycueats.dev` | — | 同時具有 vendor 與 admin 角色 |
+
+> 密碼欄為「—」的帳號透過 Google OAuth 建立，無 email 密碼登入。
+
+---
+
 ## 🥣 晨光早餐 Morning Bites
 
 | 欄位 | 內容 |
