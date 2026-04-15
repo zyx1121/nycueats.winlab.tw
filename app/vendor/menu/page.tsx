@@ -1,24 +1,7 @@
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { AddMenuItemButton } from "./add-menu-item-button";
-import { VendorMenuItemCard, type SlotStatus } from "./menu-item-card";
-
-function getSlotStatus(slots: { max_qty: number; reserved_qty: number }[]): SlotStatus {
-  if (slots.length === 0) {
-    return "none";
-  }
-  const totalSlots = slots.reduce((sum, s) => sum + s.max_qty, 0);
-  const totalReserved = slots.reduce((sum, s) => sum + s.reserved_qty, 0);
-  const remaining = totalSlots - totalReserved;
-
-  if (remaining === 0) {
-    return "none";
-  }
-  if (remaining <= Math.ceil(totalSlots * 0.2)) {
-    return "expiring";
-  }
-  return "ok";
-}
+import { VendorMenuItemCard } from "./menu-item-card";
 
 export default async function VendorMenuPage() {
   const supabase = await createClient();
@@ -55,15 +38,11 @@ export default async function VendorMenuPage() {
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">{vendor.name} — 菜單管理</h1>
-        <AddMenuItemButton />
+        <Button size="sm">新增餐點</Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {itemsWithSlots.map((item) => (
-          <VendorMenuItemCard
-            key={item.id}
-            item={item}
-            slotStatus={getSlotStatus(item.daily_slots)}
-          />
+          <VendorMenuItemCard key={item.id} item={item} />
         ))}
         {itemsWithSlots.length === 0 && (
           <p className="text-muted-foreground text-center py-8">尚無餐點，請新增</p>
