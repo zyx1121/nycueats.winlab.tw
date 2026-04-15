@@ -61,14 +61,15 @@ Campus meal ordering platform for NYCU — employees pre-order meals from partne
 
 ## Getting Started
 
+1. Write environment variables to `.env` (see `.env.example`)
+2. Install dependencies and run the development server:
+
 ```bash
 bun install
 bun run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000)
-
-See `.env.example` for required environment variables (Supabase project config).
 
 ## Testing
 
