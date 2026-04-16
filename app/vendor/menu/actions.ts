@@ -145,3 +145,39 @@ export async function deleteMenuItem(id: string) {
   return { success: true };
 }
 
+export async function bulkUpsertSlots(
+  slots: { menu_item_id: string; date: string; max_qty: number }[]
+) {
+  const { supabase, vendor } = await requireVendor();
+
+  // Verify all menu items belong to this vendor
+  const itemIds = [...new Set(slots.map((s) => s.menu_item_id))];
+  const { data: ownedItems } = await supabase
+    .from("menu_items")
+    .select("id")
+    .eq("vendor_id", vendor.id)
+    .in("id", itemIds);
+
+  const ownedIds = new Set((ownedItems ?? []).map((i) => i.id));
+  const validSlots = slots.filter((s) => ownedIds.has(s.menu_item_id));
+
+  if (validSlots.length === 0) return { error: "沒有可建立的名額" };
+
+  const { error } = await supabase
+    .from("daily_slots")
+    .upsert(
+      validSlots.map((s) => ({
+        menu_item_id: s.menu_item_id,
+        date: s.date,
+        max_qty: s.max_qty,
+      })),
+      { onConflict: "menu_item_id,date" }
+    );
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/vendor/menu");
+  revalidatePath("/menu", "layout");
+  return { success: true, count: validSlots.length };
+}
+
