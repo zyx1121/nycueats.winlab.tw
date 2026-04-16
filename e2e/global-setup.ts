@@ -35,6 +35,13 @@ export default async function globalSetup() {
     throw new Error("Login did not redirect within 30s. Screenshot saved to test-results/global-setup-failure.png");
   }
 
+  const landingPath = new URL(page.url()).pathname;
+  if (landingPath.startsWith("/vendor") || landingPath.startsWith("/admin")) {
+    const orderCatalogButton = page.getByRole("button", { name: "點餐目錄" });
+    await orderCatalogButton.click();
+    await page.waitForURL("http://localhost:3000/", { timeout: 30000 });
+  }
+
   await page.context().storageState({ path: "e2e/.auth/user.json" });
   await browser.close();
 }
