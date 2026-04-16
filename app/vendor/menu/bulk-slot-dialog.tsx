@@ -81,11 +81,11 @@ export function BulkSlotDialog({
   const [overrides, setOverrides] = useState<Record<string, Record<string, number>>>({});
   const [touched, setTouched] = useState<Record<string, Set<string>>>({});
 
-  function getQty(itemId: string, date: string, slotMap: Map<string, Slot>, defaultQty: number): number {
-    return overrides[itemId]?.[date] ?? slotMap.get(date)?.max_qty ?? defaultQty;
+  function getQty(itemId: string, date: string, slotMap: Map<string, Slot>, fallbackQty: number): number {
+    return overrides[itemId]?.[date] ?? slotMap.get(date)?.max_qty ?? fallbackQty;
   }
 
-  function handleQtyChange(itemId: string, date: string, value: string, defaultQty: number) {
+  function handleQtyChange(itemId: string, date: string, value: string) {
     const qty = parseInt(value);
     if (isNaN(qty) || qty < 0) return;
     setOverrides((prev) => ({
@@ -215,7 +215,7 @@ export function BulkSlotDialog({
                                     : ""
                               }`}
                               onChange={(e) =>
-                                handleQtyChange(item.id, date, e.target.value, item.default_max_qty)
+                                handleQtyChange(item.id, date, e.target.value)
                               }
                             />
                             {slot && slot.reserved_qty > 0 && (

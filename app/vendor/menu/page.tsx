@@ -7,6 +7,10 @@ import type { BulkSlotItem, SalesDataMap } from "./bulk-slot-dialog";
 
 const EXPIRY_THRESHOLD_DAYS = 10;
 
+function formatIsoDate(date: Date): string {
+  return date.toISOString().split("T")[0];
+}
+
 export default async function VendorMenuPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -22,9 +26,15 @@ export default async function VendorMenuPage() {
     return <p className="text-muted-foreground">尚未綁定商家帳號，請聯絡管理員。</p>;
   }
 
-  const today = new Date().toISOString().split("T")[0];
-  const sevenDaysLater = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0];
-  const thresholdDate = new Date(Date.now() + EXPIRY_THRESHOLD_DAYS * 86400000).toISOString().split("T")[0];
+  const now = new Date();
+  const today = formatIsoDate(now);
+  const sevenDaysLaterDate = new Date(now);
+  sevenDaysLaterDate.setUTCDate(sevenDaysLaterDate.getUTCDate() + 7);
+  const sevenDaysLater = formatIsoDate(sevenDaysLaterDate);
+
+  const thresholdDateObj = new Date(now);
+  thresholdDateObj.setUTCDate(thresholdDateObj.getUTCDate() + EXPIRY_THRESHOLD_DAYS);
+  const thresholdDate = formatIsoDate(thresholdDateObj);
 
   // Fetch all items with their slots (Supabase fetches all embedded rows)
   const { data: items } = await supabase
@@ -36,9 +46,11 @@ export default async function VendorMenuPage() {
   const allItems = items ?? [];
 
   // Fetch 7-day sales data
-  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
+  const sevenDaysAgoDate = new Date(now);
+  sevenDaysAgoDate.setUTCDate(sevenDaysAgoDate.getUTCDate() - 7);
+  const sevenDaysAgo = formatIsoDate(sevenDaysAgoDate);
   const itemIds = allItems.map((i) => i.id);
-  const salesData = await fetchSalesData(supabase, itemIds, sevenDaysAgo);
+  const salesData = await fetchSalesData(supabase, itemIds, sevenDaysAgo, today);
 
   // Compute slot status per item
   const slotStatuses = new Map<string, SlotStatus>();
@@ -120,6 +132,7 @@ async function fetchSalesData(
   supabase: Awaited<ReturnType<typeof createClient>>,
   itemIds: string[],
   sinceDate: string,
+  today: string,
 ): Promise<SalesDataMap> {
   if (itemIds.length === 0) return {};
 
@@ -145,8 +158,11 @@ async function fetchSalesData(
   // Build SalesDataMap: 7 data points (one per day), fill missing days with 0
   const result: SalesDataMap = {};
   const days: string[] = [];
+  const todayDate = new Date(`${today}T00:00:00.000Z`);
   for (let i = 6; i >= 0; i--) {
-    days.push(new Date(Date.now() - i * 86400000).toISOString().split("T")[0]);
+    const day = new Date(todayDate);
+    day.setUTCDate(day.getUTCDate() - i);
+    days.push(formatIsoDate(day));
   }
 
   for (const itemId of itemIds) {
