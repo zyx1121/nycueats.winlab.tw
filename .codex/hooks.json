@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/post_commit_lint_hint.py\"",
+            "statusMessage": "Checking post-commit lint workflow",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
