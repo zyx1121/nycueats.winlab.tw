@@ -1,0 +1,12 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": ".github/hooks/scripts/post-commit-lint-subagent.sh",
+        "cwd": ".",
+        "timeout": 120
+      }
+    ]
+  }
+}

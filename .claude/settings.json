@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "agent",
+            "if": "Bash(git commit*)",
+            "prompt": "$ARGUMENTS\nA git commit command just completed in this repository. Spawn a subagent now. The subagent must run bun run lint, fix all lint errors, rerun bun run lint until it passes, and then combine the changes into the commit automatically."
+          }
+        ]
+      }
+    ]
+  }
+}
