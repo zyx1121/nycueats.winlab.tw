@@ -23,18 +23,18 @@ export function MenuItemCard({ item, onClick, status, disabled }: Props) {
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`hover:scale-[1.02] transition-all duration-200 h-full border rounded-lg bg-card flex justify-between max-h-64 cursor-pointer text-left w-full ${disabled ? "opacity-50" : ""}`}
+      className={`hover:scale-[1.02] transition-all duration-200 h-full border rounded-card bg-card flex justify-between max-h-64 cursor-pointer text-left w-full ${disabled ? "opacity-50" : ""}`}
     >
       <div className="flex flex-col p-4 gap-2 flex-1 min-w-0">
-        <h2 className="text-xl font-bold">{item.name}</h2>
-        <p className="text-md">${item.price}</p>
+        <h2 className="text-heading-sm font-semibold">{item.name}</h2>
+        <p className="text-body font-semibold">${item.price}</p>
         {item.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2">{item.description}</p>
+          <p className="text-body text-muted-foreground line-clamp-2">{item.description}</p>
         )}
         <div className="flex flex-wrap items-center gap-3">
-          {item.calories && <p className="text-sm text-muted-foreground">熱量 {item.calories}kcal</p>}
-          {item.protein && <p className="text-sm text-muted-foreground">蛋白質 {item.protein}g</p>}
-          {item.sodium && <p className="text-sm text-muted-foreground">鈉 {item.sodium}mg</p>}
+          {item.calories && <p className="text-meta text-muted-foreground">熱量 {item.calories}kcal</p>}
+          {item.protein && <p className="text-meta text-muted-foreground">蛋白質 {item.protein}g</p>}
+          {item.sodium && <p className="text-meta text-muted-foreground">鈉 {item.sodium}mg</p>}
         </div>
         {status}
       </div>
