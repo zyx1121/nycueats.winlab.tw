@@ -50,7 +50,7 @@ export default async function HomePage({ searchParams }: Props) {
       <div className="max-w-6xl w-full p-4 flex flex-col gap-8">
         {(trending.length > 0 || nutritionPicks.length > 0 || randomPicks.length > 0) && (
           <div className="flex flex-col gap-6">
-            {trending.length > 0 && <RecommendationSection title="🔥 熱銷排行" items={trending} />}
+            {trending.length > 0 && <RecommendationSection title="🔥 熱銷排行" items={trending} accent />}
             {nutritionPicks.length > 0 && <RecommendationSection title="💪 營養推薦" items={nutritionPicks} />}
             {randomPicks.length > 0 && <RecommendationSection title="🎲 隨機探索" items={randomPicks} />}
           </div>

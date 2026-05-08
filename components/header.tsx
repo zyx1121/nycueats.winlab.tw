@@ -31,7 +31,7 @@ export async function Header() {
     <header className="sticky top-0 z-50 p-4 flex w-full items-center justify-between h-16 bg-card/80 backdrop-blur-sm border-b">
       <div className="flex items-center gap-4">
         <Link href="/">
-          <h1 className="text-heading font-semibold tracking-tight">NYCU Eats</h1>
+          <h1 className="text-heading font-semibold tracking-tight">NYCU <span className="text-brand">Eats</span></h1>
         </Link>
         <AreaSelect byCity={byCity} defaultAreaId={profile?.area_id ?? undefined} />
       </div>
