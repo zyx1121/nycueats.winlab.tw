@@ -24,8 +24,24 @@ type Item = {
   }[];
 };
 
-export function VendorMenuItemCard({ item }: { item: Item }) {
+export type SlotStatus = "expiring" | "none" | "ok";
+
+export function VendorMenuItemCard({ item, slotStatus }: { item: Item; slotStatus: SlotStatus }) {
   const [editOpen, setEditOpen] = useState(false);
+
+  const badge = (
+    <div className="flex flex-wrap gap-1.5">
+      {!item.is_available && (
+        <span className="text-xs text-muted-foreground border rounded-full px-2 py-0.5">已下架</span>
+      )}
+      {slotStatus === "none" && (
+        <span className="text-xs text-red-600 border border-red-200 bg-red-50 rounded-full px-2 py-0.5 dark:text-red-400 dark:border-red-900 dark:bg-red-950">無名額</span>
+      )}
+      {slotStatus === "expiring" && (
+        <span className="text-xs text-amber-600 border border-amber-200 bg-amber-50 rounded-full px-2 py-0.5 dark:text-amber-400 dark:border-amber-900 dark:bg-amber-950">名額將盡</span>
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -33,11 +49,7 @@ export function VendorMenuItemCard({ item }: { item: Item }) {
       <MenuItemCard
         item={item}
         onClick={() => setEditOpen(true)}
-        status={
-          !item.is_available && (
-            <span className="text-xs text-muted-foreground border rounded-full px-2 py-0.5 self-start">已下架</span>
-          )
-        }
+        status={badge}
       />
     </>
   );
