@@ -4,14 +4,18 @@ import type { RecommendedItem } from "@/lib/recommendation";
 interface Props {
   title: string;
   items: RecommendedItem[];
+  accent?: boolean;
 }
 
-export default function RecommendationSection({ title, items }: Props) {
+export default function RecommendationSection({ title, items, accent }: Props) {
   if (items.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="text-heading font-semibold">{title}</h2>
+      <h2 className="text-heading font-semibold flex items-center gap-2">
+        {accent && <span className="inline-block w-1 h-5 bg-brand rounded-full" aria-hidden />}
+        {title}
+      </h2>
       <div className="flex overflow-x-auto gap-3 pb-2 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {items.map((item) => (
           <Link
