@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { getDefaultHomePath } from "@/lib/navigation-rules";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
@@ -37,7 +38,13 @@ export async function proxy(request: NextRequest) {
   }
 
   if (user && pathname === "/login") {
-    return NextResponse.redirect(new URL("/", request.url));
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    return NextResponse.redirect(new URL(getDefaultHomePath(profile?.role ?? []), request.url));
   }
 
   return response;

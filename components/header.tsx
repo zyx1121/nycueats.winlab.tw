@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { getHeaderNavigation } from "@/lib/navigation-rules";
 import { createClient } from "@/lib/supabase/server";
 import { ClipboardList, ShoppingBasket } from "lucide-react";
 import Link from "next/link";
@@ -16,8 +17,7 @@ export async function Header() {
     ? (await supabase.from("profiles").select("avatar_url, name, area_id, role").eq("id", user.id).single()).data
     : null;
 
-  const isVendor = profile?.role?.includes("vendor") ?? false;
-  const isAdmin = profile?.role?.includes("admin") ?? false;
+  const navigation = getHeaderNavigation(profile?.role ?? []);
 
   // 依 city 分組
   type AreaRow = { id: string; name: string; city: string };
@@ -36,26 +36,35 @@ export async function Header() {
         <AreaSelect byCity={byCity} defaultAreaId={profile?.area_id ?? undefined} />
       </div>
       <div className="flex items-center gap-4">
-        {isVendor && (
+        {navigation.showVendorDashboard && (
           <Link href="/vendor">
             <Button variant="outline" size="sm">商家後台</Button>
           </Link>
         )}
-        {isAdmin && (
+        {navigation.showOrderCatalog && (
+          <Link href="/">
+            <Button variant="outline" size="sm">點餐目錄</Button>
+          </Link>
+        )}
+        {navigation.showAdminDashboard && (
           <Link href="/admin">
             <Button variant="outline" size="sm">管理後台</Button>
           </Link>
         )}
-        <Link href="/orders">
-          <Button variant="outline">
-            <ClipboardList className="size-4" />
-          </Button>
-        </Link>
-        <Link href="/cart">
-          <Button variant="outline">
-            <ShoppingBasket className="size-4" />
-          </Button>
-        </Link>
+        {navigation.showOrders && (
+          <Link href="/orders">
+            <Button variant="outline">
+              <ClipboardList className="size-4" />
+            </Button>
+          </Link>
+        )}
+        {navigation.showCart && (
+          <Link href="/cart">
+            <Button variant="outline">
+              <ShoppingBasket className="size-4" />
+            </Button>
+          </Link>
+        )}
         {user ? (
           <Link href="/profile">
             <Avatar>
