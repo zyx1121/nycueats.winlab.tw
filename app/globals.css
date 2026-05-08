@@ -46,6 +46,59 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Design system — surface hierarchy */
+  --color-surface-canvas: var(--surface-canvas);
+  --color-surface-card: var(--surface-card);
+  --color-surface-placeholder: var(--surface-placeholder);
+  --color-surface-loader: var(--surface-loader);
+
+  /* Design system — brand accent (the single chromatic heartbeat) */
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-success: var(--success);
+
+  /* Design system — text & dividers */
+  --color-text-disabled: var(--text-disabled);
+  --color-divider: var(--divider);
+
+  /* Design system — named radii */
+  --radius-card: var(--radius-card);
+  --radius-pill: var(--radius-pill);
+  --radius-badge: var(--radius-badge);
+  --radius-input: var(--radius-input);
+  --radius-button: var(--radius-button);
+  --radius-icon: var(--radius-icon);
+  --radius-modal: var(--radius-modal);
+
+  /* Design system — elevation */
+  --shadow-sticky: var(--shadow-sticky);
+  --shadow-floating: var(--shadow-floating);
+  --shadow-on-photo: var(--shadow-on-photo);
+  --shadow-badge: var(--shadow-badge);
+
+  /* Design system — type scale */
+  --text-caption: 11px;
+  --text-caption--line-height: 1.30;
+  --text-caption--letter-spacing: 0.02em;
+  --text-meta: 12px;
+  --text-meta--line-height: 1.40;
+  --text-meta--letter-spacing: -0.005em;
+  --text-body: 14px;
+  --text-body--line-height: 1.45;
+  --text-body--letter-spacing: -0.009em;
+  --text-heading-sm: 16px;
+  --text-heading-sm--line-height: 1.35;
+  --text-heading-sm--letter-spacing: -0.012em;
+  --text-heading: 20px;
+  --text-heading--line-height: 1.25;
+  --text-heading--letter-spacing: -0.015em;
+  --text-display: 28px;
+  --text-display--line-height: 1.18;
+  --text-display--letter-spacing: -0.02em;
+  --text-stat: 40px;
+  --text-stat--line-height: 1.10;
+  --text-stat--letter-spacing: -0.025em;
 }
 
 :root {
@@ -81,6 +134,36 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Design system — surface hierarchy (light) */
+  --surface-canvas: oklch(0.97 0 0);
+  --surface-card: oklch(1 0 0);
+  --surface-placeholder: oklch(0.92 0 0);
+  --surface-loader: oklch(0.85 0 0);
+
+  /* Design system — brand accent (light) */
+  --brand: oklch(0.65 0.18 35);
+  --brand-hover: oklch(0.58 0.18 32);
+  --success: oklch(0.62 0.14 145);
+
+  /* Design system — text & dividers (light) */
+  --text-disabled: oklch(0.75 0 0);
+  --divider: oklch(0.94 0 0);
+
+  /* Design system — named radii (px values, scale-stable) */
+  --radius-card: 1.25rem;
+  --radius-pill: 2rem;
+  --radius-badge: 0.25rem;
+  --radius-input: 0.875rem;
+  --radius-button: 0.5rem;
+  --radius-icon: 9999px;
+  --radius-modal: 1rem;
+
+  /* Design system — elevation */
+  --shadow-sticky: 0 1px 0 rgb(0 0 0 / 0.04), 0 2px 6px rgb(0 0 0 / 0.04);
+  --shadow-floating: 0 0 0 1px rgb(0 0 0 / 0.02), 0 2px 6px rgb(0 0 0 / 0.04), 0 4px 8px rgb(0 0 0 / 0.10);
+  --shadow-on-photo: 0 0 0 1px rgb(0 0 0 / 0.02), 0 2px 4px rgb(0 0 0 / 0.16);
+  --shadow-badge: 0 2px 6px rgb(0 0 0 / 0.25);
 }
 
 .dark {
@@ -115,6 +198,27 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Design system — surface hierarchy (dark) */
+  --surface-canvas: oklch(0.145 0 0);
+  --surface-card: oklch(0.205 0 0);
+  --surface-placeholder: oklch(0.30 0 0);
+  --surface-loader: oklch(0.40 0 0);
+
+  /* Design system — brand accent (dark) */
+  --brand: oklch(0.70 0.18 35);
+  --brand-hover: oklch(0.63 0.18 32);
+  --success: oklch(0.70 0.14 145);
+
+  /* Design system — text & dividers (dark) */
+  --text-disabled: oklch(0.50 0 0);
+  --divider: oklch(1 0 0 / 0.06);
+
+  /* Design system — elevation (dark, slightly stronger) */
+  --shadow-sticky: 0 1px 0 rgb(0 0 0 / 0.30), 0 2px 6px rgb(0 0 0 / 0.40);
+  --shadow-floating: 0 0 0 1px rgb(255 255 255 / 0.04), 0 2px 6px rgb(0 0 0 / 0.40), 0 4px 8px rgb(0 0 0 / 0.50);
+  --shadow-on-photo: 0 0 0 1px rgb(0 0 0 / 0.20), 0 2px 4px rgb(0 0 0 / 0.40);
+  --shadow-badge: 0 2px 6px rgb(0 0 0 / 0.50);
 }
 
 @layer base {
