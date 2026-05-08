@@ -12,7 +12,7 @@ const PAD = { top: 12, right: 12, bottom: 24, left: 32 };
 export function TrendChart({ title, data }: Props) {
   if (data.length === 0) {
     return (
-      <div className="border rounded-lg p-4">
+      <div className="border rounded-lg bg-card p-4">
         <p className="text-sm font-bold mb-2">{title}</p>
         <p className="text-sm text-muted-foreground">暫無資料</p>
       </div>
@@ -34,7 +34,7 @@ export function TrendChart({ title, data }: Props) {
   const gridLines = [0, 0.25, 0.5, 0.75, 1].map((f) => Math.round(f * maxCount));
 
   return (
-    <div className="border rounded-lg p-4 flex flex-col gap-2">
+    <div className="border rounded-lg bg-card p-4 flex flex-col gap-2">
       <p className="text-sm font-bold">{title}</p>
       <svg
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}

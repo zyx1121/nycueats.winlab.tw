@@ -77,7 +77,7 @@ export function ReportTable({ initialData, initialYear, initialMonth }: {
       )}
 
       {!isPending && data.length > 0 && (
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border rounded-lg bg-card overflow-hidden">
           <table className="w-full">
             <thead>
               <tr className="border-b bg-muted/30">

@@ -28,7 +28,7 @@ export async function Header() {
   }, {});
 
   return (
-    <header className="sticky top-0 z-50 p-4 flex w-full items-center justify-between h-16 bg-background/20 backdrop-blur-sm border-b">
+    <header className="sticky top-0 z-50 p-4 flex w-full items-center justify-between h-16 bg-card/80 backdrop-blur-sm border-b">
       <div className="flex items-center gap-4">
         <Link href="/">
           <h1 className="text-xl font-bold">NYCU Eats</h1>

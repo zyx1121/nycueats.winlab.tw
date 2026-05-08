@@ -19,7 +19,7 @@ export default function RecommendationSection({ title, items }: Props) {
             href={`/menu/${item.vendor_id}`}
             className="snap-start flex-shrink-0 w-48"
           >
-            <div className="border rounded-lg p-3 flex flex-col gap-2 h-full hover:scale-[1.02] transition-all duration-200">
+            <div className="border rounded-lg bg-card p-3 flex flex-col gap-2 h-full hover:scale-[1.02] transition-all duration-200">
               <p className="text-sm font-medium leading-tight line-clamp-2">{item.name}</p>
               <p className="text-xs text-muted-foreground">{item.vendor_name}</p>
               <p className="text-sm font-bold mt-auto">NT${item.price}</p>

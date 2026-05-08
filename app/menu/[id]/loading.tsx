@@ -14,7 +14,7 @@ export default function MenuLoading() {
         {/* 餐點卡片 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="border rounded-lg flex justify-between h-40">
+            <div key={i} className="border rounded-lg bg-card flex justify-between h-40">
               <div className="flex flex-col p-4 gap-2 flex-1">
                 <Skeleton className="h-6 w-32" />
                 <Skeleton className="h-4 w-16" />
