@@ -70,27 +70,27 @@ export default async function HomePage({ searchParams }: Props) {
             return (
               <Link key={vendor.id} href={`/menu/${vendor.id}`}>
                 <div className="hover:scale-[1.02] transition-all duration-200 w-full flex flex-col gap-3">
-                  <AspectRatio className="bg-muted rounded-lg overflow-hidden" ratio={16 / 9}>
+                  <AspectRatio className="bg-surface-placeholder rounded-card overflow-hidden" ratio={16 / 9}>
                     {vendor.image_url && (
                       <Image src={vendor.image_url} alt={vendor.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" priority />
                     )}
                   </AspectRatio>
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-md font-medium">{vendor.name}</p>
+                      <p className="text-heading-sm font-semibold">{vendor.name}</p>
                       {!vendor.is_open && (
-                        <span className="text-xs text-muted-foreground border rounded-full px-2 py-0.5">暫停營業</span>
+                        <span className="text-caption text-muted-foreground border rounded-pill px-2 py-0.5">暫停營業</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       {rating && (
-                        <span className="text-sm text-muted-foreground flex items-center gap-1">
+                        <span className="text-meta text-muted-foreground flex items-center gap-1">
                           <HeartIcon className="size-3" />
                           {rating} ({total})
                         </span>
                       )}
                       {vendor.tags.map((tag) => (
-                        <span key={tag} className="text-xs text-muted-foreground border rounded-full px-2 py-0.5">
+                        <span key={tag} className="text-caption text-muted-foreground border rounded-pill px-2 py-0.5">
                           {tag}
                         </span>
                       ))}
