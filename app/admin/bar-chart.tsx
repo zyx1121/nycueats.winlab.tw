@@ -8,7 +8,7 @@ type Props = {
 export function BarChart({ title, items }: Props) {
   const max = Math.max(...items.map((i) => i.revenue), 1);
   return (
-    <div className="border rounded-lg p-4 flex flex-col gap-3">
+    <div className="border rounded-lg bg-card p-4 flex flex-col gap-3">
       <p className="text-sm font-bold">{title}</p>
       {items.length === 0 && <p className="text-sm text-muted-foreground">暫無資料</p>}
       {items.map((item) => (

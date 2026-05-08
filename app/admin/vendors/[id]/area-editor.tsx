@@ -69,7 +69,7 @@ export function AreaEditor({
                   className={`px-3 py-1 rounded-full text-sm border transition-all duration-200 ${
                     active
                       ? "bg-foreground text-background border-foreground"
-                      : "bg-background text-foreground border-border hover:border-foreground"
+                      : "bg-card text-foreground border-border hover:border-foreground"
                   }`}
                 >
                   {area.name}

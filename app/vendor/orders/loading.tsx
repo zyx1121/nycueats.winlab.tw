@@ -7,7 +7,7 @@ export default function VendorOrdersLoading() {
       {Array.from({ length: 3 }).map((_, i) => (
         <div key={i} className="flex flex-col gap-2">
           <Skeleton className="h-4 w-28" />
-          <div className="border rounded-lg divide-y">
+          <div className="border rounded-lg bg-card divide-y">
             {Array.from({ length: 2 }).map((_, j) => (
               <div key={j} className="flex items-center justify-between p-4">
                 <Skeleton className="h-4 w-24" />

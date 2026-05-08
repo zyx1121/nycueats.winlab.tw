@@ -97,7 +97,7 @@ export function OptionGroupsEditor({ menuItemId, groups }: Props) {
       </div>
 
       {groups.map((group) => (
-        <div key={group.id} className="border rounded-lg p-3 flex flex-col gap-3">
+        <div key={group.id} className="border rounded-lg bg-card p-3 flex flex-col gap-3">
           {/* 群組 header */}
           <div className="flex items-center gap-2">
             <Input

@@ -9,7 +9,7 @@ export default function VendorMenuLoading() {
       </div>
       <div className="flex flex-col gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="border rounded-lg p-4 flex flex-col gap-3">
+          <div key={i} className="border rounded-lg bg-card p-4 flex flex-col gap-3">
             <div className="flex justify-between items-center">
               <div className="flex flex-col gap-1.5">
                 <Skeleton className="h-5 w-32" />

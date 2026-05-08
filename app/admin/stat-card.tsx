@@ -25,7 +25,7 @@ type Props = {
 export function StatCard({ title, value, prev, format }: Props) {
   const { label, positive } = diff(value, prev);
   return (
-    <div className="border rounded-lg p-4 flex flex-col gap-1">
+    <div className="border rounded-lg bg-card p-4 flex flex-col gap-1">
       <p className="text-sm text-muted-foreground">{title}</p>
       <p className="text-2xl font-bold">{formatValue(value, format)}</p>
       <p className={`text-xs ${positive ? "text-green-600" : "text-red-500"}`}>{label}</p>

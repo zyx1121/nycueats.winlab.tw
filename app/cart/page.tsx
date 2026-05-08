@@ -46,7 +46,7 @@ export default async function CartPage() {
             <p className="text-sm font-medium text-muted-foreground">
               {format(new Date(date), "MM月dd日 EEEE", { locale: zhTW })}
             </p>
-            <div className="border rounded-lg divide-y">
+            <div className="border rounded-lg bg-card divide-y">
               {byDate[date].map((item) => (
                 <div key={item.id} className="flex items-center justify-between p-4">
                   <div className="flex flex-col gap-0.5">

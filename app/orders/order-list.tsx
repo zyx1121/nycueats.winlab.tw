@@ -43,7 +43,7 @@ function OrderCard({ order }: { order: OrderSummary }) {
 
   return (
     <Link href={`/orders/${order.id}`}>
-      <div className="border rounded-lg p-4 flex flex-col gap-2 hover:scale-[1.02] transition-all duration-200">
+      <div className="border rounded-lg bg-card p-4 flex flex-col gap-2 hover:scale-[1.02] transition-all duration-200">
         <div className="flex items-center justify-between">
           <span className="text-sm font-mono text-muted-foreground">
             #{order.id.slice(0, 8)}

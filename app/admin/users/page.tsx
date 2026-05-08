@@ -19,7 +19,7 @@ export default async function AdminUsersPage() {
       {!profiles || profiles.length === 0 ? (
         <p className="text-muted-foreground text-center py-8">尚無使用者</p>
       ) : (
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border rounded-lg bg-card overflow-hidden">
           <table className="w-full">
             <thead>
               <tr className="border-b bg-muted/30">

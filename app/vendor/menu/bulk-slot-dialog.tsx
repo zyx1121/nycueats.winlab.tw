@@ -174,7 +174,7 @@ export function BulkSlotDialog({
               const touchedSet = touched[item.id] ?? new Set<string>();
 
               return (
-                <div key={item.id} className="border rounded-lg p-4 flex flex-col gap-3">
+                <div key={item.id} className="border rounded-lg bg-card p-4 flex flex-col gap-3">
                   <div className="flex items-center gap-3">
                     <span className="font-medium">{item.name}</span>
                     {sales && sales.daysWithData > 0 ? (

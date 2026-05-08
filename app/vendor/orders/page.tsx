@@ -128,7 +128,7 @@ export default async function VendorOrdersPage({
             <p className="text-sm font-medium text-muted-foreground">
               {format(new Date(date), "MM月dd日 EEEE", { locale: zhTW })}
             </p>
-            <div className="border rounded-lg divide-y">
+            <div className="border rounded-lg bg-card divide-y">
               {groups.map((group) => (
                 <div key={group.name} className="flex flex-col gap-2 p-4">
                   <div className="flex items-center justify-between">

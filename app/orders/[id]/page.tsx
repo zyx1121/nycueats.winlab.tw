@@ -93,7 +93,7 @@ export default async function OrderDetailPage({
             return (
               <div
                 key={item.id}
-                className="border rounded-lg p-4 flex flex-col gap-2"
+                className="border rounded-lg bg-card p-4 flex flex-col gap-2"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-2 flex-1">
