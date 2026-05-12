@@ -29,6 +29,9 @@ export default async function VendorLayout({ children }: { children: React.React
           <Link href="/vendor/orders">
             <Button variant="outline" size="sm">訂單彙整</Button>
           </Link>
+          <Link href="/vendor/revenue">
+            <Button variant="outline" size="sm">營業額統計</Button>
+          </Link>
         </nav>
         {children}
       </div>
