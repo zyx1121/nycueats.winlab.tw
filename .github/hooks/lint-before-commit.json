@@ -1,9 +1,9 @@
 {
   "hooks": {
-    "PostToolUse": [
+    "PreToolUse": [
       {
         "type": "command",
-        "command": ".github/hooks/scripts/post-commit-lint-subagent.sh",
+        "command": ".github/hooks/scripts/pre-commit-lint.sh",
         "cwd": ".",
         "timeout": 120
       }

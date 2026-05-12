@@ -42,16 +42,36 @@ print(command)
 PY
 )"
 
-if [[ ! "$COMMAND" =~ ^git[[:space:]]+commit ]]; then
+if [[ ! "$COMMAND" =~ ^git[[:space:]]+commit([[:space:]]|$) ]]; then
   exit 0
 fi
 
-cat <<'JSON'
-{
-  "hookSpecificOutput": {
-    "hookEventName": "PostToolUse",
-    "additionalContext": "A git commit command just completed. Spawn a subagent now. The subagent must run bun run lint, fix all lint errors, rerun bun run lint until it passes, and then combine the changes into the commit automatically."
-  },
-  "systemMessage": "Post-commit lint subagent requested."
-}
-JSON
+FILES=()
+while IFS= read -r file; do
+  FILES+=("$file")
+done < <(
+  git diff --cached --name-only --diff-filter=ACMR -- \
+    '*.js' '*.jsx' '*.ts' '*.tsx' '*.mjs' '*.cjs' '*.mts' '*.cts'
+)
+
+if (( ${#FILES[@]} == 0 )); then
+  exit 0
+fi
+
+PARTIAL=()
+for file in "${FILES[@]}"; do
+  if ! git diff --quiet -- "$file"; then
+    PARTIAL+=("$file")
+  fi
+done
+
+if (( ${#PARTIAL[@]} > 0 )); then
+  printf 'Cannot auto-fix partially staged files without staging unstaged changes:\n' >&2
+  printf '  %s\n' "${PARTIAL[@]}" >&2
+  printf 'Stage or stash the remaining changes, then commit again.\n' >&2
+  exit 1
+fi
+
+bun run lint -- --fix "${FILES[@]}"
+bun run lint -- "${FILES[@]}"
+git add -- "${FILES[@]}"
