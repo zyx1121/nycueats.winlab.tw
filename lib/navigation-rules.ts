@@ -7,9 +7,11 @@ export function getDefaultHomePath(roles: string[]) {
 export function getHeaderNavigation(roles: string[]) {
   const isAdmin = roles.includes("admin");
   const isUser = roles.includes("user");
+  const isVendor = roles.includes("vendor");
 
   return {
     showAdminDashboard: isAdmin,
+    showVendorDashboard: isVendor,
     showAreaSelect: isUser,
     showSearch: isUser,
     showOrders: isUser,

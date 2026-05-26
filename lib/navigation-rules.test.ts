@@ -29,6 +29,13 @@ describe("navigation rules", () => {
     expect(getHeaderNavigation(["vendor", "admin"])).toMatchObject({ showAdminDashboard: true });
   });
 
+  it("shows the vendor dashboard button for vendor accounts", () => {
+    expect(getHeaderNavigation(["user"])).toMatchObject({ showVendorDashboard: false });
+    expect(getHeaderNavigation(["vendor"])).toMatchObject({ showVendorDashboard: true });
+    expect(getHeaderNavigation(["user", "vendor"])).toMatchObject({ showVendorDashboard: true });
+    expect(getHeaderNavigation(["vendor", "admin"])).toMatchObject({ showVendorDashboard: true });
+  });
+
   it("shows employee features only for user role", () => {
     const employeeFeatures = { showAreaSelect: true, showSearch: true, showOrders: true, showCart: true };
     const hiddenFeatures = { showAreaSelect: false, showSearch: false, showOrders: false, showCart: false };
