@@ -9,8 +9,12 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
+    const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error && user) {
+      const name = user.user_metadata?.full_name ?? user.user_metadata?.name;
+      if (name) {
+        await supabase.from("profiles").update({ name }).eq("id", user.id).is("name", null);
+      }
       return NextResponse.redirect(`${origin}${next}`);
     }
   }
