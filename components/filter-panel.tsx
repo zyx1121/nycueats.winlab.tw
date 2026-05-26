@@ -42,14 +42,14 @@ function SortRadio({ sort, setSort }: { sort: SearchFilters["sort"]; setSort: (v
   );
 }
 
-function TagAxisGroup({ axis, tags, selTags, onToggle }: { axis: string; tags: TagEntry[]; selTags: string[]; onToggle: (slug: string) => void }) {
+function TagAxisGroup({ axis, tags, selTags, onToggle }: { axis: string; tags: TagEntry[]; selTags: string[]; onToggle: (label: string) => void }) {
   return (
     <div>
       <p className="mb-1 text-[11px] text-muted-foreground">{AXIS_LABELS[axis] ?? axis}</p>
       <div className="flex flex-wrap gap-1.5">
         {tags.map((t) => (
-          <button key={t.slug} onClick={() => onToggle(t.slug)}
-            className={`rounded-full border px-2.5 py-0.5 text-[11px] transition-colors ${selTags.includes(t.slug) ? "border-foreground bg-foreground text-card" : "border-border bg-surface-canvas hover:border-foreground/40"}`}>
+          <button key={t.label} onClick={() => onToggle(t.label)}
+            className={`rounded-full border px-2.5 py-0.5 text-[11px] transition-colors ${selTags.includes(t.label) ? "border-foreground bg-foreground text-card" : "border-border bg-surface-canvas hover:border-foreground/40"}`}>
             {t.label}
           </button>
         ))}

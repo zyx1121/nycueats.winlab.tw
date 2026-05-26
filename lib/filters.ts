@@ -61,4 +61,4 @@ export function countActiveFilters(f: SearchFilters): number {
   return n;
 }
 
-export interface TagEntry { slug: string; label: string; axis: string }
+export interface TagEntry { label: string; axis: string }

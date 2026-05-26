@@ -16,7 +16,7 @@ export async function Header() {
     supabase.from("areas").select("id, name, city").eq("is_active", true).order("city"),
     supabase.auth.getUser(),
     supabase.from("menu_items").select("name").eq("is_available", true).limit(60),
-    supabase.from("tag_vocabulary").select("slug, label, axis").order("sort_order"),
+    supabase.from("tag_vocabulary").select("label, axis").order("sort_order"),
   ]);
   // Random subset for search placeholder rotation; shuffled here (server)
   // because doing Math.random() in a client component trips react-hooks/purity.
