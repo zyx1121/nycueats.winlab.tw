@@ -11,7 +11,12 @@ import {
 import type { HomeItem } from "@/lib/recommendation";
 import { pickRandomItem } from "@/lib/roulette";
 import { Dices } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
+
+const subscribe = () => () => {};
+const useIsClient = () =>
+  useSyncExternalStore(subscribe, () => true, () => false);
 
 interface Props {
   items: HomeItem[];
@@ -24,6 +29,7 @@ export function FoodWheel({ items }: Props) {
   const [result, setResult] = useState<HomeItem | null>(null);
   const [preview, setPreview] = useState<HomeItem | null>(null);
   const [rolling, setRolling] = useState(false);
+  const isClient = useIsClient();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => () => clearTimeout(timer.current ?? undefined), []);
@@ -62,9 +68,12 @@ export function FoodWheel({ items }: Props) {
     tick();
   }
 
-  if (items.length === 0) return null;
+  if (items.length === 0 || !isClient) return null;
 
-  return (
+  // Portal to document.body so the FAB escapes <template>'s `transform`
+  // containing block — otherwise `position: fixed` anchors to the
+  // transformed page wrapper instead of the viewport.
+  return createPortal(
     <>
       <Button
         onClick={spin}
@@ -101,6 +110,7 @@ export function FoodWheel({ items }: Props) {
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </>,
+    document.body,
   );
 }

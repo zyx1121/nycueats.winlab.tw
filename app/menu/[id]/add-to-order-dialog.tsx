@@ -92,9 +92,10 @@ export function AddToOrderDialog({ vendorId, item, slots, optionGroups, children
     if (disabled) return;
     if (typeof window === "undefined") return;
     if (window.location.hash === `#item-${item.id}`) {
+      // One-shot auto-open driven by URL hash; not a cascading render.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       handleOpen();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item.id, disabled]);
 
   function handleSubmit() {
