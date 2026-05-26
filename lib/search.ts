@@ -44,7 +44,7 @@ export async function searchHomeItems(
     p_tags: filters?.tags ?? undefined,
     p_sort: hasExplicitSort ? filters!.sort : undefined,
     p_dates: filters?.dates ?? undefined,
-  } as Parameters<typeof supabase.rpc>[1]);
+  });
   if (error || !data) return [];
 
   const items: HomeItem[] = data.map((row) => ({

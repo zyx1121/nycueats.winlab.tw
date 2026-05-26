@@ -2,13 +2,11 @@
 "use client";
 
 import { FilterPanel } from "@/components/filter-panel";
-import { countActiveFilters, parseFiltersFromParams } from "@/lib/filters";
+import { countActiveFilters, parseFiltersFromParams, type TagEntry } from "@/lib/filters";
 import { Input } from "@/components/ui/input";
 import { ListFilter, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
-
-interface TagEntry { slug: string; label: string; axis: string }
 
 interface Props {
   placeholderItems?: string[];
@@ -26,7 +24,7 @@ export function SearchForm({ placeholderItems, tagVocabulary }: Props) {
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [filterOpen, setFilterOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const wrapRef = useRef<HTMLDivElement>(null);
+  const filterBtnRef = useRef<HTMLDivElement>(null);
 
   const pool = placeholderItems?.length ? placeholderItems : FALLBACK_PLACEHOLDERS;
 
@@ -50,7 +48,7 @@ export function SearchForm({ placeholderItems, tagVocabulary }: Props) {
   }
 
   return (
-    <div ref={wrapRef} className="relative">
+    <div className="relative">
       {/* Search + Filter pill */}
       <div className="flex items-center rounded-[14px] border border-border">
         <form onSubmit={handleSubmit} className="relative flex items-center">
@@ -69,7 +67,7 @@ export function SearchForm({ placeholderItems, tagVocabulary }: Props) {
         <div className="h-5 w-px bg-border" />
 
         {/* Filter button + badge */}
-        <div className="relative">
+        <div className="relative" ref={filterBtnRef}>
           <button
             type="button"
             onClick={() => setFilterOpen((v) => !v)}
@@ -91,6 +89,7 @@ export function SearchForm({ placeholderItems, tagVocabulary }: Props) {
         <FilterPanel
           tagVocabulary={tagVocabulary}
           onClose={() => setFilterOpen(false)}
+          anchorRef={filterBtnRef}
         />
       )}
     </div>
