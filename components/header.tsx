@@ -53,6 +53,11 @@ export async function Header() {
             <Button variant="outline" size="sm">管理後台</Button>
           </Link>
         )}
+        {navigation.showVendorDashboard && (
+          <Link href="/vendor">
+            <Button variant="outline" size="sm">商家後台</Button>
+          </Link>
+        )}
         <ThemeToggle />
         {navigation.showOrders && (
           <Link href="/orders">
