@@ -1,5 +1,8 @@
 "use client";
 
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import Image from "next/image";
+
 type Item = {
   name: string;
   description: string | null;
@@ -38,15 +41,19 @@ export function MenuItemCard({ item, onClick, status, disabled }: Props) {
         </div>
         {status}
       </div>
-      {/* 圖片暫時隱藏
       <div className="max-w-40 w-full shrink-0">
-        <AspectRatio ratio={1} className="bg-muted rounded-r-lg overflow-hidden">
+        <AspectRatio ratio={1} className="bg-surface-placeholder rounded-r-card overflow-hidden">
           {item.image_url && (
-            <Image src={item.image_url} alt={item.name} fill className="object-cover" />
+            <Image
+              src={item.image_url}
+              alt={item.name}
+              fill
+              sizes="(max-width: 768px) 40vw, 160px"
+              className="object-cover"
+            />
           )}
         </AspectRatio>
       </div>
-      */}
     </button>
   );
 }

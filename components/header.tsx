@@ -1,3 +1,4 @@
+import { AreaSelect } from "./area-select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { getHeaderNavigation } from "@/lib/navigation-rules";
@@ -81,6 +82,3 @@ export async function Header() {
     </header>
   );
 }
-
-// 區域選擇器是 client component（需要 onChange）
-import { AreaSelect } from "./area-select";
