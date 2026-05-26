@@ -80,14 +80,12 @@ export default async function HomePage({ searchParams }: Props) {
         {dailyPick && (
           <section className="flex flex-col gap-3">
             <h2 className="text-heading font-semibold">🎁 今日驚喜</h2>
-            <div className="max-w-sm">
-              <HomeItemCard item={dailyPick} />
+            <div className="border rounded-card bg-card p-4 flex flex-col items-center gap-4">
+              <div className="w-full max-w-xs">
+                <HomeItemCard item={dailyPick} />
+              </div>
             </div>
           </section>
-        )}
-
-        {trending.length > 0 && (
-          <RecommendationSection title="🔥 熱銷排行" items={trending} accent />
         )}
 
         {items.length === 0 ? (
@@ -98,16 +96,18 @@ export default async function HomePage({ searchParams }: Props) {
           <>
             <FoodWheel items={items} />
 
-            {items.length > 0 && (
-              <section className="flex flex-col gap-3">
-                <h2 className="text-heading font-semibold">所有餐點</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {itemsWithReasons.map((item) => (
-                    <HomeItemCard key={item.id} item={item} />
-                  ))}
-                </div>
-              </section>
+            {trending.length > 0 && (
+              <RecommendationSection title="🔥 熱銷排行" items={trending} accent />
             )}
+
+            <section className="flex flex-col gap-3">
+              <h2 className="text-heading font-semibold">所有餐點</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {itemsWithReasons.map((item) => (
+                  <HomeItemCard key={item.id} item={item} />
+                ))}
+              </div>
+            </section>
           </>
         )}
       </div>
