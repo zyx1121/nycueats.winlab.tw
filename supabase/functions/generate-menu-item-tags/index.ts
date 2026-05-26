@@ -17,6 +17,8 @@ const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!;
 const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") ?? "gpt-5.4-mini";
+const OPENAI_EMBED_MODEL = Deno.env.get("OPENAI_EMBED_MODEL") ?? "text-embedding-3-small";
+const OPENAI_EMBED_DIMS = Number(Deno.env.get("OPENAI_EMBED_DIMS") ?? "512");
 
 const SKIP_WITHIN_MS = 60_000;
 const MAX_ITEMS_PER_INVOKE = 100;
@@ -155,11 +157,32 @@ Deno.serve(async (req) => {
       const parsed = JSON.parse(content);
 
       const uniqueTags = [...new Set<string>(parsed.tags ?? [])];
+
+      // Build embedding from name + description + tag labels (semantic richness)
+      const tagLabels = uniqueTags
+        .map((slug) => (vocab as VocabRow[]).find((v) => v.slug === slug)?.label ?? slug)
+        .join(" ");
+      const embedInput = `${raw.name} ${parsed.description ?? ""} ${tagLabels}`.trim();
+
+      let embedding: number[] | null = null;
+      try {
+        const embedResp = await openai.embeddings.create({
+          model: OPENAI_EMBED_MODEL,
+          input: embedInput,
+          dimensions: OPENAI_EMBED_DIMS,
+        });
+        embedding = embedResp.data?.[0]?.embedding ?? null;
+      } catch (embedErr) {
+        // Embedding failure is non-fatal — tags still get written
+        console.error(`embedding failed for ${raw.id}:`, embedErr);
+      }
+
       const update: Record<string, unknown> = {
         ai_tags: uniqueTags,
         ai_description: parsed.description,
         ai_generated_at: new Date().toISOString(),
       };
+      if (embedding) update.embedding = JSON.stringify(embedding);
       if (raw.calories == null && parsed.calories != null) update.calories = parsed.calories;
       if (raw.protein == null && parsed.protein != null) update.protein = parsed.protein;
       if (raw.sodium == null && parsed.sodium != null) update.sodium = parsed.sodium;
