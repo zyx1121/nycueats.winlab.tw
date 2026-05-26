@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function CartLoading() {
   return (
     <main className="min-h-[calc(100dvh-4rem)] flex flex-col items-center">
-      <div className="max-w-6xl w-full p-4 flex flex-col gap-4">
+      <div className="w-full p-4 flex flex-col gap-4">
         <Skeleton className="h-8 w-36" />
         {Array.from({ length: 2 }).map((_, i) => (
           <div key={i} className="flex flex-col gap-2">
