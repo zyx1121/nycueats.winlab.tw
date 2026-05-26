@@ -19,54 +19,46 @@ export type HomeItem = {
   price: number;
   image_url: string | null;
   tags: string[];
+  ai_tags: string[];
+  ai_description: string | null;
   calories: number | null;
   protein: number | null;
   sodium: number | null;
   vendor_id: string;
   vendor_name: string;
   vendor_is_open: boolean;
+  match_score: number;
+  top_tag_label: string | null;
 };
 
 export async function getHomeItems(areaId?: string, limit = 60): Promise<HomeItem[]> {
   const supabase = await createClient();
 
-  const select = areaId
-    ? "id, name, description, price, image_url, tags, calories, protein, sodium, vendor_id, vendors!inner(id, name, is_active, is_open, vendor_areas!inner(area_id))"
-    : "id, name, description, price, image_url, tags, calories, protein, sodium, vendor_id, vendors!inner(id, name, is_active, is_open)";
+  const { data, error } = await supabase.rpc("rank_menu_items_for_home", {
+    p_area_id: areaId ?? undefined,
+    p_limit: limit,
+  });
 
-  let query = supabase
-    .from("menu_items")
-    .select(select)
-    .eq("is_available", true)
-    .eq("vendors.is_active", true);
+  if (error || !data) return [];
 
-  if (areaId) query = query.eq("vendors.vendor_areas.area_id", areaId);
-
-  const { data: items } = await query.limit(limit);
-  if (!items) return [];
-
-  return items
-    .map((item) => {
-      const vendor = item.vendors as { name: string; is_open: boolean } | null;
-      return {
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        price: item.price,
-        image_url: item.image_url,
-        tags: item.tags ?? [],
-        calories: item.calories,
-        protein: item.protein,
-        sodium: item.sodium,
-        vendor_id: item.vendor_id,
-        vendor_name: vendor?.name ?? "",
-        vendor_is_open: vendor?.is_open ?? false,
-      };
-    })
-    .sort((a, b) => {
-      if (a.vendor_is_open !== b.vendor_is_open) return a.vendor_is_open ? -1 : 1;
-      return a.name.localeCompare(b.name, "zh-Hant");
-    });
+  return data.map((row) => ({
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    price: row.price,
+    image_url: row.image_url,
+    tags: row.tags ?? [],
+    ai_tags: row.ai_tags ?? [],
+    ai_description: row.ai_description,
+    calories: row.calories,
+    protein: row.protein,
+    sodium: row.sodium,
+    vendor_id: row.vendor_id,
+    vendor_name: row.vendor_name,
+    vendor_is_open: row.vendor_is_open,
+    match_score: row.match_score,
+    top_tag_label: row.top_tag_label,
+  }));
 }
 
 export async function getTrendingItems(limit = 8, areaId?: string): Promise<RecommendedItem[]> {

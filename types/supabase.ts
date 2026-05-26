@@ -408,6 +408,80 @@ export type Database = {
         }
         Relationships: []
       }
+      user_nutrition_profile: {
+        Row: {
+          avg_calories: number | null
+          avg_protein: number | null
+          avg_sodium: number | null
+          avg_sugar: number | null
+          last_event_at: string
+          sample_count: number
+          user_id: string
+        }
+        Insert: {
+          avg_calories?: number | null
+          avg_protein?: number | null
+          avg_sodium?: number | null
+          avg_sugar?: number | null
+          last_event_at?: string
+          sample_count?: number
+          user_id: string
+        }
+        Update: {
+          avg_calories?: number | null
+          avg_protein?: number | null
+          avg_sodium?: number | null
+          avg_sugar?: number | null
+          last_event_at?: string
+          sample_count?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_nutrition_profile_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_tag_preferences: {
+        Row: {
+          last_event_at: string
+          score: number
+          tag_slug: string
+          user_id: string
+        }
+        Insert: {
+          last_event_at?: string
+          score?: number
+          tag_slug: string
+          user_id: string
+        }
+        Update: {
+          last_event_at?: string
+          score?: number
+          tag_slug?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_tag_preferences_tag_slug_fkey"
+            columns: ["tag_slug"]
+            isOneToOne: false
+            referencedRelation: "tag_vocabulary"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "user_tag_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_areas: {
         Row: {
           area_id: string
@@ -501,6 +575,27 @@ export type Database = {
     Functions: {
       is_admin: { Args: never; Returns: boolean }
       is_vendor_order: { Args: { order_id: string }; Returns: boolean }
+      rank_menu_items_for_home: {
+        Args: { p_area_id?: string; p_limit?: number }
+        Returns: {
+          ai_description: string
+          ai_tags: string[]
+          calories: number
+          description: string
+          id: string
+          image_url: string
+          match_score: number
+          name: string
+          price: number
+          protein: number
+          sodium: number
+          tags: string[]
+          top_tag_label: string
+          vendor_id: string
+          vendor_is_open: boolean
+          vendor_name: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -26,8 +26,13 @@ export function HomeItemCard({ item }: Props) {
             className="object-cover"
           />
         )}
+        {item.top_tag_label && (
+          <span className="absolute top-2 left-2 text-caption font-semibold rounded-badge bg-brand text-white px-2 py-1">
+            因你喜歡 #{item.top_tag_label}
+          </span>
+        )}
         {!item.vendor_is_open && (
-          <span className="absolute top-2 left-2 text-caption font-semibold rounded-badge bg-card/90 px-2 py-1 text-muted-foreground">
+          <span className="absolute top-2 right-2 text-caption font-semibold rounded-badge bg-card/90 px-2 py-1 text-muted-foreground">
             暫停營業
           </span>
         )}
@@ -38,6 +43,9 @@ export function HomeItemCard({ item }: Props) {
           <p className="text-body-strong shrink-0">${item.price}</p>
         </div>
         <p className="text-meta text-muted-foreground truncate">{item.vendor_name}</p>
+        {item.ai_description && (
+          <p className="text-meta text-muted-foreground line-clamp-2">{item.ai_description}</p>
+        )}
         {(item.calories || item.protein) && (
           <div className="flex flex-wrap gap-x-2 text-caption text-muted-foreground">
             {item.calories && <span>{item.calories} kcal</span>}
