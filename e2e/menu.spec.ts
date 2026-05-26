@@ -6,7 +6,7 @@ test.describe("菜單頁", () => {
     // Use the vendor grid (not recommendation section) to find vendor cards
     const vendorGrid = page.locator("main .grid");
     const firstVendor = vendorGrid.locator("a[href^='/menu/']").first();
-    const vendorName = await firstVendor.locator("p").first().textContent();
+    const vendorName = await firstVendor.locator("p.truncate").textContent();
     await firstVendor.click();
 
     await expect(page).toHaveURL(/\/menu\/.+/);
