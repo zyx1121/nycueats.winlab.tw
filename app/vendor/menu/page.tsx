@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { AiBackfillButton } from "./ai-backfill-button";
 import { VendorMenuItemCard, type SlotStatus } from "./menu-item-card";
 import { SlotBanner } from "./slot-banner";
 import type { BulkSlotItem, SalesDataMap } from "./bulk-slot-dialog";
@@ -39,11 +40,12 @@ export default async function VendorMenuPage() {
   // Fetch all items with their slots (Supabase fetches all embedded rows)
   const { data: items } = await supabase
     .from("menu_items")
-    .select("id, name, description, price, is_available, default_max_qty, image_url, calories, protein, sodium, sugar, tags, daily_slots(id, date, max_qty, reserved_qty), item_option_groups(id, name, required, max_select, sort_order, item_options(id, name, price_delta, sort_order))")
+    .select("id, name, description, price, is_available, default_max_qty, image_url, calories, protein, sodium, sugar, tags, ai_tags, ai_description, ai_generated_at, daily_slots(id, date, max_qty, reserved_qty), item_option_groups(id, name, required, max_select, sort_order, item_options(id, name, price_delta, sort_order))")
     .eq("vendor_id", vendor.id)
     .order("name");
 
   const allItems = items ?? [];
+  const missingAiCount = allItems.filter((i) => !i.ai_generated_at).length;
 
   // Fetch 7-day sales data
   const sevenDaysAgoDate = new Date(now);
@@ -101,7 +103,10 @@ export default async function VendorMenuPage() {
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">{vendor.name} — 菜單管理</h1>
-        <Button size="sm">新增餐點</Button>
+        <div className="flex items-center gap-2">
+          <AiBackfillButton missingCount={missingAiCount} />
+          <Button size="sm">新增餐點</Button>
+        </div>
       </div>
 
       <SlotBanner
