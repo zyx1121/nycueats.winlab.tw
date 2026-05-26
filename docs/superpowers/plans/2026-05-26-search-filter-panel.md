@@ -174,27 +174,23 @@ GRANT EXECUTE ON FUNCTION
 
 - [ ] **Step 2: Apply migration**
 
-```bash
-supabase db push
-```
+Use the Supabase MCP tool `apply_migration` with the full SQL from the file above.
 
-Expected: migration applies without error. If using a local Supabase stack: `supabase migration up` instead.
+Expected: migration applies without error.
 
 - [ ] **Step 3: Verify filter works**
 
-```bash
-supabase sql --command "SELECT name, price FROM hybrid_search('飯', NULL, NULL, 5, NULL, 0, 100) ORDER BY price;"
+Use the Supabase MCP tool `execute_sql` with:
+
+```sql
+SELECT name, price FROM hybrid_search('飯', NULL, NULL, 5, NULL, 0, 100) ORDER BY price;
 ```
 
-Expected: returns only items with `price <= 100`, in ascending price order (since `p_sort` is NULL so ORDER BY RRF DESC, but all results have `price <= 100`). No error.
+Expected: returns only items with `price <= 100`, no error.
 
 - [ ] **Step 4: Regenerate TypeScript types**
 
-```bash
-supabase gen types typescript --local > types/supabase.ts
-```
-
-(If no local stack: `supabase gen types typescript --project-id <YOUR_PROJECT_ID> > types/supabase.ts`)
+Use the Supabase MCP tool `generate_typescript_types`, then write the output to `types/supabase.ts`.
 
 - [ ] **Step 5: Commit**
 
@@ -308,7 +304,7 @@ describe("countActiveFilters", () => {
 - [ ] **Step 2: Run tests — expect FAIL**
 
 ```bash
-npx vitest run lib/filters.test.ts
+bunx vitest run lib/filters.test.ts
 ```
 
 Expected: `FAIL` — `Cannot find module './filters'`
@@ -383,7 +379,7 @@ export function countActiveFilters(f: SearchFilters): number {
 - [ ] **Step 4: Run tests — expect PASS**
 
 ```bash
-npx vitest run lib/filters.test.ts
+bunx vitest run lib/filters.test.ts
 ```
 
 Expected: all 10 tests pass.
@@ -451,7 +447,7 @@ Append these two `it` blocks inside the existing `describe("searchHomeItems")` b
 - [ ] **Step 2: Run tests — expect FAIL**
 
 ```bash
-npx vitest run lib/search.test.ts
+bunx vitest run lib/search.test.ts
 ```
 
 Expected: last 2 tests fail — `searchHomeItems` doesn't accept a 4th arg yet.
@@ -580,7 +576,7 @@ async function rerankItems(
 - [ ] **Step 4: Run all search tests — expect PASS**
 
 ```bash
-npx vitest run lib/search.test.ts
+bunx vitest run lib/search.test.ts
 ```
 
 Expected: all 8 tests pass.
@@ -1205,7 +1201,7 @@ export function SearchForm({ placeholderItems, tagVocabulary }: Props) {
 - [ ] **Step 3: Run TypeScript check**
 
 ```bash
-npx tsc --noEmit
+bunx tsc --noEmit
 ```
 
 Expected: no errors on the modified files.
@@ -1279,7 +1275,7 @@ export default async function SearchPage({ searchParams }: Props) {
 - [ ] **Step 2: Run full unit test suite**
 
 ```bash
-npx vitest run
+bunx vitest run
 ```
 
 Expected: all existing tests + new tests pass.
@@ -1287,7 +1283,7 @@ Expected: all existing tests + new tests pass.
 - [ ] **Step 3: Run TypeScript check**
 
 ```bash
-npx tsc --noEmit
+bunx tsc --noEmit
 ```
 
 Expected: no errors.
