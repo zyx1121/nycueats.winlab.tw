@@ -8,7 +8,8 @@
 - Next.js 16 — App Router
 - Tailwind CSS 4
 - shadcn/ui (Radix UI primitives)
-- Supabase — Auth (Google OAuth + Email) + Postgres + RLS + Storage
+- Supabase — Auth (Google OAuth + Email) + Postgres + RLS + Storage + Edge Functions
+- OpenAI API (`gpt-5.4-mini`) — offline AI tag + description + nutrition fill for menu items
 
 ### Directory Structure
 ```
@@ -50,13 +51,28 @@ types/
 - `profiles` — User profiles (role: text[])
 - `vendors` — Vendor stores
 - `vendor_areas` — Vendor-area mapping (many-to-many)
-- `menu_items` — Menu items
+- `menu_items` — Menu items (incl. `ai_tags`, `ai_description`, `ai_generated_at` for LLM-derived metadata)
 - `item_option_groups` — Option groups per menu item
 - `item_options` — Individual options within a group
 - `daily_slots` — Daily quotas (core slot-limiting mechanism, has CHECK constraint)
 - `orders` — Orders
 - `order_items` — Order line items
 - `order_item_options` — Selected options per order item
+- `tag_vocabulary` — Controlled-vocab AI tags (42 slugs × 6 axes); `validate_ai_tags` trigger enforces `menu_items.ai_tags ⊆ tag_vocabulary.slug`
+- `user_tag_preferences` — Per-user tag affinity score, accumulated on order confirm
+- `user_nutrition_profile` — Per-user running average consumption (calories/protein/sodium/sugar)
+
+### DB Functions
+- `rank_menu_items_for_home(p_area_id, p_limit)` — SECURITY DEFINER; reads `auth.uid()` internally; returns ranked items with `match_score` (tag_match × 10 + nutrition_sim × 2 + ln(trend+1) × 5 + open_bonus) and explainable `top_tag_label`. Cold-start safe: anonymous / no-history users degrade gracefully to trending + open.
+- `update_user_preferences_on_confirm()` — AFTER UPDATE trigger on orders; fires on `pending → confirmed`; accumulates tag scores + updates nutrition running mean.
+
+### Edge Functions
+- `generate-menu-item-tags` — Invoked by Server Actions / backfill script. Calls OpenAI with structured outputs enum-constrained to `tag_vocabulary.slug`. Co-fills missing nutrition fields (`NULL`-only, never overrides vendor input). 60s idempotency, max 100 items/invoke.
+
+### Recommendation pipeline (offline-only LLM)
+1. Vendor inserts menu item → Next 16 `after()` fires `generate-menu-item-tags` edge function → writes `ai_tags` + `ai_description` (+ missing nutrition).
+2. User confirms order → `update_preferences_on_order_confirm` trigger updates `user_tag_preferences` + `user_nutrition_profile`.
+3. Home page calls `rank_menu_items_for_home` RPC → pure SQL ranking, no LLM in serving path.
 
 ### Roles
 - `user` — Employee
