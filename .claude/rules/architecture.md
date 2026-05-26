@@ -61,13 +61,16 @@ types/
 - `tag_vocabulary` — Controlled-vocab AI tags (42 slugs × 6 axes); `validate_ai_tags` trigger enforces `menu_items.ai_tags ⊆ tag_vocabulary.slug`
 - `user_tag_preferences` — Per-user tag affinity score, accumulated on order confirm
 - `user_nutrition_profile` — Per-user running average consumption (calories/protein/sodium/sugar)
-- `user_embeddings` — Per-user 512-dim taste vector (mean of confirmed items' embeddings); recomputed on every confirm
+- `user_embeddings` — Per-user 512-dim taste vector (mean of confirmed items' embeddings minus 0.3 × skipped items' embeddings); recomputed on every confirm + daily cron
+- `menu_item_impressions` — 1 row per user × item × date; powers the "skipped" signal (impressed ≥ 3 days ago and never confirmed)
 
 ### DB Functions
-- `rank_menu_items_for_home(p_area_id, p_limit)` — SECURITY DEFINER; reads `auth.uid()` internally. Three-factor z-score normalised ranking: (a) cosine sim between `user_embeddings.embedding` and `menu_items.embedding`, (b) nutrition profile similarity, (c) ln(7-day trend). Plus `+0.5` open-vendor bonus. Top `limit × 3` candidate pool then reranked by MMR (λ = 0.7) for diversity. Cold-start (no user vector) → z_user clamps to 0, trend + nutrition + open drive ranking. Returns `match_score` + explainable `top_tag_label`.
+- `rank_menu_items_for_home(p_area_id, p_limit)` — SECURITY DEFINER; reads `auth.uid()` internally. Three-factor z-score normalised ranking: (a) cosine sim between `user_embeddings.embedding` and `menu_items.embedding`, (b) nutrition profile similarity, (c) ln(time-decayed 14-day trend, τ = 3 days). Plus `+0.5` open-vendor bonus. Top `limit × 3` candidate pool then reranked by MMR (λ = 0.7) for diversity. Cold-start (no user vector) → z_user clamps to 0, trend + nutrition + open drive ranking. Returns `match_score` + explainable `top_tag_label`.
 - `hybrid_search(p_query, p_query_embedding, p_area_id, p_limit)` — RRF (k=60) of pg_trgm keyword match + pgvector cosine semantic match. `p_query_embedding` 可為 NULL 讓 OpenAI 未配置時降級為 keyword-only。
 - `update_user_preferences_on_confirm()` — AFTER UPDATE trigger on orders; fires on `pending → confirmed`; accumulates tag scores + updates nutrition running mean + recomputes user embedding (full re-mean over all confirmed items).
 - `rollover_daily_slots()` — SECURITY DEFINER; scheduled via pg_cron `rollover_daily_slots` job (`0 22 * * *` UTC = 06:00 Asia/Taipei). Materialises daily_slots for next 14 days from `menu_items.default_max_qty`, filtered by `vendors.is_active` + `vendors.operating_days` + `menu_items.is_available` + `default_max_qty > 0`. `ON CONFLICT (menu_item_id, date) DO NOTHING` preserves vendor's manual max_qty tweaks.
+- `refresh_all_user_embeddings()` — SECURITY DEFINER; scheduled via pg_cron `refresh_user_embeddings` job (`0 2 * * *` UTC = 10:00 Asia/Taipei). Recomputes every user's vector as `confirmed_mean − 0.3 × skipped_mean` so skip signal (impressed ≥ 3 days ago, never confirmed) flows in without per-impression trigger thrashing.
+- `combine_user_vectors(confirmed, skipped, beta)` — IMMUTABLE helper; element-wise `confirmed − β × skipped` since pgvector lacks scalar-multiply. Called once per user per cron run.
 
 ### Edge Functions
 - `generate-menu-item-tags` — Invoked by Server Actions / backfill script. Calls OpenAI with structured outputs enum-constrained to `tag_vocabulary.slug`. Co-fills missing nutrition fields (`NULL`-only, never overrides vendor input). Also generates `embedding` (text-embedding-3-small @ 512 dims) from name + ai_description + tag labels. 60s idempotency, max 100 items/invoke.
@@ -76,9 +79,10 @@ types/
 
 ### Recommendation pipeline (offline-only LLM)
 1. Vendor inserts menu item → Next 16 `after()` fires `generate-menu-item-tags` edge function → writes `ai_tags` + `ai_description` + `embedding` (+ missing nutrition).
-2. User confirms order → `update_preferences_on_order_confirm` trigger updates `user_tag_preferences` + `user_nutrition_profile` + `user_embeddings`.
-3. Home page calls `rank_menu_items_for_home` RPC → semantic cosine + nutrition + trend with z-score normalised weights and MMR diversity rerank; no LLM in serving path.
-4. Search (`/search?q=...`) → `embed-query` edge function (one OpenAI call) → `hybrid_search` RPC (trgm + pgvector RRF) 過度檢索候選池 (40) → `rerank-search` edge function (LLM rerank by 自然語言意圖) → 取前 `limit`。「今天好熱」走 semantic 路徑找到冰品/飲品；「牛肉麵」走 keyword 路徑命中所有牛肉麵變體；「我今天想吃輕一點的」靠 rerank 依熱量/鈉把清爽餐點往前排。rerank 為 best-effort，失敗時降級回 RRF 順序。
+2. User confirms order → `update_preferences_on_order_confirm` trigger updates `user_tag_preferences` + `user_nutrition_profile` + `user_embeddings` (positive signal, immediate).
+3. Home page calls `rank_menu_items_for_home` RPC → semantic cosine + nutrition + time-decayed trend with z-score normalised weights and MMR diversity rerank; no LLM in serving path. Server component fires `after()` to log impressions (1 row per user × item × date) for the skip signal.
+4. Daily 10:00 TPE cron (`refresh_user_embeddings`) bakes skipped-but-not-confirmed items into each user's vector at β = 0.3, closing the negative-feedback loop.
+5. Search (`/search?q=...`) → `embed-query` edge function (one OpenAI call) → `hybrid_search` RPC (trgm + pgvector RRF) 過度檢索候選池 (40) → `rerank-search` edge function (LLM rerank by 自然語言意圖) → 取前 `limit`。「今天好熱」走 semantic 路徑找到冰品/飲品；「牛肉麵」走 keyword 路徑命中所有牛肉麵變體；「我今天想吃輕一點的」靠 rerank 依熱量/鈉把清爽餐點往前排。rerank 為 best-effort，失敗時降級回 RRF 順序。
 
 ### Roles
 - `user` — Employee
