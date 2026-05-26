@@ -71,12 +71,13 @@ types/
 ### Edge Functions
 - `generate-menu-item-tags` — Invoked by Server Actions / backfill script. Calls OpenAI with structured outputs enum-constrained to `tag_vocabulary.slug`. Co-fills missing nutrition fields (`NULL`-only, never overrides vendor input). Also generates `embedding` (text-embedding-3-small @ 512 dims) from name + ai_description + tag labels. 60s idempotency, max 100 items/invoke.
 - `embed-query` — Search-time helper: embeds query string → returns 512-dim vector for `hybrid_search` RPC.
+- `rerank-search` — Search-time reranker: takes `hybrid_search` candidates + 原始 query，用 `gpt-5.4-mini` structured outputs 依「意圖契合度」(含「輕一點」→ 低熱量/低鈉偏好) 給每個候選 0~1 分。Online LLM call，與 `embed-query` 同 posture；caller (`lib/search.ts`) 視失敗為 best-effort 並降級回 RRF 順序。
 
 ### Recommendation pipeline (offline-only LLM)
 1. Vendor inserts menu item → Next 16 `after()` fires `generate-menu-item-tags` edge function → writes `ai_tags` + `ai_description` + `embedding` (+ missing nutrition).
 2. User confirms order → `update_preferences_on_order_confirm` trigger updates `user_tag_preferences` + `user_nutrition_profile`.
 3. Home page calls `rank_menu_items_for_home` RPC → pure SQL ranking, no LLM in serving path.
-4. Search (`/search?q=...`) → `embed-query` edge function (one OpenAI call) → `hybrid_search` RPC (trgm + pgvector RRF) → results。「今天好熱」走 semantic 路徑找到冰品/飲品；「牛肉麵」走 keyword 路徑命中所有牛肉麵變體。
+4. Search (`/search?q=...`) → `embed-query` edge function (one OpenAI call) → `hybrid_search` RPC (trgm + pgvector RRF) 過度檢索候選池 (40) → `rerank-search` edge function (LLM rerank by 自然語言意圖) → 取前 `limit`。「今天好熱」走 semantic 路徑找到冰品/飲品；「牛肉麵」走 keyword 路徑命中所有牛肉麵變體；「我今天想吃輕一點的」靠 rerank 依熱量/鈉把清爽餐點往前排。rerank 為 best-effort，失敗時降級回 RRF 順序。
 
 ### Roles
 - `user` — Employee
