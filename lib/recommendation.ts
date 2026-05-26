@@ -66,7 +66,7 @@ export async function getHomeItems(
   }));
 }
 
-export async function getTrendingItems(limit = 8, areaId?: string): Promise<RecommendedItem[]> {
+export async function getTrendingItems(limit = 8, areaId?: string): Promise<HomeItem[]> {
   const supabase = await createClient();
   const since = new Date(new Date().getTime() - 7 * 86400000).toISOString();
 
@@ -91,8 +91,8 @@ export async function getTrendingItems(limit = 8, areaId?: string): Promise<Reco
   if (topIds.length === 0) return [];
 
   const select = areaId
-    ? "id, name, price, description, tags, ai_tags, calories, protein, vendor_id, vendors!inner(name, vendor_areas!inner(area_id))"
-    : "id, name, price, description, tags, ai_tags, calories, protein, vendor_id, vendors(name)";
+    ? "id, name, price, description, image_url, tags, ai_tags, ai_description, calories, protein, sodium, vendor_id, vendors!inner(name, is_open, vendor_areas!inner(area_id))"
+    : "id, name, price, description, image_url, tags, ai_tags, ai_description, calories, protein, sodium, vendor_id, vendors(name, is_open)";
 
   let query = supabase
     .from("menu_items")
@@ -107,23 +107,30 @@ export async function getTrendingItems(limit = 8, areaId?: string): Promise<Reco
   if (!items) return [];
 
   return topIds
-    .map((id) => {
+    .map((id): HomeItem | null => {
       const item = items.find((i) => i.id === id);
       if (!item) return null;
       if ((item.ai_tags as string[] | null)?.includes("addon")) return null;
-      const vendor = item.vendors as { name: string } | null;
+      const vendor = item.vendors as { name: string; is_open: boolean } | null;
       return {
         id: item.id,
         name: item.name,
-        price: item.price,
         description: item.description,
-        tags: item.tags,
+        price: item.price,
+        image_url: item.image_url,
+        tags: item.tags ?? [],
+        ai_tags: item.ai_tags ?? [],
+        ai_description: item.ai_description,
         calories: item.calories,
         protein: item.protein,
+        sodium: item.sodium,
         vendor_id: item.vendor_id,
         vendor_name: vendor?.name ?? "",
+        vendor_is_open: vendor?.is_open ?? true,
+        match_score: 0,
+        top_tag_label: null,
       };
     })
-    .filter((x): x is RecommendedItem => x !== null);
+    .filter((x): x is HomeItem => x !== null);
 }
 

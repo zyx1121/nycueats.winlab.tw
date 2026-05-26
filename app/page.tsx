@@ -95,7 +95,7 @@ export default async function HomePage({ searchParams }: Props) {
         ) : (
           <>
             {trending.length > 0 && (
-              <RecommendationSection title="🔥 熱銷排行" items={trending} accent />
+              <RecommendationSection title="🔥 熱銷排行" items={trending} />
             )}
 
             <section className="flex flex-col gap-3">
