@@ -2,8 +2,15 @@
 
 import { HomeItemCard } from "@/components/home-item-card";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { HomeItem } from "@/lib/recommendation";
 import { pickRandomItem } from "@/lib/roulette";
+import { Dices } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 interface Props {
@@ -13,6 +20,7 @@ interface Props {
 const SPIN_MS = 1300;
 
 export function FoodWheel({ items }: Props) {
+  const [open, setOpen] = useState(false);
   const [result, setResult] = useState<HomeItem | null>(null);
   const [preview, setPreview] = useState<HomeItem | null>(null);
   const [rolling, setRolling] = useState(false);
@@ -29,6 +37,7 @@ export function FoodWheel({ items }: Props) {
 
   function spin() {
     if (items.length === 0 || rolling) return;
+    setOpen(true);
     setResult(null);
 
     if (reducedMotion()) {
@@ -43,7 +52,7 @@ export function FoodWheel({ items }: Props) {
     const tick = () => {
       setPreview(pickRandomItem(items));
       if (Date.now() - start < SPIN_MS) {
-        delay += 16; // decelerate
+        delay += 16;
         timer.current = setTimeout(tick, delay);
       } else {
         setRolling(false);
@@ -53,41 +62,45 @@ export function FoodWheel({ items }: Props) {
     tick();
   }
 
-  // Empty state — never spin an empty plate.
-  if (items.length === 0) {
-    return (
-      <section className="flex flex-col gap-3">
-        <h2 className="text-heading font-semibold">🎲 今天吃什麼</h2>
-        <div className="border rounded-card bg-card p-8 text-center text-muted-foreground">
-          這個校區今天還沒有可選的餐點，換個校區或晚點再來看看 🍽️
-        </div>
-      </section>
-    );
-  }
+  if (items.length === 0) return null;
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-heading font-semibold">🎲 今天吃什麼</h2>
-      <div className="border rounded-card bg-card p-4 flex flex-col items-center gap-4">
-        <div className="w-full max-w-xs">
-          {result && !rolling ? (
-            <HomeItemCard item={result} />
-          ) : rolling ? (
-            <div className="h-44 flex items-center justify-center text-center">
-              <p className="text-heading font-semibold animate-pulse line-clamp-2">
-                {preview?.name ?? "…"}
-              </p>
+    <>
+      <Button
+        onClick={spin}
+        aria-label="今天吃什麼"
+        className="fixed bottom-6 right-6 z-50 size-14 rounded-full shadow-floating p-0"
+      >
+        <Dices className="size-6" />
+      </Button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>🎲 今天吃什麼</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-full max-w-xs">
+              {rolling ? (
+                <div className="h-44 flex items-center justify-center text-center">
+                  <p className="text-heading font-semibold animate-pulse line-clamp-2">
+                    {preview?.name ?? "…"}
+                  </p>
+                </div>
+              ) : result ? (
+                <HomeItemCard item={result} />
+              ) : (
+                <div className="h-44 flex items-center justify-center text-center text-muted-foreground">
+                  <p>選擇困難？讓骰子幫你決定今天的午餐</p>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="h-44 flex items-center justify-center text-center text-muted-foreground">
-              <p>選擇困難？讓骰子幫你決定今天的午餐</p>
-            </div>
-          )}
-        </div>
-        <Button onClick={spin} disabled={rolling} className="self-center">
-          {rolling ? "選擇中…" : result ? "再轉一次" : "🎲 幫我選一個"}
-        </Button>
-      </div>
-    </section>
+            <Button onClick={spin} disabled={rolling} className="w-full">
+              {rolling ? "選擇中…" : result ? "再轉一次" : "🎲 幫我選一個"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

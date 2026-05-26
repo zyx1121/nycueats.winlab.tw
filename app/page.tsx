@@ -94,8 +94,6 @@ export default async function HomePage({ searchParams }: Props) {
           </p>
         ) : (
           <>
-            <FoodWheel items={items} />
-
             {trending.length > 0 && (
               <RecommendationSection title="🔥 熱銷排行" items={trending} accent />
             )}
@@ -111,6 +109,7 @@ export default async function HomePage({ searchParams }: Props) {
           </>
         )}
       </div>
+      <FoodWheel items={items} />
     </main>
   );
 }
