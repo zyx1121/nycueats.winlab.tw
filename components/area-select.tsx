@@ -36,7 +36,7 @@ export function AreaSelect({ byCity, defaultAreaId }: Props) {
   return (
     <Select value={current ?? undefined} onValueChange={handleChange}>
       <SelectTrigger>
-        <SelectValue placeholder="選擇校區" />
+        <SelectValue placeholder="選擇廠區" />
       </SelectTrigger>
       <SelectContent position="popper">
         {cities.map((city, i) => (

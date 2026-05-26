@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("首頁", () => {
-  test("頁面載入成功，顯示 NYCU Eats", async ({ page }) => {
+  test("頁面載入成功，顯示 TSMC Eats", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("header h1", { hasText: "NYCU Eats" })).toBeVisible();
+    await expect(page.locator("header h1", { hasText: "TSMC Eats" })).toBeVisible();
   });
 
   test("顯示商家列表", async ({ page }) => {
