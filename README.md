@@ -136,7 +136,7 @@ This project is maintained with [Claude Code](https://claude.com/claude-code). T
 | `.claude/rules/architecture.md` | Current architecture, directory structure, DB schema |
 | `.claude/rules/coding-style.md` | Code style (minimal, type-safe, Server Component first) |
 | `.claude/rules/project.md` | Stack versions, doc-lookup rules, conventions |
-| `.claude/rules/uiux.md` | UI/UX design system (spacing, colors, loading states) |
+| `DESIGN.md` | UI/UX design system — tokens, surfaces, typography, brand accent rules |
 | `.claude/rules/git.md` | Branch naming, commit format, PR conventions, versioning |
 
 ### Recommended Plugins

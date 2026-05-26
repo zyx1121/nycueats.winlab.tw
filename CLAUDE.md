@@ -5,5 +5,5 @@
 @.claude/rules/coding-style.md
 @.claude/rules/architecture.md
 @.claude/rules/project.md
-@.claude/rules/uiux.md
+@DESIGN.md
 @.claude/rules/git.md
