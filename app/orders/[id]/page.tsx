@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { CheckCircle, Circle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import { OrderRealtimeRefresh } from "./order-realtime-refresh";
 import { QRCodeSVG } from "./qr-code";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -63,11 +65,14 @@ export default async function OrderDetailPage({
     0
   );
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+  const h = await headers();
+  const host = h.get("host") ?? "localhost:3000";
+  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  const baseUrl = `${proto}://${host}`;
 
   return (
     <main className="min-h-[calc(100dvh-4rem)] flex flex-col items-center">
+      <OrderRealtimeRefresh orderId={order.id} />
       <div className="w-full p-4 flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold">訂單 #{shortId}</h1>
