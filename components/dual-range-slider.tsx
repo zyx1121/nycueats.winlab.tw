@@ -28,7 +28,7 @@ export function DualRangeSlider({
         />
       </div>
 
-      {/* Low thumb — transparent range input; pointer-events active only when needed */}
+      {/* Low thumb */}
       <input
         type="range"
         min={min}
@@ -39,9 +39,11 @@ export function DualRangeSlider({
           const v = Number(e.target.value);
           if (v <= high - step) onLowChange(v);
         }}
-        className="absolute inset-0 h-full w-full cursor-pointer appearance-none bg-transparent
+        className="pointer-events-none absolute inset-0 h-full w-full appearance-none bg-transparent
+                   [&::-webkit-slider-thumb]:pointer-events-auto
                    [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4
-                   [&::-webkit-slider-thumb]:appearance-auto
+                   [&::-webkit-slider-thumb]:cursor-pointer
+                   [&::-webkit-slider-thumb]:appearance-none
                    [&::-webkit-slider-thumb]:rounded-full
                    [&::-webkit-slider-thumb]:border-2
                    [&::-webkit-slider-thumb]:border-foreground
@@ -61,9 +63,11 @@ export function DualRangeSlider({
           const v = Number(e.target.value);
           if (v >= low + step) onHighChange(v);
         }}
-        className="absolute inset-0 h-full w-full cursor-pointer appearance-none bg-transparent
+        className="pointer-events-none absolute inset-0 h-full w-full appearance-none bg-transparent
+                   [&::-webkit-slider-thumb]:pointer-events-auto
                    [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4
-                   [&::-webkit-slider-thumb]:appearance-auto
+                   [&::-webkit-slider-thumb]:cursor-pointer
+                   [&::-webkit-slider-thumb]:appearance-none
                    [&::-webkit-slider-thumb]:rounded-full
                    [&::-webkit-slider-thumb]:border-2
                    [&::-webkit-slider-thumb]:border-foreground
