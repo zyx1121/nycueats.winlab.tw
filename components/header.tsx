@@ -1,4 +1,5 @@
 import { AreaSelect } from "./area-select";
+import { SearchForm } from "./search-form";
 import { ThemeToggle } from "./theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ export async function Header() {
           <h1 className="text-heading font-semibold tracking-tight">NYCU <span className="text-brand">Eats</span></h1>
         </Link>
         <AreaSelect byCity={byCity} defaultAreaId={profile?.area_id ?? undefined} />
+        <SearchForm />
       </div>
       <div className="flex items-center gap-4">
         {navigation.showAdminDashboard && (

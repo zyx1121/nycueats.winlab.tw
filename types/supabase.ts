@@ -158,6 +158,7 @@ export type Database = {
           created_at: string
           default_max_qty: number
           description: string | null
+          embedding: string | null
           id: string
           image_url: string | null
           is_available: boolean
@@ -177,6 +178,7 @@ export type Database = {
           created_at?: string
           default_max_qty?: number
           description?: string | null
+          embedding?: string | null
           id?: string
           image_url?: string | null
           is_available?: boolean
@@ -196,6 +198,7 @@ export type Database = {
           created_at?: string
           default_max_qty?: number
           description?: string | null
+          embedding?: string | null
           id?: string
           image_url?: string | null
           is_available?: boolean
@@ -573,6 +576,32 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      hybrid_search: {
+        Args: {
+          p_area_id?: string
+          p_limit?: number
+          p_query: string
+          p_query_embedding?: string
+        }
+        Returns: {
+          ai_description: string
+          ai_tags: string[]
+          calories: number
+          description: string
+          id: string
+          image_url: string
+          match_score: number
+          name: string
+          price: number
+          protein: number
+          sodium: number
+          tags: string[]
+          top_tag_label: string
+          vendor_id: string
+          vendor_is_open: boolean
+          vendor_name: string
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
       is_vendor_order: { Args: { order_id: string }; Returns: boolean }
       rank_menu_items_for_home: {
@@ -596,6 +625,8 @@ export type Database = {
           vendor_name: string
         }[]
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       [_ in never]: never
