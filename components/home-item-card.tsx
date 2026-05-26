@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface Props {
-  item: HomeItem;
+  item: HomeItem & { reason?: string | null };
 }
 
 export function HomeItemCard({ item }: Props) {
@@ -43,9 +43,11 @@ export function HomeItemCard({ item }: Props) {
           <p className="text-heading-sm font-semibold shrink-0">${item.price}</p>
         </div>
         <p className="text-body text-muted-foreground truncate">{item.vendor_name}</p>
-        {item.ai_description && (
+        {item.reason ? (
+          <p className="text-body text-foreground italic line-clamp-2">{item.reason}</p>
+        ) : item.ai_description ? (
           <p className="text-body text-muted-foreground line-clamp-2">{item.ai_description}</p>
-        )}
+        ) : null}
         {(item.calories || item.protein) && (
           <div className="flex flex-wrap gap-x-2 text-meta text-muted-foreground">
             {item.calories && <span>{item.calories} kcal</span>}

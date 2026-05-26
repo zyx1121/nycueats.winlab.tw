@@ -65,6 +65,7 @@ types/
 - `menu_item_impressions` — 1 row per user × item × date; powers the "skipped" signal (impressed ≥ 3 days ago and never confirmed)
 - `context_embeddings` — Cached embeddings keyed by `{hour_band}_{temp_band}_{rain}` so the same time-of-day × weather bucket doesn't pay OpenAI twice
 - `daily_picks` — One Thompson-Sampling surprise pick per user per day (PK: user_id + date); stores chosen menu_item_id + θ + β for traceability
+- `personalized_reasons` — Per (user, menu_item) cached LLM recommendation sentence; 24h TTL, lazy-filled on homepage render via the `generate-reasons` edge function
 
 ### DB Functions
 - `rank_menu_items_for_home(p_area_id, p_limit, p_context_vec)` — SECURITY DEFINER; reads `auth.uid()` internally. raw_user_sim = `0.7 × cos(user_vec) + 0.3 × cos(context_vec)` when both present; either NULL → falls back to the other; both NULL → 0. Three-factor z-score normalised blend with nutrition profile similarity and ln(time-decayed 14-day trend, τ = 3 days). Plus `+0.5` open-vendor bonus. Top `limit × 3` candidate pool then reranked by MMR (λ = 0.7) for diversity. Cold-start (no user vector, no context) degrades to trend + nutrition + open. Returns `match_score` + explainable `top_tag_label`.
@@ -79,13 +80,15 @@ types/
 - `generate-menu-item-tags` — Invoked by Server Actions / backfill script. Calls OpenAI with structured outputs enum-constrained to `tag_vocabulary.slug`. Co-fills missing nutrition fields (`NULL`-only, never overrides vendor input). Also generates `embedding` (text-embedding-3-small @ 512 dims) from name + ai_description + tag labels. 60s idempotency, max 100 items/invoke.
 - `embed-query` — Search-time helper: embeds query string → returns 512-dim vector for `hybrid_search` RPC.
 - `rerank-search` — Search-time reranker: takes `hybrid_search` candidates + 原始 query，用 `gpt-5.4-mini` structured outputs 依「意圖契合度」(含「輕一點」→ 低熱量/低鈉偏好) 給每個候選 0~1 分。Online LLM call，與 `embed-query` 同 posture；caller (`lib/search.ts`) 視失敗為 best-effort 並降級回 RRF 順序。
+- `generate-reasons` — Homepage reason generator: takes the items currently shown to the caller + reads their `user_tag_preferences`, calls `gpt-5.4-mini` once per cache-missing item (concurrency 5), upserts into `personalized_reasons` with a 24h TTL. Invoked fire-and-forget via `after()` from `app/page.tsx`; failures degrade silently to no-reason cards (fall back to `ai_description`).
 
 ### Recommendation pipeline (offline-only LLM)
 1. Vendor inserts menu item → Next 16 `after()` fires `generate-menu-item-tags` edge function → writes `ai_tags` + `ai_description` + `embedding` (+ missing nutrition).
 2. User confirms order → `update_preferences_on_order_confirm` trigger updates `user_tag_preferences` + `user_nutrition_profile` + `user_embeddings` (positive signal, immediate).
 3. Home server component fetches Open-Meteo current conditions (Next 16 fetch cache 30 min) → maps `{hour_band, temp_band, rain}` to a fixed English phrase → looks up `context_embeddings`; on miss invokes `embed-query` edge function and upserts. The resulting context vector is passed to `rank_menu_items_for_home(area, limit, context_vec)` → semantic cosine + nutrition + time-decayed trend with z-score normalised weights and MMR diversity rerank; no LLM in serving path. Server component also fires `after()` to log impressions (1 row per user × item × date) for the skip signal.
 4. Daily 10:00 TPE cron (`refresh_user_embeddings`) bakes skipped-but-not-confirmed items into each user's vector at β = 0.3, closing the negative-feedback loop. Same window, `compute_daily_picks` Thompson-samples one surprise pick per user from a personalised top-30 pool and writes to `daily_picks`; the homepage renders it as a "🎁 今日驚喜" card above the trending carousel.
-5. Search (`/search?q=...`) → `embed-query` edge function (one OpenAI call) → `hybrid_search` RPC (trgm + pgvector RRF) 過度檢索候選池 (40) → `rerank-search` edge function (LLM rerank by 自然語言意圖) → 取前 `limit`。「今天好熱」走 semantic 路徑找到冰品/飲品；「牛肉麵」走 keyword 路徑命中所有牛肉麵變體；「我今天想吃輕一點的」靠 rerank 依熱量/鈉把清爽餐點往前排。rerank 為 best-effort，失敗時降級回 RRF 順序。
+5. After rendering, homepage's `after()` hook checks `personalized_reasons` cache; items missing or > 24h stale trigger the `generate-reasons` edge function to fill the cache. Next render picks up reasons and renders them in italic text on each card; failures are silent (cards fall back to `ai_description`).
+6. Search (`/search?q=...`) → `embed-query` edge function (one OpenAI call) → `hybrid_search` RPC (trgm + pgvector RRF) 過度檢索候選池 (40) → `rerank-search` edge function (LLM rerank by 自然語言意圖) → 取前 `limit`。「今天好熱」走 semantic 路徑找到冰品/飲品；「牛肉麵」走 keyword 路徑命中所有牛肉麵變體；「我今天想吃輕一點的」靠 rerank 依熱量/鈉把清爽餐點往前排。rerank 為 best-effort，失敗時降級回 RRF 順序。
 
 ### Roles
 - `user` — Employee
