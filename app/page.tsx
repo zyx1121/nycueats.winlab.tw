@@ -2,6 +2,7 @@ import { FoodWheel } from "@/components/food-wheel";
 import { HomeItemCard } from "@/components/home-item-card";
 import RecommendationSection from "@/components/recommendation-section";
 import { DEFAULT_FACTORY_AREA_NAME } from "@/lib/branding";
+import { getContextEmbedding, getCurrentContext } from "@/lib/context";
 import { recordImpressions } from "@/lib/impressions";
 import { getHomeItems, getTrendingItems } from "@/lib/recommendation";
 import { createClient } from "@/lib/supabase/server";
@@ -40,8 +41,11 @@ export default async function HomePage({ searchParams }: Props) {
     if (defaultArea?.id) redirect(`/?area=${defaultArea.id}`);
   }
 
+  const ctx = await getCurrentContext();
+  const contextVec = ctx ? await getContextEmbedding(supabase, ctx) : null;
+
   const [items, trending] = await Promise.all([
-    getHomeItems(area),
+    getHomeItems(area, 60, contextVec),
     getTrendingItems(8, area),
   ]);
 

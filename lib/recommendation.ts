@@ -31,12 +31,17 @@ export type HomeItem = {
   top_tag_label: string | null;
 };
 
-export async function getHomeItems(areaId?: string, limit = 60): Promise<HomeItem[]> {
+export async function getHomeItems(
+  areaId?: string,
+  limit = 60,
+  contextVec?: number[] | null,
+): Promise<HomeItem[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc("rank_menu_items_for_home", {
     p_area_id: areaId ?? undefined,
     p_limit: limit,
+    p_context_vec: (contextVec ?? undefined) as unknown as string,
   });
 
   if (error || !data) return [];
