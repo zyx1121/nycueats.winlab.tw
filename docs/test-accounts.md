@@ -17,7 +17,7 @@ Email 登入的測試帳號可直接在登入頁輸入 email + 密碼。
 
 | 角色 | Email | 名稱 | 備註 |
 |------|-------|------|------|
-| `user` + `admin` | `admin.test@nycueats.dev` | 輔委會管理員 | 手動建立於 2026-04-15，供 /admin 功能測試 |
+| `user` + `admin` | `admin.test@nycueats.dev` | 福委會管理員 | 手動建立於 2026-04-15，供 /admin 功能測試 |
 | `vendor` + `admin` | `morning.bites@nycueats.dev` | 晨光早餐 | 同時具有商家與管理員權限 |
 | `admin` | `test.admin@nycueats.dev` | （未設定） | 舊測試帳號，名稱未設定 |
 
@@ -32,7 +32,7 @@ E2E 測試（Playwright）使用的帳號由 GitHub Actions Secrets 管理：
 | `E2E_EMAIL` | E2E 測試登入 email |
 | `E2E_PASSWORD` | E2E 測試登入密碼 |
 
-本地執行 E2E 時需在 `.env.local` 加上：
+本地執行 E2E 時需在 `.env` 加上：
 
 ```env
 E2E_EMAIL=<email>

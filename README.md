@@ -38,6 +38,7 @@ Campus meal ordering platform for NYCU — employees pre-order meals from partne
 - Daily quota settings (next 7 days)
 - Custom option group management (option groups + individual options)
 - Order summary view (aggregated by date with quantity and amount)
+- Revenue dashboard (daily / weekly / monthly aggregates with trend + bar charts)
 - Image upload (store banner + menu item images, stored in Supabase Storage)
 
 ### Infrastructure
@@ -90,6 +91,8 @@ bun run test:ui     # Playwright UI mode
 - `app/orders/order-summary.test.ts`: order summary normalization
 - `app/cart/actions.test.ts`: mocked Server Action coverage for cart flows
 - `app/orders/actions.test.ts`: mocked order query + pagination coverage
+- `app/vendor/revenue/revenue-model.test.ts`: revenue aggregation helpers
+- `lib/navigation-rules.test.ts`: role → default-home + header-visibility rules
 - `e2e/home.spec.ts`, `e2e/menu.spec.ts`, `e2e/order-flow.spec.ts`: real browser flows
 
 ### E2E Requirements
@@ -103,22 +106,36 @@ E2E_EMAIL=...
 E2E_PASSWORD=...
 ```
 
-CI currently runs lint + build + e2e test on every PR (see `.github/workflows/ci.yml`).
+CI currently runs lint + build on every PR (see `.github/workflows/ci.yml`). Unit and e2e tests are run locally before merge — see follow-up to gate them in CI.
 
 ## Directory Structure
 
 ```
 app/
-  (user)/           # Employee: homepage, menu, cart, profile
-  (vendor)/         # Vendor dashboard: store info, menu management, orders
-  (admin)/          # Admin dashboard: operations overview, vendor management
+  page.tsx          # Home: area-filtered vendor grid + recommendation sections
+  cart/             # Employee cart + actions + tests
+  orders/           # Employee order list + detail + tests
+  menu/[id]/        # Vendor menu detail + add-to-order dialog
+  profile/          # Employee profile
   login/            # Login page
   auth/callback/    # Supabase OAuth callback
+  api/pickup/       # QR-code pickup endpoint
+  vendor/           # Vendor: store info, menu, orders, revenue
+  admin/            # Admin: operations, vendor management, reports, users
 components/
-  ui/               # shadcn/ui components
+  ui/               # shadcn/ui primitives
   header.tsx        # Global header
+  area-select.tsx   # Area filter dropdown
+  image-upload.tsx  # Image upload with type/size validation
+  login-form.tsx    # Email/password + Google OAuth form
+  menu-item-card.tsx        # Shared menu item card
+  recommendation-section.tsx # Horizontal carousel
 lib/
+  auth.ts           # requireRole() helper
+  recommendation.ts # Recommendation engine
+  navigation-rules.ts # Role-based default home + header visibility
   supabase/         # Browser & server client
+proxy.ts            # Next.js 16 edge middleware (was middleware.ts)
 types/
   supabase.ts       # Auto-generated Supabase DB types
 ```
@@ -136,7 +153,7 @@ This project is maintained with [Claude Code](https://claude.com/claude-code). T
 | `.claude/rules/architecture.md` | Current architecture, directory structure, DB schema |
 | `.claude/rules/coding-style.md` | Code style (minimal, type-safe, Server Component first) |
 | `.claude/rules/project.md` | Stack versions, doc-lookup rules, conventions |
-| `.claude/rules/uiux.md` | UI/UX design system (spacing, colors, loading states) |
+| `DESIGN.md` | UI/UX design system — tokens, surfaces, typography, brand accent rules |
 | `.claude/rules/git.md` | Branch naming, commit format, PR conventions, versioning |
 
 ### Recommended Plugins
@@ -181,7 +198,7 @@ claude plugins install learning-output-style@claude-plugins-official     # Inter
 
 ## Example Accounts
 
-See [EXAMPLES.md](./EXAMPLES.md) — all example account passwords are `password123`.
+See [EXAMPLES.md](./EXAMPLES.md) for vendor/menu seed data and login addresses. Test account credentials live in [docs/test-accounts.md](./docs/test-accounts.md) (admin uses `Admin1234!`, the rest are noted inline).
 
 ## License
 

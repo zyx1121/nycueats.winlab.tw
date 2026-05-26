@@ -26,7 +26,7 @@ NYCU Eats 是 WinLab 為廠區員工打造的訂餐平台，三種角色（員�
 2. **建立 surface 階層**：canvas → card → placeholder → loader 四層 surface，整個 app 用同一套。
 3. **單一品牌色心跳**：選一個 accent color 只用在品牌識別點（logo、active state、推薦徽章），其他地方禁用。
 4. **Photography-first**：餐點與商家卡片以圖片為主視覺，文字只是說明，不喧賓奪主。
-5. **節奏一致**：縱向用 48px 區塊、12px 卡內、8px 元素間距三層節奏；橫向用 max-width 1280px 收攏。
+5. **節奏一致**：縱向用 48px 區塊、12px 卡內、8px 元素間距三層節奏；橫向用 max-width 1152px (`max-w-6xl`) 收攏。
 6. **支援 dark mode**：所有 token 都要有 light / dark 對應值，預設 light。
 
 ## Non-Goals

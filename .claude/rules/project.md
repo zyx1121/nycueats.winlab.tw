@@ -20,5 +20,5 @@
 ## 重要約定
 - 請求 APIs 用 async/await Server Actions 或 Route Handlers，不用 useEffect 直接 fetch
 - Supabase client：`lib/supabase/client.ts`（browser），`lib/supabase/server.ts`（server/SSR）
-- 環境變數從 `.env.local` 讀取，不 hardcode
+- 環境變數從 `.env` 讀取，不 hardcode
 - DB 型別從 `types/supabase.ts` 引用，由 `supabase gen types` 生成
