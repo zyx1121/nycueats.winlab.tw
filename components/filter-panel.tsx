@@ -137,11 +137,15 @@ export function FilterPanel({ tagVocabulary, onClose, anchorRef }: Props) {
   const chipDate = (dateStr: string) => { const d = new Date(dateStr); return `${d.getMonth() + 1}/${d.getDate()}`; };
 
   return (
-    <div ref={panelRef} className="absolute left-0 top-full z-50 mt-2 w-[560px] overflow-hidden rounded-2xl border bg-card shadow-[0_0_0_1px_rgba(0,0,0,0.02),0_2px_6px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.10)]">
-      <div className="flex items-center justify-between border-b px-4 py-3">
+    <div ref={panelRef} className="absolute left-0 top-full z-50 mt-2 flex w-[560px] flex-col overflow-hidden rounded-2xl border bg-card shadow-[0_0_0_1px_rgba(0,0,0,0.02),0_2px_6px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.10)]" style={{ maxHeight: "calc(100dvh - 5rem)" }}>
+      {/* Sticky header */}
+      <div className="flex flex-none items-center justify-between border-b px-4 py-3">
         <span className="text-[14px] font-semibold">篩選條件</span>
         <button onClick={handleClear} className="text-[12px] text-brand hover:text-brand-hover">清除全部</button>
       </div>
+
+      {/* Scrollable body */}
+      <div className="min-h-0 flex-1 overflow-y-auto">
 
       <div className="grid grid-cols-2 border-b">
         <div className="p-4">
@@ -201,7 +205,10 @@ export function FilterPanel({ tagVocabulary, onClose, anchorRef }: Props) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between border-t px-4 py-3">
+      </div>{/* end scrollable body */}
+
+      {/* Sticky footer */}
+      <div className="flex flex-none items-center justify-between border-t px-4 py-3">
         <span className="text-[12px] text-muted-foreground">
           {activeCount > 0 ? `已選 ${activeCount} 個條件` : "尚未設定條件"}
         </span>
