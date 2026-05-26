@@ -1,3 +1,4 @@
+import { FoodWheel } from "@/components/food-wheel";
 import { HomeItemCard } from "@/components/home-item-card";
 import RecommendationSection from "@/components/recommendation-section";
 import { getHomeItems, getTrendingItems } from "@/lib/recommendation";
@@ -39,19 +40,23 @@ export default async function HomePage({ searchParams }: Props) {
           <RecommendationSection title="🔥 熱銷排行" items={trending} accent />
         )}
 
-        {items.length === 0 ? (
-          <p className="text-muted-foreground text-center py-16">
-            {area ? "此校區目前沒有可預訂的餐點" : "請先選擇校區"}
-          </p>
+        {items.length === 0 && !area ? (
+          <p className="text-muted-foreground text-center py-16">請先選擇校區</p>
         ) : (
-          <section className="flex flex-col gap-3">
-            <h2 className="text-heading font-semibold">所有餐點</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {items.map((item) => (
-                <HomeItemCard key={item.id} item={item} />
-              ))}
-            </div>
-          </section>
+          <>
+            <FoodWheel items={items} />
+
+            {items.length > 0 && (
+              <section className="flex flex-col gap-3">
+                <h2 className="text-heading font-semibold">所有餐點</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {items.map((item) => (
+                    <HomeItemCard key={item.id} item={item} />
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
         )}
       </div>
     </main>
