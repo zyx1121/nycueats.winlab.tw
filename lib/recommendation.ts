@@ -91,8 +91,8 @@ export async function getTrendingItems(limit = 8, areaId?: string): Promise<Reco
   if (topIds.length === 0) return [];
 
   const select = areaId
-    ? "id, name, price, description, tags, calories, protein, vendor_id, vendors!inner(name, vendor_areas!inner(area_id))"
-    : "id, name, price, description, tags, calories, protein, vendor_id, vendors(name)";
+    ? "id, name, price, description, tags, ai_tags, calories, protein, vendor_id, vendors!inner(name, vendor_areas!inner(area_id))"
+    : "id, name, price, description, tags, ai_tags, calories, protein, vendor_id, vendors(name)";
 
   let query = supabase
     .from("menu_items")
@@ -110,6 +110,7 @@ export async function getTrendingItems(limit = 8, areaId?: string): Promise<Reco
     .map((id) => {
       const item = items.find((i) => i.id === id);
       if (!item) return null;
+      if ((item.ai_tags as string[] | null)?.includes("addon")) return null;
       const vendor = item.vendors as { name: string } | null;
       return {
         id: item.id,
