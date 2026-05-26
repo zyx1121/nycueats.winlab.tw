@@ -92,16 +92,14 @@ export function AddToOrderDialog({ vendorId, item, slots, optionGroups, children
     if (!slot) return;
     setErrorMsg(null);
 
-    const selected = sortedGroups.flatMap((g) => {
+    const selectedOptionIds = sortedGroups.flatMap((g) => {
       const sel = selections[g.id];
       if (!sel) return [];
-      return g.item_options
-        .filter((o) => sel.has(o.id))
-        .map((o) => ({ option_id: o.id, name: o.name, price_delta: o.price_delta }));
+      return g.item_options.filter((o) => sel.has(o.id)).map((o) => o.id);
     });
 
     startTransition(async () => {
-      const result = await addToOrder(vendorId, item.id, slot.id, date, item.price, Number(qty), selected);
+      const result = await addToOrder(vendorId, item.id, slot.id, date, Number(qty), selectedOptionIds);
       if (result.error) {
         setErrorMsg(result.error);
       } else {
