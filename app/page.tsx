@@ -6,6 +6,7 @@ import { getContextEmbedding, getCurrentContext } from "@/lib/context";
 import { getDailyPick } from "@/lib/daily-pick";
 import { recordImpressions } from "@/lib/impressions";
 import { getHomeItems, getTrendingItems } from "@/lib/recommendation";
+import { attachReasons, fetchReasonsForItems, triggerReasonGeneration } from "@/lib/reasons";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
@@ -51,11 +52,25 @@ export default async function HomePage({ searchParams }: Props) {
     user ? getDailyPick(supabase, user.id) : Promise.resolve(null),
   ]);
 
+  let itemsWithReasons = items as ReturnType<typeof attachReasons<typeof items[number]>>;
   if (user) {
     const userId = user.id;
+    const topForReasons = items.slice(0, 12);
+    const reasons = await fetchReasonsForItems(
+      supabase,
+      userId,
+      topForReasons.map((i) => i.id),
+    );
+    itemsWithReasons = attachReasons(items, reasons);
+
     after(async () => {
       const ids = [...items.map((i) => i.id), ...trending.map((t) => t.id)];
       await recordImpressions(supabase, userId, ids);
+
+      const missing = topForReasons.filter((i) => !reasons.has(i.id));
+      if (missing.length > 0) {
+        await triggerReasonGeneration(supabase, missing);
+      }
     });
   }
 
@@ -87,7 +102,7 @@ export default async function HomePage({ searchParams }: Props) {
               <section className="flex flex-col gap-3">
                 <h2 className="text-heading font-semibold">所有餐點</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {items.map((item) => (
+                  {itemsWithReasons.map((item) => (
                     <HomeItemCard key={item.id} item={item} />
                   ))}
                 </div>
