@@ -10,18 +10,21 @@ describe("buildCartViewModel", () => {
         date: "2026-04-02",
         qty: 1,
         unit_price: 80,
+        order_item_options: [],
       },
       {
         id: "item-1",
         date: "2026-04-01",
         qty: 2,
         unit_price: 100,
+        order_item_options: [],
       },
       {
         id: "item-3",
         date: "2026-04-01",
         qty: 3,
         unit_price: 50,
+        order_item_options: [],
       },
     ]);
 
