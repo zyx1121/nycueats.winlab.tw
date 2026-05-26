@@ -66,6 +66,7 @@ types/
 - `rank_menu_items_for_home(p_area_id, p_limit)` — SECURITY DEFINER; reads `auth.uid()` internally; returns ranked items with `match_score` (tag_match × 10 + nutrition_sim × 2 + ln(trend+1) × 5 + open_bonus) and explainable `top_tag_label`. Cold-start safe: anonymous / no-history users degrade gracefully to trending + open.
 - `hybrid_search(p_query, p_query_embedding, p_area_id, p_limit)` — RRF (k=60) of pg_trgm keyword match + pgvector cosine semantic match. `p_query_embedding` 可為 NULL 讓 OpenAI 未配置時降級為 keyword-only。
 - `update_user_preferences_on_confirm()` — AFTER UPDATE trigger on orders; fires on `pending → confirmed`; accumulates tag scores + updates nutrition running mean.
+- `rollover_daily_slots()` — SECURITY DEFINER; scheduled via pg_cron `rollover_daily_slots` job (`0 22 * * *` UTC = 06:00 Asia/Taipei). Materialises daily_slots for next 14 days from `menu_items.default_max_qty`, filtered by `vendors.is_active` + `vendors.operating_days` + `menu_items.is_available` + `default_max_qty > 0`. `ON CONFLICT (menu_item_id, date) DO NOTHING` preserves vendor's manual max_qty tweaks.
 
 ### Edge Functions
 - `generate-menu-item-tags` — Invoked by Server Actions / backfill script. Calls OpenAI with structured outputs enum-constrained to `tag_vocabulary.slug`. Co-fills missing nutrition fields (`NULL`-only, never overrides vendor input). Also generates `embedding` (text-embedding-3-small @ 512 dims) from name + ai_description + tag labels. 60s idempotency, max 100 items/invoke.
@@ -92,3 +93,6 @@ types/
 
 ### Slot-Limiting Mechanism
 `daily_slots.reserved_qty` is atomically updated by a Postgres trigger. `CHECK (reserved_qty <= max_qty)` prevents overselling.
+
+### Slot rollover (auto-provisioning)
+`rollover_daily_slots()` runs nightly (06:00 TPE) and on migration apply. Vendors only need to set `menu_items.default_max_qty` once; pg_cron auto-materialises the next 14 days of daily_slots respecting `vendor.operating_days`. Manual per-date max_qty overrides via the vendor bulk-slot dialog are preserved (`ON CONFLICT DO NOTHING`).
