@@ -14,7 +14,7 @@ export function HomeItemCard({ item }: Props) {
       className="group flex flex-col gap-3 hover:scale-[1.02] transition-all duration-200"
     >
       <AspectRatio
-        ratio={1}
+        ratio={4 / 3}
         className="bg-surface-placeholder rounded-card overflow-hidden relative"
       >
         {item.image_url && (
@@ -37,17 +37,17 @@ export function HomeItemCard({ item }: Props) {
           </span>
         )}
       </AspectRatio>
-      <div className="flex flex-col gap-1 px-1">
+      <div className="flex flex-col gap-1.5 px-1">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-heading-sm font-semibold leading-tight line-clamp-2">{item.name}</p>
-          <p className="text-body-strong shrink-0">${item.price}</p>
+          <p className="text-heading font-semibold leading-tight line-clamp-2">{item.name}</p>
+          <p className="text-heading-sm font-semibold shrink-0">${item.price}</p>
         </div>
-        <p className="text-meta text-muted-foreground truncate">{item.vendor_name}</p>
+        <p className="text-body text-muted-foreground truncate">{item.vendor_name}</p>
         {item.ai_description && (
-          <p className="text-meta text-muted-foreground line-clamp-2">{item.ai_description}</p>
+          <p className="text-body text-muted-foreground line-clamp-2">{item.ai_description}</p>
         )}
         {(item.calories || item.protein) && (
-          <div className="flex flex-wrap gap-x-2 text-caption text-muted-foreground">
+          <div className="flex flex-wrap gap-x-2 text-meta text-muted-foreground">
             {item.calories && <span>{item.calories} kcal</span>}
             {item.protein && <span>蛋白 {item.protein}g</span>}
           </div>

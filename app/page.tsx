@@ -1,11 +1,6 @@
 import { HomeItemCard } from "@/components/home-item-card";
 import RecommendationSection from "@/components/recommendation-section";
-import {
-  getHomeItems,
-  getNutritionPicks,
-  getRandomPicks,
-  getTrendingItems,
-} from "@/lib/recommendation";
+import { getHomeItems, getTrendingItems } from "@/lib/recommendation";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -32,30 +27,16 @@ export default async function HomePage({ searchParams }: Props) {
     }
   }
 
-  const [items, trending, nutritionPicks, randomPicks] = await Promise.all([
+  const [items, trending] = await Promise.all([
     getHomeItems(area),
     getTrendingItems(8, area),
-    getNutritionPicks(8, area),
-    getRandomPicks(user?.id ?? null, 8, area),
   ]);
-
-  const hasCarousels = trending.length + nutritionPicks.length + randomPicks.length > 0;
 
   return (
     <main className="min-h-[calc(100dvh-4rem)] flex flex-col items-center">
       <div className="w-full p-4 flex flex-col gap-8">
-        {hasCarousels && (
-          <div className="flex flex-col gap-6">
-            {trending.length > 0 && (
-              <RecommendationSection title="🔥 熱銷排行" items={trending} accent />
-            )}
-            {nutritionPicks.length > 0 && (
-              <RecommendationSection title="💪 營養推薦" items={nutritionPicks} />
-            )}
-            {randomPicks.length > 0 && (
-              <RecommendationSection title="🎲 隨機探索" items={randomPicks} />
-            )}
-          </div>
+        {trending.length > 0 && (
+          <RecommendationSection title="🔥 熱銷排行" items={trending} accent />
         )}
 
         {items.length === 0 ? (

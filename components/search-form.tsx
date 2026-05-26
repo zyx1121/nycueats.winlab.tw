@@ -3,14 +3,32 @@
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
-export function SearchForm() {
+interface Props {
+  placeholderItems?: string[];
+}
+
+const FALLBACK_PLACEHOLDERS = ["今天好熱", "高蛋白", "牛肉麵", "輕食", "辣"];
+const CYCLE_MS = 2500;
+
+export function SearchForm({ placeholderItems }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialQ = searchParams.get("q") ?? "";
   const [value, setValue] = useState(initialQ);
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [isPending, startTransition] = useTransition();
+
+  const pool = placeholderItems?.length ? placeholderItems : FALLBACK_PLACEHOLDERS;
+
+  useEffect(() => {
+    if (pool.length <= 1) return;
+    const id = setInterval(() => {
+      setPlaceholderIdx((i) => (i + 1) % pool.length);
+    }, CYCLE_MS);
+    return () => clearInterval(id);
+  }, [pool.length]);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -28,7 +46,7 @@ export function SearchForm() {
         type="search"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="今天好熱 / 高蛋白 / 牛肉麵…"
+        placeholder={pool[placeholderIdx] ?? "搜尋餐點"}
         className="pl-9 w-48 md:w-64"
         disabled={isPending}
       />

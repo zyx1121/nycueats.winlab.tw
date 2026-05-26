@@ -11,10 +11,18 @@ import Link from "next/link";
 export async function Header() {
   const supabase = await createClient();
 
-  const [{ data: areas }, { data: { user } }] = await Promise.all([
+  const [{ data: areas }, { data: { user } }, { data: itemNames }] = await Promise.all([
     supabase.from("areas").select("id, name, city").eq("is_active", true).order("city"),
     supabase.auth.getUser(),
+    supabase.from("menu_items").select("name").eq("is_available", true).limit(60),
   ]);
+  // Random subset for search placeholder rotation; shuffled here (server)
+  // because doing Math.random() in a client component trips react-hooks/purity.
+  const placeholderItems = (itemNames ?? [])
+    .map((i) => i.name)
+    .filter(Boolean)
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 12);
 
   const profile = user
     ? (await supabase.from("profiles").select("avatar_url, name, area_id, role").eq("id", user.id).single()).data
@@ -37,7 +45,7 @@ export async function Header() {
           <h1 className="text-heading font-semibold tracking-tight">NYCU <span className="text-brand">Eats</span></h1>
         </Link>
         <AreaSelect byCity={byCity} defaultAreaId={profile?.area_id ?? undefined} />
-        <SearchForm />
+        <SearchForm placeholderItems={placeholderItems} />
       </div>
       <div className="flex items-center gap-4">
         {navigation.showAdminDashboard && (
