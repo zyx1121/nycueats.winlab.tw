@@ -44,8 +44,8 @@ export async function Header() {
         <Link href="/">
           <h1 className="text-heading font-semibold tracking-tight">NYCU <span className="text-brand">Eats</span></h1>
         </Link>
-        <AreaSelect byCity={byCity} defaultAreaId={profile?.area_id ?? undefined} />
-        <SearchForm placeholderItems={placeholderItems} />
+        {navigation.showAreaSelect && <AreaSelect byCity={byCity} defaultAreaId={profile?.area_id ?? undefined} />}
+        {navigation.showSearch && <SearchForm placeholderItems={placeholderItems} />}
       </div>
       <div className="flex items-center gap-4">
         {navigation.showAdminDashboard && (

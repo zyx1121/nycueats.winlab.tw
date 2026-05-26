@@ -6,10 +6,13 @@ export function getDefaultHomePath(roles: string[]) {
 
 export function getHeaderNavigation(roles: string[]) {
   const isAdmin = roles.includes("admin");
+  const isUser = roles.includes("user");
 
   return {
     showAdminDashboard: isAdmin,
-    showCart: true,
-    showOrders: true,
+    showAreaSelect: isUser,
+    showSearch: isUser,
+    showOrders: isUser,
+    showCart: isUser,
   };
 }

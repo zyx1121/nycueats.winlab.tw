@@ -29,14 +29,21 @@ describe("navigation rules", () => {
     expect(getHeaderNavigation(["vendor", "admin"])).toMatchObject({ showAdminDashboard: true });
   });
 
-  it("keeps cart and orders visible for all logged-in roles", () => {
-    expect(getHeaderNavigation(["user"])).toMatchObject({
-      showCart: true,
-      showOrders: true,
-    });
-    expect(getHeaderNavigation(["vendor"])).toMatchObject({
-      showCart: true,
-      showOrders: true,
-    });
+  it("shows employee features only for user role", () => {
+    const employeeFeatures = { showAreaSelect: true, showSearch: true, showOrders: true, showCart: true };
+    const hiddenFeatures = { showAreaSelect: false, showSearch: false, showOrders: false, showCart: false };
+
+    expect(getHeaderNavigation(["user"])).toMatchObject(employeeFeatures);
+    expect(getHeaderNavigation(["vendor"])).toMatchObject(hiddenFeatures);
+    expect(getHeaderNavigation(["admin"])).toMatchObject(hiddenFeatures);
+    expect(getHeaderNavigation([])).toMatchObject(hiddenFeatures);
+  });
+
+  it("preserves employee features when user also holds vendor or admin role", () => {
+    const employeeFeatures = { showAreaSelect: true, showSearch: true, showOrders: true, showCart: true };
+
+    expect(getHeaderNavigation(["user", "vendor"])).toMatchObject(employeeFeatures);
+    expect(getHeaderNavigation(["user", "admin"])).toMatchObject(employeeFeatures);
+    expect(getHeaderNavigation(["user", "vendor", "admin"])).toMatchObject(employeeFeatures);
   });
 });
