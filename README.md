@@ -1,16 +1,6 @@
-```
-███╗   ██╗██╗   ██╗ ██████╗██╗   ██╗    ███████╗ █████╗ ████████╗███████╗
-████╗  ██║╚██╗ ██╔╝██╔════╝██║   ██║    ██╔════╝██╔══██╗╚══██╔══╝██╔════╝
-██╔██╗ ██║ ╚████╔╝ ██║     ██║   ██║    █████╗  ███████║   ██║   ███████╗
-██║╚██╗██║  ╚██╔╝  ██║     ██║   ██║    ██╔══╝  ██╔══██║   ██║   ╚════██║
-██║ ╚████║   ██║   ╚██████╗╚██████╔╝    ███████╗██║  ██║   ██║   ███████║
-╚═╝  ╚═══╝   ╚═╝    ╚═════╝ ╚═════╝     ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝
-                                                                         
-```
+# TSMC Eats
 
-# NYCU Eats
-
-Campus meal ordering platform for NYCU — employees pre-order meals from partnered vendors, solving mealtime fatigue across campus sites.
+Factory meal ordering platform for TSMC — employees pre-order meals from partnered vendors, solving mealtime fatigue across factory sites.
 
 ## Tech Stack
 
@@ -22,13 +12,13 @@ Campus meal ordering platform for NYCU — employees pre-order meals from partne
 
 ### Employee
 
-- Filter partnered vendors by campus area
+- Filter partnered vendors by factory site
 - Browse vendor menus with daily remaining quotas
 - Customizable meal options (single / multi-select, price adjustments)
 - Shopping cart management (grouped by date, remove items)
 - Place pre-orders (Postgres trigger for atomic quota deduction, prevents overselling)
 - Meal recommendations (trending, nutrition picks, random discovery)
-- Profile management (name, area)
+- Profile management (name, factory site)
 - Google OAuth / Email login
 
 ### Vendor
@@ -48,7 +38,7 @@ Campus meal ordering platform for NYCU — employees pre-order meals from partne
 - Every route has a `loading.tsx` skeleton
 - Role system (user / vendor / admin, one person can have multiple roles)
 - Auth guards (layout + Server Action dual-layer verification)
-- Admin dashboard (vendor approval, operations dashboard, multi-area management, monthly report CSV export)
+- Admin dashboard (vendor approval, operations dashboard, multi-factory management, monthly report CSV export)
 - Error handling (error.tsx / global-error.tsx / not-found.tsx)
 - CI pipeline (GitHub Actions: lint + build + e2e test)
 - Layered test setup:
@@ -112,7 +102,7 @@ CI currently runs lint + build on every PR (see `.github/workflows/ci.yml`). Uni
 
 ```
 app/
-  page.tsx          # Home: area-filtered vendor grid + recommendation sections
+  page.tsx          # Home: factory-filtered vendor grid + recommendation sections
   cart/             # Employee cart + actions + tests
   orders/           # Employee order list + detail + tests
   menu/[id]/        # Vendor menu detail + add-to-order dialog
@@ -125,7 +115,7 @@ app/
 components/
   ui/               # shadcn/ui primitives
   header.tsx        # Global header
-  area-select.tsx   # Area filter dropdown
+  area-select.tsx   # Factory filter dropdown
   image-upload.tsx  # Image upload with type/size validation
   login-form.tsx    # Email/password + Google OAuth form
   menu-item-card.tsx        # Shared menu item card

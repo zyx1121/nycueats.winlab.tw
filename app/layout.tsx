@@ -1,5 +1,6 @@
 import "@/app/globals.css";
 import { Header } from "@/components/header";
+import { APP_BRAND } from "@/lib/branding";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { Geist } from "next/font/google";
@@ -10,8 +11,8 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "NYCU Eats",
-  description: "NYCU Eats",
+  title: APP_BRAND.name,
+  description: APP_BRAND.description,
 };
 
 export default function RootLayout({

@@ -63,10 +63,10 @@ export function ProfileForm({ profile, byCity }: Props) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label>預設校區</Label>
+        <Label>預設廠區</Label>
         <Select value={areaId} onValueChange={(v) => { setAreaId(v); setSaved(false); }}>
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="選擇校區" />
+            <SelectValue placeholder="選擇廠區" />
           </SelectTrigger>
           <SelectContent position="popper">
             {cities.map((city, i) => (

@@ -11,6 +11,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { APP_BRAND } from "@/lib/branding";
 import { cn } from "@/lib/utils";
 import { useState, useTransition } from "react";
 
@@ -35,7 +36,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <FieldGroup>
         <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="text-xl font-bold">登入 NYCU Eats 系統</h1>
+          <h1 className="text-xl font-bold">登入 {APP_BRAND.name} 系統</h1>
         </div>
 
         <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4">

@@ -1,6 +1,7 @@
 import { FoodWheel } from "@/components/food-wheel";
 import { HomeItemCard } from "@/components/home-item-card";
 import RecommendationSection from "@/components/recommendation-section";
+import { DEFAULT_FACTORY_AREA_NAME } from "@/lib/branding";
 import { getHomeItems, getTrendingItems } from "@/lib/recommendation";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -26,6 +27,15 @@ export default async function HomePage({ searchParams }: Props) {
         .single();
       if (profile?.area_id) redirect(`/?area=${profile.area_id}`);
     }
+
+    const { data: defaultArea } = await supabase
+      .from("areas")
+      .select("id")
+      .eq("name", DEFAULT_FACTORY_AREA_NAME)
+      .eq("is_active", true)
+      .single();
+
+    if (defaultArea?.id) redirect(`/?area=${defaultArea.id}`);
   }
 
   const [items, trending] = await Promise.all([
@@ -40,8 +50,10 @@ export default async function HomePage({ searchParams }: Props) {
           <RecommendationSection title="🔥 熱銷排行" items={trending} accent />
         )}
 
-        {items.length === 0 && !area ? (
-          <p className="text-muted-foreground text-center py-16">請先選擇校區</p>
+        {items.length === 0 ? (
+          <p className="text-muted-foreground text-center py-16">
+            {area ? "此廠區目前沒有可預訂的餐點" : "請先選擇廠區"}
+          </p>
         ) : (
           <>
             <FoodWheel items={items} />

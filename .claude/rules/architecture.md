@@ -14,7 +14,7 @@
 ### Directory Structure
 ```
 app/
-  page.tsx          # Home — area-filtered vendor grid + recommendation sections
+  page.tsx          # Home — factory-filtered vendor grid + recommendation sections
   layout.tsx        # Root layout (Geist Sans, ThemeProvider, Header)
   globals.css       # Tokens (surface/brand/radius/shadow/type scale), light/dark
   cart/             # Employee cart (/cart) + actions, view-model, tests
@@ -30,7 +30,7 @@ app/
 components/
   ui/               # shadcn/ui primitives
   header.tsx        # Global header (area selector, cart, user avatar)
-  area-select.tsx   # Area filter dropdown
+  area-select.tsx   # Factory filter dropdown
   image-upload.tsx  # Image upload with type/size validation
   login-form.tsx    # Email/password + Google OAuth form
   menu-item-card.tsx # Shared menu item card (user + vendor view)
@@ -47,7 +47,7 @@ types/
 ```
 
 ### DB Tables
-- `areas` — Campus areas (e.g. Hsinchu Guangfu)
+- `areas` — Factory sites (e.g. 新竹廠)
 - `profiles` — User profiles (role: text[])
 - `vendors` — Vendor stores
 - `vendor_areas` — Vendor-area mapping (many-to-many)

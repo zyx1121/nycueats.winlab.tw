@@ -3,6 +3,7 @@ import { SearchForm } from "./search-form";
 import { ThemeToggle } from "./theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { APP_BRAND } from "@/lib/branding";
 import { getHeaderNavigation } from "@/lib/navigation-rules";
 import { createClient } from "@/lib/supabase/server";
 import { ClipboardList, ShoppingBasket } from "lucide-react";
@@ -42,7 +43,9 @@ export async function Header() {
     <header className="sticky top-0 z-50 p-4 flex w-full items-center justify-between h-16 bg-card/80 backdrop-blur-sm border-b">
       <div className="flex items-center gap-4">
         <Link href="/">
-          <h1 className="text-heading font-semibold tracking-tight">NYCU <span className="text-brand">Eats</span></h1>
+          <h1 className="text-heading font-semibold tracking-tight">
+            {APP_BRAND.primary} <span className="text-brand">{APP_BRAND.accent}</span>
+          </h1>
         </Link>
         {navigation.showAreaSelect && <AreaSelect byCity={byCity} defaultAreaId={profile?.area_id ?? undefined} />}
         {navigation.showSearch && <SearchForm placeholderItems={placeholderItems} />}
