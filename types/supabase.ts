@@ -7,6 +7,8 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }
@@ -149,6 +151,9 @@ export type Database = {
       }
       menu_items: {
         Row: {
+          ai_description: string | null
+          ai_generated_at: string | null
+          ai_tags: string[]
           calories: number | null
           created_at: string
           default_max_qty: number
@@ -165,6 +170,9 @@ export type Database = {
           vendor_id: string
         }
         Insert: {
+          ai_description?: string | null
+          ai_generated_at?: string | null
+          ai_tags?: string[]
           calories?: number | null
           created_at?: string
           default_max_qty?: number
@@ -181,6 +189,9 @@ export type Database = {
           vendor_id: string
         }
         Update: {
+          ai_description?: string | null
+          ai_generated_at?: string | null
+          ai_tags?: string[]
           calories?: number | null
           created_at?: string
           default_max_qty?: number
@@ -372,6 +383,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tag_vocabulary: {
+        Row: {
+          axis: string
+          created_at: string
+          label: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          axis: string
+          created_at?: string
+          label: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          axis?: string
+          created_at?: string
+          label?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
       }
       vendor_areas: {
         Row: {
