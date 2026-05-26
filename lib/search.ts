@@ -1,24 +1,23 @@
+// lib/search.ts
+import type { SearchFilters } from "@/lib/filters";
 import type { HomeItem } from "@/lib/recommendation";
 import { createClient } from "@/lib/supabase/server";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
-// Over-fetch a candidate pool from hybrid_search so the reranker has room to
-// reorder; the final result is sliced back down to `limit`.
 const RERANK_POOL = 40;
 
 export async function searchHomeItems(
   query: string,
   areaId?: string,
   limit = 30,
+  filters?: SearchFilters,
 ): Promise<HomeItem[]> {
   const trimmed = query.trim();
   if (!trimmed) return [];
 
   const supabase = await createClient();
 
-  // Step 1: try to get semantic embedding via edge function. Falls back
-  // to keyword-only search if OpenAI / function unavailable.
   let embedding: number[] | null = null;
   try {
     const { data: embedRes, error: embedErr } = await supabase.functions.invoke<{
@@ -29,12 +28,22 @@ export async function searchHomeItems(
     console.error("embed-query failed; degrading to keyword-only:", e);
   }
 
-  // Step 2: retrieve a candidate pool via hybrid_search (keyword + semantic RRF).
+  const hasExplicitSort = filters?.sort && filters.sort !== "recommended";
+  const fetchLimit = hasExplicitSort ? limit : Math.max(limit, RERANK_POOL);
+
   const { data, error } = await supabase.rpc("hybrid_search", {
     p_query: trimmed,
     p_query_embedding: embedding as unknown as string,
     p_area_id: areaId ?? undefined,
-    p_limit: Math.max(limit, RERANK_POOL),
+    p_limit: fetchLimit,
+    p_open: filters?.open ?? undefined,
+    p_price_min: filters?.priceMin ?? undefined,
+    p_price_max: filters?.priceMax ?? undefined,
+    p_cal_min: filters?.calMin ?? undefined,
+    p_cal_max: filters?.calMax ?? undefined,
+    p_tags: filters?.tags ?? undefined,
+    p_sort: hasExplicitSort ? filters!.sort : undefined,
+    p_dates: filters?.dates ?? undefined,
   });
   if (error || !data) return [];
 
@@ -57,8 +66,8 @@ export async function searchHomeItems(
     top_tag_label: row.top_tag_label,
   }));
 
-  // Step 3: LLM rerank by natural-language intent. Best-effort — any failure
-  // keeps the original RRF order.
+  if (hasExplicitSort) return items;
+
   const reranked = await rerankItems(supabase, trimmed, items);
   return (reranked ?? items).slice(0, limit);
 }
@@ -89,8 +98,6 @@ async function rerankItems(
 
     const scoreById = new Map(data.ranking.map((r) => [r.id, r.score]));
 
-    // Reorder by rerank score (desc); items the reranker omitted keep their
-    // relative RRF order at the tail. Array.sort is stable in modern engines.
     return [...items].sort((a, b) => {
       const sa = scoreById.get(a.id);
       const sb = scoreById.get(b.id);

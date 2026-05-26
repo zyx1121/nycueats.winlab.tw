@@ -151,4 +151,43 @@ describe("searchHomeItems", () => {
     createClientMock.mockResolvedValue(client);
     await expect(searchHomeItems("漢堡")).resolves.toEqual([]);
   });
+
+  it("passes filter params to the RPC", async () => {
+    const { client, rpc } = makeClient({ rpcData: [row("a", "A")] });
+    createClientMock.mockResolvedValue(client);
+
+    await searchHomeItems("飯", "area1", 10, {
+      open: true,
+      priceMin: 60,
+      priceMax: 200,
+      calMin: 100,
+      calMax: 500,
+      tags: ["spicy", "rice"],
+      dates: ["2026-05-26"],
+    });
+
+    expect(rpc).toHaveBeenCalledWith(
+      "hybrid_search",
+      expect.objectContaining({
+        p_open: true,
+        p_price_min: 60,
+        p_price_max: 200,
+        p_cal_min: 100,
+        p_cal_max: 500,
+        p_tags: ["spicy", "rice"],
+        p_dates: ["2026-05-26"],
+      }),
+    );
+  });
+
+  it("skips the reranker when an explicit sort is set", async () => {
+    const { client, invoke } = makeClient({
+      rpcData: [row("a", "A"), row("b", "B"), row("c", "C")],
+    });
+    createClientMock.mockResolvedValue(client);
+
+    await searchHomeItems("飯", undefined, 10, { sort: "price_asc" });
+
+    expect(invoke).not.toHaveBeenCalledWith("rerank-search", expect.anything());
+  });
 });

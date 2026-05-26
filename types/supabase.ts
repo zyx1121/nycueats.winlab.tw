@@ -38,6 +38,66 @@ export type Database = {
         }
         Relationships: []
       }
+      context_embeddings: {
+        Row: {
+          created_at: string
+          embedding: string
+          key: string
+        }
+        Insert: {
+          created_at?: string
+          embedding: string
+          key: string
+        }
+        Update: {
+          created_at?: string
+          embedding?: string
+          key?: string
+        }
+        Relationships: []
+      }
+      daily_picks: {
+        Row: {
+          beta: number
+          created_at: string
+          date: string
+          menu_item_id: string
+          theta: number
+          user_id: string
+        }
+        Insert: {
+          beta: number
+          created_at?: string
+          date?: string
+          menu_item_id: string
+          theta: number
+          user_id: string
+        }
+        Update: {
+          beta?: number
+          created_at?: string
+          date?: string
+          menu_item_id?: string
+          theta?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_picks_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_picks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_slots: {
         Row: {
           created_at: string
@@ -145,6 +205,42 @@ export type Database = {
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "item_option_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_item_impressions: {
+        Row: {
+          created_at: string
+          date: string
+          menu_item_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          menu_item_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          menu_item_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_item_impressions_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "menu_item_impressions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -349,6 +445,42 @@ export type Database = {
           },
         ]
       }
+      personalized_reasons: {
+        Row: {
+          generated_at: string
+          menu_item_id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          generated_at?: string
+          menu_item_id: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          generated_at?: string
+          menu_item_id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personalized_reasons_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personalized_reasons_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           area_id: string | null
@@ -410,6 +542,35 @@ export type Database = {
           sort_order?: number
         }
         Relationships: []
+      }
+      user_embeddings: {
+        Row: {
+          embedding: string
+          n_orders: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          embedding: string
+          n_orders?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          embedding?: string
+          n_orders?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_embeddings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_nutrition_profile: {
         Row: {
@@ -576,12 +737,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      combine_user_vectors: {
+        Args: { beta: number; confirmed: string; skipped: string }
+        Returns: string
+      }
+      compute_daily_picks: { Args: never; Returns: number }
       hybrid_search: {
         Args: {
           p_area_id?: string
+          p_cal_max?: number
+          p_cal_min?: number
+          p_dates?: string[]
           p_limit?: number
+          p_open?: boolean
+          p_price_max?: number
+          p_price_min?: number
           p_query: string
           p_query_embedding?: string
+          p_sort?: string
+          p_tags?: string[]
         }
         Returns: {
           ai_description: string
@@ -605,7 +779,7 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       is_vendor_order: { Args: { order_id: string }; Returns: boolean }
       rank_menu_items_for_home: {
-        Args: { p_area_id?: string; p_limit?: number }
+        Args: { p_area_id?: string; p_context_vec?: string; p_limit?: number }
         Returns: {
           ai_description: string
           ai_tags: string[]
@@ -625,6 +799,8 @@ export type Database = {
           vendor_name: string
         }[]
       }
+      refresh_all_user_embeddings: { Args: never; Returns: number }
+      rollover_daily_slots: { Args: never; Returns: number }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
