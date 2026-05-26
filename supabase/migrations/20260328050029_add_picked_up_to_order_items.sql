@@ -1,0 +1,1 @@
+ALTER TABLE order_items ADD COLUMN picked_up boolean NOT NULL DEFAULT false;

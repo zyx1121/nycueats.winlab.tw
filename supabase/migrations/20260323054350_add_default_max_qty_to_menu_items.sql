@@ -1,0 +1,1 @@
+ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS default_max_qty integer NOT NULL DEFAULT 0;
