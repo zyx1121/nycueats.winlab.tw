@@ -103,7 +103,7 @@ E2E_EMAIL=...
 E2E_PASSWORD=...
 ```
 
-CI currently runs lint + build + e2e test on every PR (see `.github/workflows/ci.yml`).
+CI currently runs lint + build on every PR (see `.github/workflows/ci.yml`). Unit and e2e tests are run locally before merge — see follow-up to gate them in CI.
 
 ## Directory Structure
 
@@ -181,7 +181,7 @@ claude plugins install learning-output-style@claude-plugins-official     # Inter
 
 ## Example Accounts
 
-See [EXAMPLES.md](./EXAMPLES.md) — all example account passwords are `password123`.
+See [EXAMPLES.md](./EXAMPLES.md) for vendor/menu seed data and login addresses. Test account credentials live in [docs/test-accounts.md](./docs/test-accounts.md) (admin uses `Admin1234!`, the rest are noted inline).
 
 ## License
 
