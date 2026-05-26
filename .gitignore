@@ -48,3 +48,6 @@ next-env.d.ts
 /playwright/.cache/
 /e2e/.auth/
 .playwright-mcp/
+
+# Supabase CLI scratch
+/supabase/.temp/

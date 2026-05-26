@@ -11,7 +11,7 @@ import { createClient } from "@supabase/supabase-js";
 const SUPABASE_URL = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const FORCE = process.argv.includes("--force");
-const BATCH_SIZE = 50;
+const BATCH_SIZE = Number(process.env.BATCH_SIZE ?? "10");
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
   console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
