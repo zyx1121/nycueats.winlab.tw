@@ -38,6 +38,7 @@ Campus meal ordering platform for NYCU — employees pre-order meals from partne
 - Daily quota settings (next 7 days)
 - Custom option group management (option groups + individual options)
 - Order summary view (aggregated by date with quantity and amount)
+- Revenue dashboard (daily / weekly / monthly aggregates with trend + bar charts)
 - Image upload (store banner + menu item images, stored in Supabase Storage)
 
 ### Infrastructure
