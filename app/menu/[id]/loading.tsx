@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function MenuLoading() {
   return (
     <main className="min-h-[calc(100dvh-4rem)] flex flex-col items-center">
-      <div className="max-w-6xl w-full p-4 flex flex-col gap-2">
+      <div className="w-full p-4 flex flex-col gap-2">
         {/* 橫幅 */}
         <Skeleton className="w-full rounded-lg" style={{ aspectRatio: "16/5" }} />
         {/* 標題 */}

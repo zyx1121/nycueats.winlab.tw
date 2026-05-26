@@ -68,7 +68,7 @@ export default async function OrderDetailPage({
 
   return (
     <main className="min-h-[calc(100dvh-4rem)] flex flex-col items-center">
-      <div className="max-w-6xl w-full p-4 flex flex-col gap-4">
+      <div className="w-full p-4 flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold">訂單 #{shortId}</h1>
           <p className="text-sm text-muted-foreground">

@@ -12,7 +12,7 @@ export default async function SearchPage({ searchParams }: Props) {
 
   return (
     <main className="min-h-[calc(100dvh-4rem)] flex flex-col items-center">
-      <div className="w-full max-w-6xl p-4 flex flex-col gap-6">
+      <div className="w-full p-4 flex flex-col gap-6">
         <div className="flex flex-col gap-1">
           <h1 className="text-heading font-semibold">
             {query ? `「${query}」的搜尋結果` : "搜尋"}
