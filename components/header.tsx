@@ -37,16 +37,6 @@ export async function Header() {
         <AreaSelect byCity={byCity} defaultAreaId={profile?.area_id ?? undefined} />
       </div>
       <div className="flex items-center gap-4">
-        {navigation.showVendorDashboard && (
-          <Link href="/vendor">
-            <Button variant="outline" size="sm">商家後台</Button>
-          </Link>
-        )}
-        {navigation.showOrderCatalog && (
-          <Link href="/">
-            <Button variant="outline" size="sm">點餐目錄</Button>
-          </Link>
-        )}
         {navigation.showAdminDashboard && (
           <Link href="/admin">
             <Button variant="outline" size="sm">管理後台</Button>

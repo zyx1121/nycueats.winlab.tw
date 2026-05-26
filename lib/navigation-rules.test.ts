@@ -22,27 +22,11 @@ describe("navigation rules", () => {
     expect(getDefaultHomePath(["vendor", "admin", "user"])).toBe("/admin");
   });
 
-  it("shows 點餐目錄 for vendor and admin accounts", () => {
-    expect(getHeaderNavigation(["user"])).toMatchObject({
-      showOrderCatalog: false,
-      showVendorDashboard: false,
-      showAdminDashboard: false,
-    });
-    expect(getHeaderNavigation(["admin"])).toMatchObject({
-      showOrderCatalog: true,
-      showVendorDashboard: false,
-      showAdminDashboard: true,
-    });
-    expect(getHeaderNavigation(["vendor"])).toMatchObject({
-      showOrderCatalog: true,
-      showVendorDashboard: true,
-      showAdminDashboard: false,
-    });
-    expect(getHeaderNavigation(["vendor", "admin"])).toMatchObject({
-      showOrderCatalog: true,
-      showVendorDashboard: true,
-      showAdminDashboard: true,
-    });
+  it("only shows admin dashboard button for admin accounts", () => {
+    expect(getHeaderNavigation(["user"])).toMatchObject({ showAdminDashboard: false });
+    expect(getHeaderNavigation(["vendor"])).toMatchObject({ showAdminDashboard: false });
+    expect(getHeaderNavigation(["admin"])).toMatchObject({ showAdminDashboard: true });
+    expect(getHeaderNavigation(["vendor", "admin"])).toMatchObject({ showAdminDashboard: true });
   });
 
   it("keeps cart and orders visible for all logged-in roles", () => {
