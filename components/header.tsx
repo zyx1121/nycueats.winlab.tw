@@ -1,4 +1,5 @@
 import { AreaSelect } from "./area-select";
+import { ThemeToggle } from "./theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { getHeaderNavigation } from "@/lib/navigation-rules";
@@ -42,6 +43,7 @@ export async function Header() {
             <Button variant="outline" size="sm">管理後台</Button>
           </Link>
         )}
+        <ThemeToggle />
         {navigation.showOrders && (
           <Link href="/orders">
             <Button variant="outline">
