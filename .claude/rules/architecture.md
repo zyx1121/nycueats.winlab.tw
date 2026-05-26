@@ -64,6 +64,7 @@ types/
 - `user_embeddings` — Per-user 512-dim taste vector (mean of confirmed items' embeddings minus 0.3 × skipped items' embeddings); recomputed on every confirm + daily cron
 - `menu_item_impressions` — 1 row per user × item × date; powers the "skipped" signal (impressed ≥ 3 days ago and never confirmed)
 - `context_embeddings` — Cached embeddings keyed by `{hour_band}_{temp_band}_{rain}` so the same time-of-day × weather bucket doesn't pay OpenAI twice
+- `daily_picks` — One Thompson-Sampling surprise pick per user per day (PK: user_id + date); stores chosen menu_item_id + θ + β for traceability
 
 ### DB Functions
 - `rank_menu_items_for_home(p_area_id, p_limit, p_context_vec)` — SECURITY DEFINER; reads `auth.uid()` internally. raw_user_sim = `0.7 × cos(user_vec) + 0.3 × cos(context_vec)` when both present; either NULL → falls back to the other; both NULL → 0. Three-factor z-score normalised blend with nutrition profile similarity and ln(time-decayed 14-day trend, τ = 3 days). Plus `+0.5` open-vendor bonus. Top `limit × 3` candidate pool then reranked by MMR (λ = 0.7) for diversity. Cold-start (no user vector, no context) degrades to trend + nutrition + open. Returns `match_score` + explainable `top_tag_label`.
@@ -71,6 +72,7 @@ types/
 - `update_user_preferences_on_confirm()` — AFTER UPDATE trigger on orders; fires on `pending → confirmed`; accumulates tag scores + updates nutrition running mean + recomputes user embedding (full re-mean over all confirmed items).
 - `rollover_daily_slots()` — SECURITY DEFINER; scheduled via pg_cron `rollover_daily_slots` job (`0 22 * * *` UTC = 06:00 Asia/Taipei). Materialises daily_slots for next 14 days from `menu_items.default_max_qty`, filtered by `vendors.is_active` + `vendors.operating_days` + `menu_items.is_available` + `default_max_qty > 0`. `ON CONFLICT (menu_item_id, date) DO NOTHING` preserves vendor's manual max_qty tweaks.
 - `refresh_all_user_embeddings()` — SECURITY DEFINER; scheduled via pg_cron `refresh_user_embeddings` job (`0 2 * * *` UTC = 10:00 Asia/Taipei). Recomputes every user's vector as `confirmed_mean − 0.3 × skipped_mean` so skip signal (impressed ≥ 3 days ago, never confirmed) flows in without per-impression trigger thrashing.
+- `compute_daily_picks()` — SECURITY DEFINER; scheduled via pg_cron `compute_daily_picks` job (same window as user-vector refresh). For each user with history, samples one item from the top-30 candidate pool via Beta(1, impressions+1) — closed-form `θ = 1 − (1 − U)^(1/β)`. Already-confirmed items are excluded. Cold-start user (no `user_embeddings` row) → candidates ranked purely by ln(decay_trend), β=1 → uniform random pick.
 - `combine_user_vectors(confirmed, skipped, beta)` — IMMUTABLE helper; element-wise `confirmed − β × skipped` since pgvector lacks scalar-multiply. Called once per user per cron run.
 
 ### Edge Functions
@@ -82,7 +84,7 @@ types/
 1. Vendor inserts menu item → Next 16 `after()` fires `generate-menu-item-tags` edge function → writes `ai_tags` + `ai_description` + `embedding` (+ missing nutrition).
 2. User confirms order → `update_preferences_on_order_confirm` trigger updates `user_tag_preferences` + `user_nutrition_profile` + `user_embeddings` (positive signal, immediate).
 3. Home server component fetches Open-Meteo current conditions (Next 16 fetch cache 30 min) → maps `{hour_band, temp_band, rain}` to a fixed English phrase → looks up `context_embeddings`; on miss invokes `embed-query` edge function and upserts. The resulting context vector is passed to `rank_menu_items_for_home(area, limit, context_vec)` → semantic cosine + nutrition + time-decayed trend with z-score normalised weights and MMR diversity rerank; no LLM in serving path. Server component also fires `after()` to log impressions (1 row per user × item × date) for the skip signal.
-4. Daily 10:00 TPE cron (`refresh_user_embeddings`) bakes skipped-but-not-confirmed items into each user's vector at β = 0.3, closing the negative-feedback loop.
+4. Daily 10:00 TPE cron (`refresh_user_embeddings`) bakes skipped-but-not-confirmed items into each user's vector at β = 0.3, closing the negative-feedback loop. Same window, `compute_daily_picks` Thompson-samples one surprise pick per user from a personalised top-30 pool and writes to `daily_picks`; the homepage renders it as a "🎁 今日驚喜" card above the trending carousel.
 5. Search (`/search?q=...`) → `embed-query` edge function (one OpenAI call) → `hybrid_search` RPC (trgm + pgvector RRF) 過度檢索候選池 (40) → `rerank-search` edge function (LLM rerank by 自然語言意圖) → 取前 `limit`。「今天好熱」走 semantic 路徑找到冰品/飲品；「牛肉麵」走 keyword 路徑命中所有牛肉麵變體；「我今天想吃輕一點的」靠 rerank 依熱量/鈉把清爽餐點往前排。rerank 為 best-effort，失敗時降級回 RRF 順序。
 
 ### Roles

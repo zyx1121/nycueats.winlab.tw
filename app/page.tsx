@@ -3,6 +3,7 @@ import { HomeItemCard } from "@/components/home-item-card";
 import RecommendationSection from "@/components/recommendation-section";
 import { DEFAULT_FACTORY_AREA_NAME } from "@/lib/branding";
 import { getContextEmbedding, getCurrentContext } from "@/lib/context";
+import { getDailyPick } from "@/lib/daily-pick";
 import { recordImpressions } from "@/lib/impressions";
 import { getHomeItems, getTrendingItems } from "@/lib/recommendation";
 import { createClient } from "@/lib/supabase/server";
@@ -44,9 +45,10 @@ export default async function HomePage({ searchParams }: Props) {
   const ctx = await getCurrentContext();
   const contextVec = ctx ? await getContextEmbedding(supabase, ctx) : null;
 
-  const [items, trending] = await Promise.all([
+  const [items, trending, dailyPick] = await Promise.all([
     getHomeItems(area, 60, contextVec),
     getTrendingItems(8, area),
+    user ? getDailyPick(supabase, user.id) : Promise.resolve(null),
   ]);
 
   if (user) {
@@ -60,6 +62,15 @@ export default async function HomePage({ searchParams }: Props) {
   return (
     <main className="min-h-[calc(100dvh-4rem)] flex flex-col items-center">
       <div className="w-full p-4 flex flex-col gap-8">
+        {dailyPick && (
+          <section className="flex flex-col gap-3">
+            <h2 className="text-heading font-semibold">🎁 今日驚喜</h2>
+            <div className="max-w-sm">
+              <HomeItemCard item={dailyPick} />
+            </div>
+          </section>
+        )}
+
         {trending.length > 0 && (
           <RecommendationSection title="🔥 熱銷排行" items={trending} accent />
         )}
