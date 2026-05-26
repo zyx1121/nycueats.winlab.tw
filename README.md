@@ -90,6 +90,8 @@ bun run test:ui     # Playwright UI mode
 - `app/orders/order-summary.test.ts`: order summary normalization
 - `app/cart/actions.test.ts`: mocked Server Action coverage for cart flows
 - `app/orders/actions.test.ts`: mocked order query + pagination coverage
+- `app/vendor/revenue/revenue-model.test.ts`: revenue aggregation helpers
+- `lib/navigation-rules.test.ts`: role → default-home + header-visibility rules
 - `e2e/home.spec.ts`, `e2e/menu.spec.ts`, `e2e/order-flow.spec.ts`: real browser flows
 
 ### E2E Requirements
@@ -109,16 +111,30 @@ CI currently runs lint + build on every PR (see `.github/workflows/ci.yml`). Uni
 
 ```
 app/
-  (user)/           # Employee: homepage, menu, cart, profile
-  (vendor)/         # Vendor dashboard: store info, menu management, orders
-  (admin)/          # Admin dashboard: operations overview, vendor management
+  page.tsx          # Home: area-filtered vendor grid + recommendation sections
+  cart/             # Employee cart + actions + tests
+  orders/           # Employee order list + detail + tests
+  menu/[id]/        # Vendor menu detail + add-to-order dialog
+  profile/          # Employee profile
   login/            # Login page
   auth/callback/    # Supabase OAuth callback
+  api/pickup/       # QR-code pickup endpoint
+  vendor/           # Vendor: store info, menu, orders, revenue
+  admin/            # Admin: operations, vendor management, reports, users
 components/
-  ui/               # shadcn/ui components
+  ui/               # shadcn/ui primitives
   header.tsx        # Global header
+  area-select.tsx   # Area filter dropdown
+  image-upload.tsx  # Image upload with type/size validation
+  login-form.tsx    # Email/password + Google OAuth form
+  menu-item-card.tsx        # Shared menu item card
+  recommendation-section.tsx # Horizontal carousel
 lib/
+  auth.ts           # requireRole() helper
+  recommendation.ts # Recommendation engine
+  navigation-rules.ts # Role-based default home + header visibility
   supabase/         # Browser & server client
+proxy.ts            # Next.js 16 edge middleware (was middleware.ts)
 types/
   supabase.ts       # Auto-generated Supabase DB types
 ```
