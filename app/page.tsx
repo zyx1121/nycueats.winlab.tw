@@ -2,9 +2,11 @@ import { FoodWheel } from "@/components/food-wheel";
 import { HomeItemCard } from "@/components/home-item-card";
 import RecommendationSection from "@/components/recommendation-section";
 import { DEFAULT_FACTORY_AREA_NAME } from "@/lib/branding";
+import { recordImpressions } from "@/lib/impressions";
 import { getHomeItems, getTrendingItems } from "@/lib/recommendation";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 
 interface Props {
   searchParams: Promise<{ area?: string }>;
@@ -42,6 +44,14 @@ export default async function HomePage({ searchParams }: Props) {
     getHomeItems(area),
     getTrendingItems(8, area),
   ]);
+
+  if (user) {
+    const userId = user.id;
+    after(async () => {
+      const ids = [...items.map((i) => i.id), ...trending.map((t) => t.id)];
+      await recordImpressions(supabase, userId, ids);
+    });
+  }
 
   return (
     <main className="min-h-[calc(100dvh-4rem)] flex flex-col items-center">
