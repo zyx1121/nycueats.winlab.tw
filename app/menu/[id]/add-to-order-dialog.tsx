@@ -15,7 +15,7 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Tables } from "@/types/supabase";
 import { format } from "date-fns";
-import React, { useState, useTransition } from "react";
+import React, { useEffect, useState, useTransition } from "react";
 
 type MenuItem = Pick<Tables<"menu_items">, "id" | "name" | "description" | "price">;
 type DailySlot = Pick<Tables<"daily_slots">, "id" | "date" | "max_qty" | "reserved_qty">;
@@ -87,6 +87,15 @@ export function AddToOrderDialog({ vendorId, item, slots, optionGroups, children
     setSelections({});
     setErrorMsg(null);
   }
+
+  useEffect(() => {
+    if (disabled) return;
+    if (typeof window === "undefined") return;
+    if (window.location.hash === `#item-${item.id}`) {
+      handleOpen();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.id, disabled]);
 
   function handleSubmit() {
     if (!slot) return;
