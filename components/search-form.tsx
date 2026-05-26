@@ -42,9 +42,9 @@ export function SearchForm({ placeholderItems, tagVocabulary }: Props) {
     e.preventDefault();
     const q = value.trim();
     if (!q) return;
-    const area = searchParams.get("area");
-    const url = `/search?q=${encodeURIComponent(q)}${area ? `&area=${area}` : ""}`;
-    startTransition(() => router.push(url));
+    const all = new URLSearchParams(Object.fromEntries(searchParams.entries()));
+    all.set("q", q);
+    startTransition(() => router.push(`/search?${all.toString()}`));
   }
 
   return (
@@ -90,6 +90,7 @@ export function SearchForm({ placeholderItems, tagVocabulary }: Props) {
           tagVocabulary={tagVocabulary}
           onClose={() => setFilterOpen(false)}
           anchorRef={filterBtnRef}
+          currentQuery={value}
         />
       )}
     </div>

@@ -62,9 +62,10 @@ interface Props {
   tagVocabulary: TagEntry[];
   onClose: () => void;
   anchorRef?: React.RefObject<HTMLElement | null>;
+  currentQuery?: string;
 }
 
-export function FilterPanel({ tagVocabulary, onClose, anchorRef }: Props) {
+export function FilterPanel({ tagVocabulary, onClose, anchorRef, currentQuery }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -114,7 +115,7 @@ export function FilterPanel({ tagVocabulary, onClose, anchorRef }: Props) {
   }
 
   function handleApply() {
-    const q = searchParams.get("q") ?? "";
+    const q = (currentQuery ?? "").trim();
     const area = searchParams.get("area");
     const all = new URLSearchParams({ ...(q ? { q } : {}), ...(area ? { area } : {}), ...filtersToSearchParams(buildFilters()) });
     startTransition(() => { router.push(`/search?${all.toString()}`); onClose(); });
