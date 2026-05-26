@@ -12,6 +12,63 @@ export type RecommendedItem = {
   vendor_name: string;
 };
 
+export type HomeItem = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  image_url: string | null;
+  tags: string[];
+  calories: number | null;
+  protein: number | null;
+  sodium: number | null;
+  vendor_id: string;
+  vendor_name: string;
+  vendor_is_open: boolean;
+};
+
+export async function getHomeItems(areaId?: string, limit = 60): Promise<HomeItem[]> {
+  const supabase = await createClient();
+
+  const select = areaId
+    ? "id, name, description, price, image_url, tags, calories, protein, sodium, vendor_id, vendors!inner(id, name, is_active, is_open, vendor_areas!inner(area_id))"
+    : "id, name, description, price, image_url, tags, calories, protein, sodium, vendor_id, vendors!inner(id, name, is_active, is_open)";
+
+  let query = supabase
+    .from("menu_items")
+    .select(select)
+    .eq("is_available", true)
+    .eq("vendors.is_active", true);
+
+  if (areaId) query = query.eq("vendors.vendor_areas.area_id", areaId);
+
+  const { data: items } = await query.limit(limit);
+  if (!items) return [];
+
+  return items
+    .map((item) => {
+      const vendor = item.vendors as { name: string; is_open: boolean } | null;
+      return {
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        image_url: item.image_url,
+        tags: item.tags ?? [],
+        calories: item.calories,
+        protein: item.protein,
+        sodium: item.sodium,
+        vendor_id: item.vendor_id,
+        vendor_name: vendor?.name ?? "",
+        vendor_is_open: vendor?.is_open ?? false,
+      };
+    })
+    .sort((a, b) => {
+      if (a.vendor_is_open !== b.vendor_is_open) return a.vendor_is_open ? -1 : 1;
+      return a.name.localeCompare(b.name, "zh-Hant");
+    });
+}
+
 export async function getTrendingItems(limit = 8, areaId?: string): Promise<RecommendedItem[]> {
   const supabase = await createClient();
   const since = new Date(new Date().getTime() - 7 * 86400000).toISOString();

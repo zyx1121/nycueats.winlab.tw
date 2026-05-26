@@ -81,14 +81,16 @@ export default async function MenuPage({ params }: Props) {
             const hasAvailable = slots.some((s) => s.max_qty - s.reserved_qty > 0);
 
             return (
-              <AddToOrderDialog key={item.id} vendorId={vendor.id} item={item} slots={slots} optionGroups={item.item_option_groups} disabled={!hasAvailable}>
-                <MenuItemCard
-                  item={item}
-                  status={!hasAvailable && (
-                    <p className="text-sm text-destructive">本週已售完</p>
-                  )}
-                />
-              </AddToOrderDialog>
+              <div key={item.id} id={`item-${item.id}`} className="scroll-mt-20">
+                <AddToOrderDialog vendorId={vendor.id} item={item} slots={slots} optionGroups={item.item_option_groups} disabled={!hasAvailable}>
+                  <MenuItemCard
+                    item={item}
+                    status={!hasAvailable && (
+                      <p className="text-sm text-destructive">本週已售完</p>
+                    )}
+                  />
+                </AddToOrderDialog>
+              </div>
             );
           })}
         </div>
