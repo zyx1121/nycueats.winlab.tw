@@ -13,7 +13,7 @@ vi.mock("next/cache", () => ({
   revalidatePath: revalidatePathMock,
 }));
 
-import { pickUpOrderItem } from "@/app/vendor/orders/actions";
+import { batchPickUp, pickUpOrderItem } from "@/app/vendor/orders/actions";
 
 type QueryResult = { data?: unknown; error?: unknown };
 type FromExpectation = { table: string; result: QueryResult };
@@ -157,5 +157,47 @@ describe("pickUpOrderItem", () => {
     expect(updateCaptures).toEqual([
       { table: "order_items", payload: { picked_up: true } },
     ]);
+  });
+
+  describe("batchPickUp", () => {
+    it("returns success when every item is picked up", async () => {
+      const { client } = createSupabaseMock({
+        user: { id: "u1" },
+        expectations: [
+          { table: "vendors", result: { data: { id: "v1" } } },
+          {
+            table: "order_items",
+            result: {
+              data: { id: "oi1", order_id: "ord1", menu_items: { vendor_id: "v1" } },
+            },
+          },
+          { table: "order_items", result: { data: null, error: null } },
+          { table: "order_items", result: { data: [{ id: "oi2" }] } },
+          { table: "vendors", result: { data: { id: "v1" } } },
+          {
+            table: "order_items",
+            result: {
+              data: { id: "oi2", order_id: "ord1", menu_items: { vendor_id: "v1" } },
+            },
+          },
+          { table: "order_items", result: { data: null, error: null } },
+          { table: "order_items", result: { data: [] } },
+          { table: "orders", result: { data: null, error: null } },
+        ],
+      });
+      createClientMock.mockResolvedValue(client);
+
+      await expect(batchPickUp(["oi1", "oi2"])).resolves.toEqual({ success: true });
+    });
+
+    it("summarizes failed item pickups", async () => {
+      const { client } = createSupabaseMock({
+        user: { id: "u1" },
+        expectations: [{ table: "vendors", result: { data: null } }],
+      });
+      createClientMock.mockResolvedValue(client);
+
+      await expect(batchPickUp(["oi1"])).resolves.toEqual({ error: "1 筆失敗" });
+    });
   });
 });
