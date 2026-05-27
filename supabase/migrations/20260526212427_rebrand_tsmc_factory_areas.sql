@@ -1,24 +1,37 @@
--- Rebrand active areas from legacy campus records to TSMC factory sites.
+-- Rebrand active areas from legacy campus/factory records to TSMC Fab sites.
 -- Keep the `areas` table and FK structure intact; only active data changes.
 
 INSERT INTO public.areas (name, city, is_active)
 VALUES
-  ('新竹廠', '新竹', true),
-  ('台中廠', '台中', true),
-  ('嘉義廠', '嘉義', true),
-  ('台南廠', '台南', true),
-  ('高雄廠', '高雄', true)
+  ('Fab 2', '新竹科學園區（竹科）', true),
+  ('Fab 3', '新竹科學園區（竹科）', true),
+  ('Fab 5', '新竹科學園區（竹科）', true),
+  ('Fab 6', '新竹科學園區（竹科）', true),
+  ('Fab 8', '新竹科學園區（竹科）', true),
+  ('Fab 12A', '新竹科學園區（竹科）', true),
+  ('Fab 12B', '新竹科學園區（竹科）', true),
+  ('Fab 20', '新竹科學園區（竹科）', true),
+  ('Fab 14', '台南科學園區（南科）', true),
+  ('Fab 18', '台南科學園區（南科）', true),
+  ('Fab 15', '中部科學園區（中科）', true),
+  ('Fab 22 高雄', '南部科學園區', true),
+  ('Fab 25 嘉義/台南沙崙', '南部科學園區', true)
 ON CONFLICT (name) DO UPDATE
 SET city = EXCLUDED.city,
     is_active = true;
 
 WITH area_map(old_name, new_name) AS (
   VALUES
-    ('新竹光復校區', '新竹廠'),
-    ('新竹博愛校區', '新竹廠'),
-    ('新竹六家校區', '新竹廠'),
-    ('臺南歸仁校區', '台南廠'),
-    ('高雄校區', '高雄廠')
+    ('新竹光復校區', 'Fab 12A'),
+    ('新竹博愛校區', 'Fab 12A'),
+    ('新竹六家校區', 'Fab 12A'),
+    ('新竹廠', 'Fab 12A'),
+    ('臺南歸仁校區', 'Fab 14'),
+    ('台南廠', 'Fab 14'),
+    ('台中廠', 'Fab 15'),
+    ('嘉義廠', 'Fab 25 嘉義/台南沙崙'),
+    ('高雄校區', 'Fab 22 高雄'),
+    ('高雄廠', 'Fab 22 高雄')
 )
 UPDATE public.profiles AS p
 SET area_id = new_area.id
@@ -29,11 +42,16 @@ WHERE p.area_id = old_area.id;
 
 WITH area_map(old_name, new_name) AS (
   VALUES
-    ('新竹光復校區', '新竹廠'),
-    ('新竹博愛校區', '新竹廠'),
-    ('新竹六家校區', '新竹廠'),
-    ('臺南歸仁校區', '台南廠'),
-    ('高雄校區', '高雄廠')
+    ('新竹光復校區', 'Fab 12A'),
+    ('新竹博愛校區', 'Fab 12A'),
+    ('新竹六家校區', 'Fab 12A'),
+    ('新竹廠', 'Fab 12A'),
+    ('臺南歸仁校區', 'Fab 14'),
+    ('台南廠', 'Fab 14'),
+    ('台中廠', 'Fab 15'),
+    ('嘉義廠', 'Fab 25 嘉義/台南沙崙'),
+    ('高雄校區', 'Fab 22 高雄'),
+    ('高雄廠', 'Fab 22 高雄')
 )
 INSERT INTO public.vendor_areas (vendor_id, area_id)
 SELECT DISTINCT va.vendor_id, new_area.id
@@ -53,17 +71,13 @@ WHERE va.area_id = old_area.id
     '臺北陽明校區',
     '臺北北門校區',
     '臺南歸仁校區',
-    '高雄校區'
+    '高雄校區',
+    '新竹廠',
+    '台中廠',
+    '嘉義廠',
+    '台南廠',
+    '高雄廠'
   );
-
-INSERT INTO public.vendor_areas (vendor_id, area_id)
-SELECT DISTINCT v.id, a.id
-FROM public.vendors AS v
-CROSS JOIN public.areas AS a
-WHERE v.is_active = true
-  AND a.is_active = true
-  AND a.name IN ('新竹廠', '台中廠', '嘉義廠', '台南廠', '高雄廠')
-ON CONFLICT (vendor_id, area_id) DO NOTHING;
 
 UPDATE public.profiles
 SET area_id = NULL
@@ -82,10 +96,15 @@ WHERE name IN (
   '臺北陽明校區',
   '臺北北門校區',
   '臺南歸仁校區',
-  '高雄校區'
+  '高雄校區',
+  '新竹廠',
+  '台中廠',
+  '嘉義廠',
+  '台南廠',
+  '高雄廠'
 );
 
 UPDATE public.profiles
-SET area_id = (SELECT id FROM public.areas WHERE name = '新竹廠')
+SET area_id = (SELECT id FROM public.areas WHERE name = 'Fab 12A')
 WHERE area_id IS NULL
-  AND EXISTS (SELECT 1 FROM public.areas WHERE name = '新竹廠');
+  AND EXISTS (SELECT 1 FROM public.areas WHERE name = 'Fab 12A');

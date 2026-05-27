@@ -9,15 +9,23 @@ describe("branding", () => {
 
   it("defines the active factory areas", () => {
     expect(ACTIVE_FACTORY_AREAS.map((area) => area.name)).toEqual([
-      "新竹廠",
-      "台中廠",
-      "嘉義廠",
-      "台南廠",
-      "高雄廠",
+      "Fab 2",
+      "Fab 3",
+      "Fab 5",
+      "Fab 6",
+      "Fab 8",
+      "Fab 12A",
+      "Fab 12B",
+      "Fab 20",
+      "Fab 14",
+      "Fab 18",
+      "Fab 15",
+      "Fab 22 高雄",
+      "Fab 25 嘉義/台南沙崙",
     ]);
   });
 
   it("defaults users to the Hsinchu factory", () => {
-    expect(DEFAULT_FACTORY_AREA_NAME).toBe("新竹廠");
+    expect(DEFAULT_FACTORY_AREA_NAME).toBe("Fab 12A");
   });
 });

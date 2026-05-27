@@ -8,13 +8,13 @@ insert into vendors (id, name, description, tags, is_active) values
   ('11111111-0000-0000-0000-000000000003'::uuid, '泰式廚房', '道地泰式料理，香辣夠味', array['泰式', '異國'], true);
 
 insert into vendor_areas (vendor_id, area_id)
-select '11111111-0000-0000-0000-000000000001'::uuid, id from areas where name = '新竹廠'
+select '11111111-0000-0000-0000-000000000001'::uuid, id from areas where name = 'Fab 12A'
 union all
-select '11111111-0000-0000-0000-000000000002'::uuid, id from areas where name = '新竹廠'
+select '11111111-0000-0000-0000-000000000002'::uuid, id from areas where name = 'Fab 12A'
 union all
-select '11111111-0000-0000-0000-000000000003'::uuid, id from areas where name = '新竹廠'
+select '11111111-0000-0000-0000-000000000003'::uuid, id from areas where name = 'Fab 12A'
 union all
-select '11111111-0000-0000-0000-000000000001'::uuid, id from areas where name = '台中廠';
+select '11111111-0000-0000-0000-000000000001'::uuid, id from areas where name = 'Fab 15';
 
 insert into menu_items (vendor_id, name, description, price, calories, protein, sodium, sugar) values
   ('11111111-0000-0000-0000-000000000001'::uuid, '汁心煎餃', '招牌餡心煎餃，外皮煎至金黃酥脆', 120, 350, 15, 800, 2),
