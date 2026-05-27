@@ -47,7 +47,7 @@ types/
 ```
 
 ### DB Tables
-- `areas` — Factory sites (e.g. 新竹廠)
+- `areas` — Factory sites (e.g. Fab 12A)
 - `profiles` — User profiles (role: text[])
 - `vendors` — Vendor stores
 - `vendor_areas` — Vendor-area mapping (many-to-many)
