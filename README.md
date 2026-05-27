@@ -71,18 +71,59 @@ Open [http://localhost:3000](http://localhost:3000)
 ```bash
 bun run test        # Run Vitest first, then Playwright e2e
 bun run test:unit   # Run unit tests + mock integration tests with Vitest
+bun run test:coverage # Run Vitest with backend coverage report
 bun run test:e2e    # Run Playwright e2e tests
 bun run test:ui     # Playwright UI mode
 ```
 
 ### Current Test Coverage
 
-- `app/cart/cart-view.test.ts`: cart grouping, sorting, totals
-- `app/orders/order-summary.test.ts`: order summary normalization
+Latest local backend unit test run:
+
+```text
+bun run test:unit
+Test Files  31 passed (31)
+Tests       162 passed (162)
+```
+
+Latest local backend coverage run:
+
+```text
+bun run test:coverage
+All files: 88.87% statements, 78.63% branches, 93.38% functions, 94.72% lines
+```
+
+Backend coverage includes `lib/**/*.ts`, Server Actions, route handlers, and `proxy.ts`.
+
+Unit and mock-integration coverage currently includes:
+
+- `app/api/pickup/route.test.ts`: QR pickup route permissions, order status checks, picked-up transitions
+- `app/auth/callback/route.test.ts`: OAuth callback exchange, safe redirects, profile-name backfill
 - `app/cart/actions.test.ts`: mocked Server Action coverage for cart flows
+- `app/cart/cart-view.test.ts`: cart grouping, sorting, totals
+- `app/login/actions.test.ts`: email login and Google OAuth redirect behavior
+- `app/menu/[id]/actions.test.ts`: add-to-order validation, anti-tampering checks, quota errors
 - `app/orders/actions.test.ts`: mocked order query + pagination coverage
+- `app/orders/order-summary.test.ts`: order summary normalization
+- `app/profile/actions.test.ts`: sign-out and employee profile updates
+- `app/vendor/menu/actions.test.ts`: menu item, AI metadata, quota, option group, and option actions
+- `app/vendor/orders/actions.test.ts`: single and batch pickup actions
+- `app/vendor/profile/actions.test.ts`: vendor profile, schedule, and image updates
+- `app/vendor/revenue/actions.test.ts`: vendor revenue dashboard query/fallback behavior
 - `app/vendor/revenue/revenue-model.test.ts`: revenue aggregation helpers
-- `lib/navigation-rules.test.ts`: role → default-home + header-visibility rules
+- `lib/auth.test.ts`: role guard behavior
+- `lib/branding.test.ts`: product name and factory-area constants
+- `lib/context.test.ts`: weather context mapping and context embedding cache behavior
+- `lib/daily-pick.test.ts`: daily pick lookup and normalization
+- `lib/filters.test.ts`: search filter parsing, serialization, and active counts
+- `lib/impressions.test.ts`: impression deduplication and upsert payloads
+- `lib/navigation-rules.test.ts`: role to default-home and header-visibility rules
+- `lib/reasons.test.ts`: personalized reason TTL filtering, attachment, and generation trigger
+- `lib/recommendation.test.ts`: home ranking RPC mapping and trending item aggregation
+- `lib/roulette.test.ts`: random item selection boundaries
+- `lib/search.test.ts`: hybrid search, embedding fallback, rerank fallback, filter params
+- `lib/utils.test.ts`: class-name merge helper
+- `proxy.test.ts`: auth proxy redirects and public auth path behavior
 - `e2e/home.spec.ts`, `e2e/menu.spec.ts`, `e2e/order-flow.spec.ts`: real browser flows
 
 ### E2E Requirements

@@ -11,10 +11,17 @@ vi.mock("next/cache", () => ({ revalidatePath: revalidatePathMock }));
 vi.mock("next/server", () => ({ after: afterMock }));
 
 import {
+  backfillMissingAiTags,
   bulkUpsertSlots,
+  deleteOption,
+  deleteOptionGroup,
   deleteMenuItem,
   regenerateAiMetadata,
   setDailySlot,
+  toggleMenuItem,
+  upsertMenuItem,
+  upsertOption,
+  upsertOptionGroup,
 } from "@/app/vendor/menu/actions";
 import { createSupabaseMock, roleProfile, type FromExpectation } from "@/test/supabase-mock";
 
@@ -150,6 +157,70 @@ describe("vendor menu actions", () => {
     });
   });
 
+  describe("upsertMenuItem", () => {
+    it("creates a menu item for the current vendor and schedules AI tagging", async () => {
+      const { client, mutations } = createSupabaseMock({
+        user: { id: "u1" },
+        expectations: [
+          ...vendorContext("v1"),
+          { table: "menu_items", result: { data: { id: "m1" }, error: null } },
+        ],
+      });
+      createClientMock.mockResolvedValue(client);
+
+      await expect(
+        upsertMenuItem({ name: "雞腿飯", price: 120, description: "招牌" }),
+      ).resolves.toEqual({ success: true, id: "m1" });
+
+      expect(mutations).toEqual([
+        {
+          table: "menu_items",
+          op: "insert",
+          payload: { name: "雞腿飯", price: 120, description: "招牌", vendor_id: "v1" },
+        },
+      ]);
+      expect(afterMock).toHaveBeenCalledOnce();
+      expect(revalidatePathMock).toHaveBeenCalledWith("/vendor/menu");
+    });
+
+    it("updates an existing item scoped to the current vendor", async () => {
+      const { client, mutations } = createSupabaseMock({
+        user: { id: "u1" },
+        expectations: [...vendorContext("v1"), { table: "menu_items", result: { error: null } }],
+      });
+      createClientMock.mockResolvedValue(client);
+
+      await expect(upsertMenuItem({ id: "m1", name: "飯", price: 90 })).resolves.toEqual({
+        success: true,
+      });
+
+      expect(mutations).toEqual([
+        {
+          table: "menu_items",
+          op: "update",
+          payload: { id: "m1", name: "飯", price: 90, vendor_id: "v1" },
+        },
+      ]);
+    });
+  });
+
+  describe("toggleMenuItem", () => {
+    it("updates availability scoped to the current vendor", async () => {
+      const { client, mutations } = createSupabaseMock({
+        user: { id: "u1" },
+        expectations: [...vendorContext("v1"), { table: "menu_items", result: { error: null } }],
+      });
+      createClientMock.mockResolvedValue(client);
+
+      await expect(toggleMenuItem("m1", false)).resolves.toBeUndefined();
+
+      expect(mutations).toEqual([
+        { table: "menu_items", op: "update", payload: { is_available: false } },
+      ]);
+      expect(revalidatePathMock).toHaveBeenCalledWith("/vendor/menu");
+    });
+  });
+
   describe("regenerateAiMetadata", () => {
     it("rejects an empty selection", async () => {
       const { client } = createSupabaseMock({
@@ -186,6 +257,135 @@ describe("vendor menu actions", () => {
       expect(client.functions.invoke).toHaveBeenCalledWith("generate-menu-item-tags", {
         body: { menu_item_ids: ["m1"], force: true },
       });
+    });
+  });
+
+  describe("backfillMissingAiTags", () => {
+    it("returns count 0 without invoking the edge function when nothing is missing", async () => {
+      const { client } = createSupabaseMock({
+        user: { id: "u1" },
+        expectations: [...vendorContext("v1"), { table: "menu_items", result: { data: [] } }],
+      });
+      createClientMock.mockResolvedValue(client);
+
+      await expect(backfillMissingAiTags()).resolves.toEqual({ success: true, count: 0 });
+      expect(client.functions.invoke).not.toHaveBeenCalled();
+    });
+
+    it("invokes AI tagging for up to 100 missing items", async () => {
+      const { client } = createSupabaseMock({
+        user: { id: "u1" },
+        expectations: [
+          ...vendorContext("v1"),
+          { table: "menu_items", result: { data: [{ id: "m1" }, { id: "m2" }] } },
+        ],
+        invokeResult: { data: { results: [{ id: "m1", status: "ok" }] }, error: null },
+      });
+      createClientMock.mockResolvedValue(client);
+
+      await expect(backfillMissingAiTags()).resolves.toEqual({
+        results: [{ id: "m1", status: "ok" }],
+        count: 2,
+      });
+      expect(client.functions.invoke).toHaveBeenCalledWith("generate-menu-item-tags", {
+        body: { menu_item_ids: ["m1", "m2"], force: false },
+      });
+    });
+  });
+
+  describe("option groups and options", () => {
+    it("upserts an option group after checking menu item ownership", async () => {
+      const { client, mutations } = createSupabaseMock({
+        user: { id: "u1" },
+        expectations: [
+          ...vendorContext("v1"),
+          { table: "menu_items", result: { data: { id: "m1" } } },
+          { table: "item_option_groups", result: { error: null } },
+        ],
+      });
+      createClientMock.mockResolvedValue(client);
+
+      await expect(
+        upsertOptionGroup({
+          menu_item_id: "m1",
+          name: "甜度",
+          required: true,
+          max_select: 1,
+          sort_order: 0,
+        }),
+      ).resolves.toEqual({ success: true });
+
+      expect(mutations[0]).toEqual({
+        table: "item_option_groups",
+        op: "insert",
+        payload: {
+          menu_item_id: "m1",
+          name: "甜度",
+          required: true,
+          max_select: 1,
+          sort_order: 0,
+        },
+      });
+    });
+
+    it("deletes an option group only after ownership is verified", async () => {
+      const { client, mutations } = createSupabaseMock({
+        user: { id: "u1" },
+        expectations: [
+          ...vendorContext("v1"),
+          { table: "item_option_groups", result: { data: { menu_item_id: "m1" } } },
+          { table: "menu_items", result: { data: { id: "m1" } } },
+          { table: "item_option_groups", result: { error: null } },
+        ],
+      });
+      createClientMock.mockResolvedValue(client);
+
+      await expect(deleteOptionGroup("g1")).resolves.toBeUndefined();
+      expect(mutations).toEqual([
+        { table: "item_option_groups", op: "delete", payload: undefined },
+      ]);
+    });
+
+    it("upserts an option after resolving its group ownership", async () => {
+      const { client, mutations } = createSupabaseMock({
+        user: { id: "u1" },
+        expectations: [
+          ...vendorContext("v1"),
+          { table: "item_option_groups", result: { data: { menu_item_id: "m1" } } },
+          { table: "menu_items", result: { data: { id: "m1" } } },
+          { table: "item_options", result: { error: null } },
+        ],
+      });
+      createClientMock.mockResolvedValue(client);
+
+      await expect(
+        upsertOption({ group_id: "g1", name: "加蛋", price_delta: 15, sort_order: 1 }),
+      ).resolves.toEqual({ success: true });
+
+      expect(mutations[0]).toEqual({
+        table: "item_options",
+        op: "insert",
+        payload: { group_id: "g1", name: "加蛋", price_delta: 15, sort_order: 1 },
+      });
+    });
+
+    it("deletes an option after resolving nested group ownership", async () => {
+      const { client, mutations } = createSupabaseMock({
+        user: { id: "u1" },
+        expectations: [
+          ...vendorContext("v1"),
+          {
+            table: "item_options",
+            result: { data: { group_id: "g1", item_option_groups: { menu_item_id: "m1" } } },
+          },
+          { table: "menu_items", result: { data: { id: "m1" } } },
+          { table: "item_options", result: { error: null } },
+        ],
+      });
+      createClientMock.mockResolvedValue(client);
+
+      await expect(deleteOption("o1")).resolves.toBeUndefined();
+      expect(mutations).toEqual([{ table: "item_options", op: "delete", payload: undefined }]);
     });
   });
 });
