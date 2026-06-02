@@ -12,7 +12,9 @@ export default defineConfig({
     : "html",
   use: {
     baseURL: "http://localhost:3000",
-    trace: "on-first-retry",
+    screenshot: "only-on-failure",
+    trace: "retain-on-failure",
+    video: "retain-on-failure",
     storageState: "e2e/.auth/user.json",
   },
   projects: [
