@@ -27,9 +27,11 @@ test.describe("菜單頁", () => {
     await page.waitForLoadState("networkidle");
 
     // Click a menu item that is NOT sold out
-    const menuItem = page.locator("main .grid button:not(:has-text('本週已售完'))").first();
-    await expect(menuItem).toBeVisible({ timeout: 10000 });
-    await menuItem.click();
+    // Disabled since we click on a product so the product dialog opens directly without
+    // the need to click on meal in the restaurants menu list.
+    // const menuItem = page.locator("main .grid button:not(:has-text('本週已售完'))").first();
+    // await expect(menuItem).toBeVisible({ timeout: 10000 });
+    // await menuItem.click();
 
     const dialog = page.locator("dialog, [role='dialog']");
     await expect(dialog).toBeVisible({ timeout: 10000 });
