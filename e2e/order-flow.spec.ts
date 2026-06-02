@@ -11,9 +11,11 @@ async function addItemToCart(page: Page) {
   await page.waitForLoadState("networkidle");
 
   // Click a menu item that is NOT sold out (no "本週已售完" text)
-  const availableItem = page.locator("main .grid button:not(:has-text('本週已售完'))").first();
-  await expect(availableItem).toBeVisible({ timeout: 10000 });
-  await availableItem.click();
+  // Disabled since we click on a product so the product dialog opens directly without
+  // the need to click on meal in the restaurants menu list.
+  // const availableItem = page.locator("main .grid button:not(:has-text('本週已售完'))").first();
+  // await expect(availableItem).toBeVisible({ timeout: 10000 });
+  // await availableItem.click();
 
   const dialog = page.locator("[role='dialog']");
   await expect(dialog).toBeVisible({ timeout: 10000 });
