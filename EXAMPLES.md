@@ -5,9 +5,9 @@
 
 | 角色 | Email | 密碼 | 說明 |
 |------|-------|------|------|
-| 福委會（admin） | `admin.test@nycueats.dev` | `Admin1234!` | 可進入 /admin 後台 |
+| 福委會（admin） | `admin.test@nycueats.dev` | 向維護者索取 | 可進入 /admin 後台 |
 | 商家 + 輔委會 | `morning.bites@nycueats.dev` | — | 同時具有 vendor 與 admin 角色 |
-| 使用者 | `testuser@nycueats.dev` | `password123` | 一般可訂餐使用者 |
+| 使用者 | `testuser@nycueats.dev` | 向維護者索取 | 一般可訂餐使用者 |
 
 > 密碼欄為「—」的帳號透過 Google OAuth 建立，無 email 密碼登入。
 

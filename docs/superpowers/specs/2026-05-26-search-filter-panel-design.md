@@ -1,7 +1,7 @@
 # Search Filter Panel — Design Spec
 
 **Date:** 2026-05-26
-**Status:** Approved for implementation
+**Status:** Shipped — archived design doc (implemented; see `app/search/`, `components/filter-panel.tsx`)
 
 ---
 

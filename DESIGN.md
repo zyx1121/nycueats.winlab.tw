@@ -3,7 +3,7 @@
 **Status:** Draft v0.1
 **Last updated:** 2026-05-08
 **Author:** Loki (zyx1121)
-**Related:** `.claude/rules/uiux.md`（戰術級規則）、`PROJECT.md`（產品脈絡）
+**Related:** `PROJECT.md`（產品脈絡）
 
 ---
 

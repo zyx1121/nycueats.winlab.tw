@@ -1,5 +1,7 @@
 # 訂單流程補完 Implementation Plan
 
+> **Status:** Shipped — archived design doc. The feature described here has since been implemented; kept as a historical record, not a current spec. See the codebase and `README.md` for as-built behavior.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 補完訂單生命週期 — 結帳確認、取消、訂單紀錄頁（infinite scroll）、領餐 QR code、商家批次/逐筆管理。

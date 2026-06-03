@@ -1,5 +1,7 @@
 # Bulk Slot Creation Implementation Plan
 
+> **Status:** Shipped — archived design doc. The feature described here has since been implemented; kept as a historical record, not a current spec. See the codebase and `README.md` for as-built behavior.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add a smart banner and bulk slot dialog to `/vendor/menu` so vendors can create daily slots for all menu items across two calendar weeks in one action.

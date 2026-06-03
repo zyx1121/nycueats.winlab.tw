@@ -1,5 +1,7 @@
 # Documentation Review — 2026-05-26
 
+> **Status:** Archived snapshot (2026-05-26). Point-in-time review — many items have been addressed since (see PRs #129–#132 and `git log`); some may still be open. Verify against current code before acting. **Not a live TODO list.**
+
 ## Summary
 
 審 11 個 root + rules + docs 檔。Documentation drift 集中在三個方向：(1) README 的 「Implemented Features」漏掉 vendor revenue dashboard；(2) `.claude/rules/uiux.md` 跟 `DESIGN.md` 對圓角 token 直接打架，但沒有任何交叉引用；(3) `EXAMPLES.md` / `test-accounts.md` / README 對「測試帳號密碼」三個地方說三套。Main session 已知三 drift（`(user)/(vendor)/(admin)` route groups、CI e2e、slot-limiting DDL）不重複報。

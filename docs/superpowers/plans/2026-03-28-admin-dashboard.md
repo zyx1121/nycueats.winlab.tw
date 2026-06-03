@@ -1,5 +1,7 @@
 # 管理員後台 Implementation Plan
 
+> **Status:** Shipped — archived design doc. The feature described here has since been implemented; kept as a historical record, not a current spec. See the codebase and `README.md` for as-built behavior.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 建立福委會管理後台 — 商家審核（申請制）、營運數據 Dashboard、多廠區商家服務範圍管理。
