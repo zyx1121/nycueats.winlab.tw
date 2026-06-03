@@ -12,12 +12,29 @@ import Link from "next/link";
 export async function Header() {
   const supabase = await createClient();
 
-  const [{ data: areas }, { data: { user } }, { data: itemNames }, { data: tagVocab }] = await Promise.all([
-    supabase.from("areas").select("id, name, city").eq("is_active", true).order("city"),
-    supabase.auth.getUser(),
-    supabase.from("menu_items").select("name").eq("is_available", true).limit(60),
-    supabase.from("tag_vocabulary").select("label, axis").order("sort_order"),
-  ]);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const profile = user
+    ? (await supabase.from("profiles").select("avatar_url, name, area_id, role").eq("id", user.id).single()).data
+    : null;
+
+  const navigation = getHeaderNavigation(profile?.role ?? []);
+
+  // The area picker + search box only render for signed-in `user` role. Fetching
+  // their data unconditionally made the area/menu_items/tag_vocabulary queries the
+  // entire server-render cost of every public page (e.g. /login renders none of
+  // them) — so gate the queries on what the visible nav actually shows.
+  const needsBrowseData = navigation.showAreaSelect || navigation.showSearch;
+  const [{ data: areas }, { data: itemNames }, { data: tagVocab }] = needsBrowseData
+    ? await Promise.all([
+        supabase.from("areas").select("id, name, city").eq("is_active", true).order("city"),
+        supabase.from("menu_items").select("name").eq("is_available", true).limit(60),
+        supabase.from("tag_vocabulary").select("label, axis").order("sort_order"),
+      ])
+    : [{ data: null }, { data: null }, { data: null }];
+
   // Random subset for search placeholder rotation; shuffled here (server)
   // because doing Math.random() in a client component trips react-hooks/purity.
   const placeholderItems = (itemNames ?? [])
@@ -25,12 +42,6 @@ export async function Header() {
     .filter(Boolean)
     .sort(() => Math.random() - 0.5)
     .slice(0, 12);
-
-  const profile = user
-    ? (await supabase.from("profiles").select("avatar_url, name, area_id, role").eq("id", user.id).single()).data
-    : null;
-
-  const navigation = getHeaderNavigation(profile?.role ?? []);
 
   // 依 city 分組
   type AreaRow = { id: string; name: string; city: string };
