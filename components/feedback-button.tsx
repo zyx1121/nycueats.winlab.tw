@@ -15,7 +15,7 @@ export function FeedbackButton() {
     const el = ref.current;
     const feedback = Sentry.getFeedback();
     if (el && feedback) {
-      return feedback.attachTo(el, { formTitle: "回報問題" });
+      return feedback.attachTo(el);
     }
   }, []);
 
