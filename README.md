@@ -40,7 +40,7 @@ Factory meal ordering platform for TSMC — employees pre-order meals from partn
 - Auth guards (layout + Server Action dual-layer verification)
 - Admin dashboard (vendor approval, operations dashboard, multi-factory management, monthly report CSV export)
 - Error handling (error.tsx / global-error.tsx / not-found.tsx)
-- CI pipeline (GitHub Actions: lint + build + e2e test)
+- CI pipeline (GitHub Actions: lint + unit + e2e + build)
 - Layered test setup:
   - Vitest for unit tests
   - Vitest + mocks for Server Action / query-flow integration tests
@@ -137,7 +137,7 @@ E2E_EMAIL=...
 E2E_PASSWORD=...
 ```
 
-CI currently runs lint + build on every PR (see `.github/workflows/ci.yml`). Unit and e2e tests are run locally before merge — see follow-up to gate them in CI.
+CI runs lint + unit tests + Playwright e2e + build on every PR (see `.github/workflows/ci.yml`). E2E uses the `E2E_EMAIL` / `E2E_PASSWORD` GitHub Actions secrets.
 
 ## Directory Structure
 
@@ -229,7 +229,7 @@ claude plugins install learning-output-style@claude-plugins-official     # Inter
 
 ## Example Accounts
 
-See [EXAMPLES.md](./EXAMPLES.md) for vendor/menu seed data and login addresses. Test account credentials live in [docs/test-accounts.md](./docs/test-accounts.md) (admin uses `Admin1234!`, the rest are noted inline).
+See [EXAMPLES.md](./EXAMPLES.md) for vendor/menu seed data and login addresses, and [docs/test-accounts.md](./docs/test-accounts.md) for the manually-seeded test accounts. Passwords are intentionally not committed — ask the maintainer or reset them in the Supabase Dashboard.
 
 ## License
 

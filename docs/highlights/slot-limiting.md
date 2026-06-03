@@ -46,7 +46,7 @@ daily_slots.reserved_qty  -- 系統自動累計
 下單 server action 只 INSERT `order_items`，**從不手動更新 `reserved_qty`**：
 
 ```ts
-// app/menu/[id]/actions.ts:46-62
+// app/menu/[id]/actions.ts — addToOrder()
 const { data: orderItem, error } = await supabase
   .from("order_items")
   .insert({
@@ -68,7 +68,7 @@ if (error) {
 
 `23514` = PostgreSQL `check_violation` SQLSTATE。Trigger 在 INSERT 時試圖把 `reserved_qty` 推過 `max_qty` → CHECK fail → transaction rollback → 應用層收到 23514 → 翻譯為「此日期已售完」。
 
-`[SOURCE: app/menu/[id]/actions.ts:46-62]`
+`[SOURCE: app/menu/[id]/actions.ts → addToOrder()]`
 
 ## 為什麼這比應用層鎖好
 

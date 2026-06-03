@@ -18,14 +18,17 @@ app/
   page.tsx          # Home — factory-filtered vendor grid + recommendation sections
   layout.tsx        # Root layout (Geist Sans, ThemeProvider, Header)
   globals.css       # Tokens (surface/brand/radius/shadow/type scale), light/dark
+  actions/          # Shared Server Actions (filter.ts — area filter persistence)
   cart/             # Employee cart (/cart) + actions, view-model, tests
   orders/[id]/      # Order detail + QR code component
   orders/           # Employee orders list (/orders) + actions, summary, tests
-  menu/[id]/        # Vendor menu detail (/menu/[id]) + add-to-order dialog
+  menu/[id]/        # Menu detail (/menu/[id]) + add-to-order dialog + actions
+  search/           # Semantic search (/search?q=) — hybrid_search + LLM rerank
   profile/          # Employee profile (/profile)
   login/            # Login page (/login) + actions
   auth/callback/    # Supabase OAuth callback
   api/pickup/       # QR code pickup endpoint (route handler)
+  api/sentry-alert-webhook/ # Sentry alert ingestion webhook (route handler)
   vendor/           # /vendor, /vendor/{menu,orders,profile,revenue}
   admin/            # /admin, /admin/{vendors,reports,users}
 components/
@@ -35,11 +38,26 @@ components/
   image-upload.tsx  # Image upload with type/size validation
   login-form.tsx    # Email/password + Google OAuth form
   menu-item-card.tsx # Shared menu item card (user + vendor view)
+  home-item-card.tsx # Home recommendation card (with personalized reason)
   recommendation-section.tsx # Horizontal carousel for trending/nutrition/random
+  food-wheel.tsx    # Random-pick roulette wheel
+  search-form.tsx   # Search input box
+  filter-panel.tsx  # Search filter panel (price/tags/nutrition)
+  dual-range-slider.tsx # Min/max range slider used in filter-panel
+  theme-toggle.tsx  # Light/dark mode toggle
 lib/
   auth.ts           # requireRole() helper for Server Action guards
-  recommendation.ts # Recommendation engine (trending, nutrition, random)
+  recommendation.ts # Home ranking + trending engine (getHomeItems / getTrendingItems → HomeItem)
+  reasons.ts        # Personalized reason fetch / attach / generation trigger
+  daily-pick.ts     # Daily Thompson-sampled surprise pick lookup
+  search.ts         # Hybrid search client (embed-query + hybrid_search + rerank, best-effort)
+  filters.ts        # Search filter parse / serialize / active-count
+  impressions.ts    # Impression logging (powers the skip signal)
+  context.ts        # Weather/time context → context-embedding cache
+  roulette.ts       # Random item selection helper
+  branding.ts       # App brand + factory-area constants
   navigation-rules.ts # Role-based default home + header visibility rules
+  observability.ts  # Sentry helpers (captureActionError, business-error reporting)
   supabase/{client,server}.ts  # Browser / SSR clients
   utils.ts
 proxy.ts            # Next.js 16 edge middleware (renamed from middleware.ts)
@@ -81,6 +99,12 @@ types/
 - `compute_daily_picks()` — SECURITY DEFINER; scheduled via pg_cron `compute_daily_picks` job (same window as user-vector refresh). For each user with history, samples one item from the top-30 candidate pool via Beta(1, impressions+1) — closed-form `θ = 1 − (1 − U)^(1/β)`. Already-confirmed items are excluded. Cold-start user (no `user_embeddings` row) → candidates ranked purely by ln(decay_trend), β=1 → uniform random pick.
 - `combine_user_vectors(confirmed, skipped, beta)` — IMMUTABLE helper; element-wise `confirmed − β × skipped` since pgvector lacks scalar-multiply. Called once per user per cron run.
 
+#### Trigger / RLS-internal functions
+- `handle_new_user()` — `on_auth_user_created` trigger on `auth.users`; seeds a `profiles` row (default role + name) on signup.
+- `update_reserved_qty()` — `sync_reserved_qty` trigger on `order_items` (AFTER INSERT/DELETE); atomically ±1 the matching `daily_slots.reserved_qty` (the core slot-limiting hook; CHECK constraint enforces the cap).
+- `validate_ai_tags()` — `menu_items_validate_ai_tags` trigger; enforces `menu_items.ai_tags ⊆ tag_vocabulary.slug`.
+- `is_admin()` / `is_vendor_order(order_id)` — SECURITY DEFINER RLS helper predicates used inside policies to avoid recursive policy evaluation.
+
 ### Edge Functions
 - `generate-menu-item-tags` — Invoked by Server Actions / backfill script. Calls OpenAI with structured outputs enum-constrained to `tag_vocabulary.slug`. Co-fills missing nutrition fields (`NULL`-only, never overrides vendor input). Also generates `embedding` (text-embedding-3-small @ 512 dims) from name + ai_description + tag labels. 60s idempotency, max 100 items/invoke.
 - `embed-query` — Search-time helper: embeds query string → returns 512-dim vector for `hybrid_search` RPC.
@@ -89,7 +113,7 @@ types/
 
 ### Recommendation pipeline (offline-only LLM)
 1. Vendor inserts menu item → Next 16 `after()` fires `generate-menu-item-tags` edge function → writes `ai_tags` + `ai_description` + `embedding` (+ missing nutrition).
-2. User confirms order → `update_preferences_on_order_confirm` trigger updates `user_tag_preferences` + `user_nutrition_profile` + `user_embeddings` (positive signal, immediate).
+2. User confirms order → the `update_preferences_on_order_confirm` trigger (fn `update_user_preferences_on_confirm`) updates `user_tag_preferences` + `user_nutrition_profile` + `user_embeddings` (positive signal, immediate).
 3. Home server component fetches Open-Meteo current conditions (Next 16 fetch cache 30 min) → maps `{hour_band, temp_band, rain}` to a fixed English phrase → looks up `context_embeddings`; on miss invokes `embed-query` edge function and upserts. The resulting context vector is passed to `rank_menu_items_for_home(area, limit, context_vec)` → semantic cosine + nutrition + time-decayed trend with z-score normalised weights and MMR diversity rerank; no LLM in serving path. Server component also fires `after()` to log impressions (1 row per user × item × date) for the skip signal.
 4. Daily 10:00 TPE cron (`refresh_user_embeddings`) bakes skipped-but-not-confirmed items into each user's vector at β = 0.3, closing the negative-feedback loop. Same window, `compute_daily_picks` Thompson-samples one surprise pick per user from a personalised top-30 pool and writes to `daily_picks`; the homepage renders it as a "🎁 今日驚喜" card above the trending carousel.
 5. After rendering, homepage's `after()` hook checks `personalized_reasons` cache; items missing or > 24h stale trigger the `generate-reasons` edge function to fill the cache. Next render picks up reasons and renders them in italic text on each card; failures are silent (cards fall back to `ai_description`).
