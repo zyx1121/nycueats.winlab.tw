@@ -105,6 +105,47 @@ describe("cart server actions", () => {
     expect(revalidatePathMock).toHaveBeenCalledWith("/orders");
   });
 
+  it("returns an error when confirming a missing order", async () => {
+    const supabase = createSupabaseMock({
+      user: { id: "user-1" },
+      queries: {
+        orders: [{ singleResult: { data: null } }],
+      },
+    });
+    createClientMock.mockResolvedValue(supabase);
+
+    await expect(confirmOrder("order-1")).resolves.toEqual({ error: "找不到預約單" });
+  });
+
+  it("returns an error when confirming a non-pending order", async () => {
+    const supabase = createSupabaseMock({
+      user: { id: "user-1" },
+      queries: {
+        orders: [{ singleResult: { data: { id: "order-1", status: "confirmed" } } }],
+      },
+    });
+    createClientMock.mockResolvedValue(supabase);
+
+    await expect(confirmOrder("order-1")).resolves.toEqual({ error: "預約單狀態不符" });
+  });
+
+  it("returns an error when the order status update fails", async () => {
+    const supabase = createSupabaseMock({
+      user: { id: "user-1" },
+      queries: {
+        orders: [
+          { singleResult: { data: { id: "order-1", status: "pending" } } },
+          { eqResults: [{ error: { message: "db down" } }] },
+        ],
+        order_items: [{ limitResult: { data: [{ id: "item-1" }] } }],
+      },
+    });
+    createClientMock.mockResolvedValue(supabase);
+
+    await expect(confirmOrder("order-1")).resolves.toEqual({ error: "確認失敗" });
+    expect(revalidatePathMock).not.toHaveBeenCalled();
+  });
+
   it("refuses to confirm an empty pending order", async () => {
     const supabase = createSupabaseMock({
       user: { id: "user-1" },
@@ -138,6 +179,67 @@ describe("cart server actions", () => {
     expect(revalidatePathMock).toHaveBeenCalledWith("/orders");
   });
 
+  it("rejects canceling when the user is not logged in", async () => {
+    const supabase = createSupabaseMock({ user: null, queries: {} });
+    createClientMock.mockResolvedValue(supabase);
+
+    await expect(cancelOrder("order-1")).resolves.toEqual({ error: "未登入" });
+    expect(supabase.from).not.toHaveBeenCalled();
+  });
+
+  it("returns an error when canceling a missing order", async () => {
+    const supabase = createSupabaseMock({
+      user: { id: "user-1" },
+      queries: {
+        orders: [{ singleResult: { data: null } }],
+      },
+    });
+    createClientMock.mockResolvedValue(supabase);
+
+    await expect(cancelOrder("order-1")).resolves.toEqual({ error: "找不到預約單" });
+  });
+
+  it("returns an error when canceling a non-pending order", async () => {
+    const supabase = createSupabaseMock({
+      user: { id: "user-1" },
+      queries: {
+        orders: [{ singleResult: { data: { id: "order-1", status: "confirmed" } } }],
+      },
+    });
+    createClientMock.mockResolvedValue(supabase);
+
+    await expect(cancelOrder("order-1")).resolves.toEqual({ error: "預約單狀態不符" });
+  });
+
+  it("returns an error when clearing order items fails", async () => {
+    const supabase = createSupabaseMock({
+      user: { id: "user-1" },
+      queries: {
+        orders: [{ singleResult: { data: { id: "order-1", status: "pending" } } }],
+        order_items: [{ eqResults: [{ error: { message: "delete failed" } }] }],
+      },
+    });
+    createClientMock.mockResolvedValue(supabase);
+
+    await expect(cancelOrder("order-1")).resolves.toEqual({ error: "清空失敗" });
+  });
+
+  it("returns an error when canceling the order status update fails", async () => {
+    const supabase = createSupabaseMock({
+      user: { id: "user-1" },
+      queries: {
+        orders: [
+          { singleResult: { data: { id: "order-1", status: "pending" } } },
+          { eqResults: [{ error: { message: "update failed" } }] },
+        ],
+        order_items: [{ eqResults: [{ error: null }] }],
+      },
+    });
+    createClientMock.mockResolvedValue(supabase);
+
+    await expect(cancelOrder("order-1")).resolves.toEqual({ error: "取消失敗" });
+  });
+
   it("removes an order item owned by the current user", async () => {
     const supabase = createSupabaseMock({
       user: { id: "user-1" },
@@ -156,6 +258,33 @@ describe("cart server actions", () => {
 
     await expect(removeOrderItem("item-1")).resolves.toEqual({ success: true });
     expect(revalidatePathMock).toHaveBeenCalledWith("/cart");
+  });
+
+  it("rejects removing an item when the user is not logged in", async () => {
+    const supabase = createSupabaseMock({ user: null, queries: {} });
+    createClientMock.mockResolvedValue(supabase);
+
+    await expect(removeOrderItem("item-1")).resolves.toEqual({ error: "未登入" });
+    expect(supabase.from).not.toHaveBeenCalled();
+  });
+
+  it("returns an error when deleting an owned item fails", async () => {
+    const supabase = createSupabaseMock({
+      user: { id: "user-1" },
+      queries: {
+        order_items: [
+          {
+            singleResult: {
+              data: { id: "item-1", orders: { user_id: "user-1" } },
+            },
+          },
+          { eqResults: [{ error: { message: "delete failed" } }] },
+        ],
+      },
+    });
+    createClientMock.mockResolvedValue(supabase);
+
+    await expect(removeOrderItem("item-1")).resolves.toEqual({ error: "取消失敗" });
   });
 
   it("blocks removing an item owned by another user", async () => {

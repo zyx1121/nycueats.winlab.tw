@@ -4,7 +4,7 @@ const { createClientMock } = vi.hoisted(() => ({ createClientMock: vi.fn() }));
 
 vi.mock("@/lib/supabase/server", () => ({ createClient: createClientMock }));
 
-import { getDashboardStats, getTopMenuItems, getTopVendors } from "@/app/admin/actions";
+import { getDashboardStats, getOrderTrend, getTopMenuItems, getTopVendors } from "@/app/admin/actions";
 import { createSupabaseMock, roleProfile } from "@/test/supabase-mock";
 
 describe("getDashboardStats", () => {
@@ -73,6 +73,41 @@ describe("getDashboardStats", () => {
       completionRate: 0,
       cancelRate: 0,
     });
+  });
+});
+
+describe("getOrderTrend", () => {
+  beforeEach(() => {
+    createClientMock.mockReset();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-27T12:00:00.000Z"));
+  });
+
+  it("builds a daily order count series for the requested window", async () => {
+    const { client } = createSupabaseMock({
+      user: { id: "admin1" },
+      expectations: [
+        roleProfile("admin"),
+        {
+          table: "orders",
+          result: {
+            data: [
+              { created_at: "2026-05-25T08:00:00.000Z" },
+              { created_at: "2026-05-25T12:30:00.000Z" },
+              { created_at: "2026-05-27T09:00:00.000Z" },
+              { created_at: "2026-05-20T09:00:00.000Z" },
+            ],
+          },
+        },
+      ],
+    });
+    createClientMock.mockResolvedValue(client);
+
+    await expect(getOrderTrend(3)).resolves.toEqual([
+      { date: "2026-05-25", count: 2 },
+      { date: "2026-05-26", count: 0 },
+      { date: "2026-05-27", count: 1 },
+    ]);
   });
 });
 

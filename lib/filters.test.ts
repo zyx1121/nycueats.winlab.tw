@@ -26,6 +26,11 @@ describe("parseFiltersFromParams", () => {
     expect(f).toMatchObject({ priceMin: 60, priceMax: 280 });
   });
 
+  it("parses calorie range", () => {
+    const f = parseFiltersFromParams({ cal_min: "100", cal_max: "500" });
+    expect(f).toMatchObject({ calMin: 100, calMax: 500 });
+  });
+
   it("parses comma-separated tags", () => {
     const f = parseFiltersFromParams({ tags: "spicy,rice" });
     expect(f.tags).toEqual(["spicy", "rice"]);
@@ -56,6 +61,8 @@ describe("filtersToSearchParams", () => {
       sort: "price_asc",
       priceMin: 60,
       priceMax: 280,
+      calMin: 100,
+      calMax: 500,
       tags: ["spicy", "rice"],
       dates: ["2026-05-26"],
     };
@@ -81,6 +88,10 @@ describe("countActiveFilters", () => {
 
   it("price range counts as 1 even when only min is set", () => {
     expect(countActiveFilters({ priceMin: 50 })).toBe(1);
+  });
+
+  it("calorie range counts as 1 even when only max is set", () => {
+    expect(countActiveFilters({ calMax: 500 })).toBe(1);
   });
 
   it("does not count sort=recommended", () => {

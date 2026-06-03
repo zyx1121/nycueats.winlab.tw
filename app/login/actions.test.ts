@@ -47,6 +47,41 @@ describe("login actions", () => {
     expect(redirectMock).toHaveBeenCalledWith("/vendor");
   });
 
+  it("redirects email sign in to home when Supabase returns no user", async () => {
+    const { client } = createSupabaseMock({
+      user: null,
+      expectations: [],
+    });
+    (client.auth as typeof client.auth & {
+      signInWithPassword: ReturnType<typeof vi.fn>;
+    }).signInWithPassword = vi.fn(async () => ({ error: null }));
+    createClientMock.mockResolvedValue(client);
+    redirectMock.mockImplementationOnce((url: string) => {
+      throw new Error(`redirect:${url}`);
+    });
+
+    await expect(signInWithEmail("u@example.test", "pw")).rejects.toThrow("redirect:/");
+
+    expect(redirectMock).toHaveBeenCalledWith("/");
+  });
+
+  it("redirects Google OAuth failures back to login", async () => {
+    const signInWithOAuth = vi.fn(async () => ({
+      data: { url: null },
+      error: { message: "oauth failed" },
+    }));
+    createClientMock.mockResolvedValue({ auth: { signInWithOAuth } });
+    headersMock.mockResolvedValue({ get: vi.fn(() => null) });
+
+    await signInWithGoogle();
+
+    expect(signInWithOAuth).toHaveBeenCalledWith({
+      provider: "google",
+      options: { redirectTo: "/auth/callback" },
+    });
+    expect(redirectMock).toHaveBeenCalledWith("/login?error=auth");
+  });
+
   it("starts Google OAuth with the callback URL from request origin", async () => {
     const signInWithOAuth = vi.fn(async () => ({
       data: { url: "https://accounts.google.test/oauth" },
