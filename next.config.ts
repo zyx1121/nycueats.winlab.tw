@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
 
 export default withSentryConfig(nextConfig, {
   org: "zyx1121",
-  project: "nycueats",
+  project: "tsmceats",
 
   // Source map upload token (set SENTRY_AUTH_TOKEN in CI / .env.sentry-build-plugin)
   authToken: process.env.SENTRY_AUTH_TOKEN,
