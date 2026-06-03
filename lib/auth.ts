@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { identifyUser } from "@/lib/observability";
 
 type Role = "admin" | "vendor" | "user";
 
@@ -15,5 +16,6 @@ export async function requireRole(role: Role) {
 
   if (!profile?.role?.includes(role)) throw new Error("權限不足");
 
+  identifyUser(user, profile.role);
   return { user, supabase };
 }

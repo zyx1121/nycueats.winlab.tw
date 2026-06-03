@@ -1,4 +1,6 @@
+import * as Sentry from "@sentry/nextjs";
 import { createClient } from "@/lib/supabase/server";
+import { captureActionError } from "@/lib/observability";
 
 export type RecommendedItem = {
   id: string;
@@ -38,13 +40,25 @@ export async function getHomeItems(
 ): Promise<HomeItem[]> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.rpc("rank_menu_items_for_home", {
-    p_area_id: areaId ?? undefined,
-    p_limit: limit,
-    p_context_vec: (contextVec ?? undefined) as unknown as string,
-  });
+  const { data, error } = await Sentry.startSpan(
+    { name: "recommend.rank", op: "db.rpc", attributes: { rpc: "rank_menu_items_for_home" } },
+    () =>
+      supabase.rpc("rank_menu_items_for_home", {
+        p_area_id: areaId ?? undefined,
+        p_limit: limit,
+        p_context_vec: (contextVec ?? undefined) as unknown as string,
+      }),
+  );
 
-  if (error || !data) return [];
+  if (error || !data) {
+    if (error)
+      captureActionError(error, {
+        action: "getHomeItems",
+        tags: { rpc: "rank_menu_items_for_home" },
+        extra: { areaId, limit },
+      });
+    return [];
+  }
 
   return data.map((row) => ({
     id: row.id,

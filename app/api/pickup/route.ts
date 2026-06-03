@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { type NextRequest } from "next/server";
+import { captureActionError, identifyUser } from "@/lib/observability";
 
 export async function GET(request: NextRequest) {
   const itemId = request.nextUrl.searchParams.get("item");
@@ -20,6 +21,7 @@ export async function GET(request: NextRequest) {
   if (!profile?.role?.includes("vendor")) {
     return new Response("需要商家權限", { status: 403 });
   }
+  identifyUser(user, profile.role);
 
   const { data: vendor } = await supabase
     .from("vendors")
@@ -48,7 +50,18 @@ export async function GET(request: NextRequest) {
     return redirect("/vendor/orders?msg=already-picked-up");
   }
 
-  await supabase.from("order_items").update({ picked_up: true }).eq("id", itemId);
+  const { error: pickupError } = await supabase
+    .from("order_items")
+    .update({ picked_up: true })
+    .eq("id", itemId);
+  if (pickupError) {
+    captureActionError(pickupError, {
+      action: "pickup",
+      tags: { step: "mark_picked_up", vendor_id: vendor.id },
+      extra: { itemId, orderId: orderItem.order_id },
+    });
+    return new Response("核銷失敗，請稍後再試", { status: 500 });
+  }
 
   // Check if all items in the order are picked up → complete the order
   const { data: remaining } = await supabase
@@ -58,7 +71,17 @@ export async function GET(request: NextRequest) {
     .eq("picked_up", false);
 
   if (!remaining || remaining.length === 0) {
-    await supabase.from("orders").update({ status: "completed" }).eq("id", orderItem.order_id);
+    const { error: completeError } = await supabase
+      .from("orders")
+      .update({ status: "completed" })
+      .eq("id", orderItem.order_id);
+    if (completeError) {
+      captureActionError(completeError, {
+        action: "pickup",
+        tags: { step: "complete_order", vendor_id: vendor.id },
+        extra: { orderId: orderItem.order_id },
+      });
+    }
   }
 
   return redirect("/vendor/orders?msg=picked-up");

@@ -32,7 +32,7 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  const publicPaths = ["/login", "/auth/callback"];
+  const publicPaths = ["/login", "/auth/callback", "/api/sentry-alert-webhook"];
   if (!user && !publicPaths.some((p) => pathname.startsWith(p))) {
     return NextResponse.redirect(new URL("/login", request.url));
   }

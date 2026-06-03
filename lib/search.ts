@@ -2,6 +2,7 @@
 import type { SearchFilters } from "@/lib/filters";
 import type { HomeItem } from "@/lib/recommendation";
 import { createClient } from "@/lib/supabase/server";
+import * as Sentry from "@sentry/nextjs";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -20,9 +21,13 @@ export async function searchHomeItems(
 
   let embedding: number[] | null = null;
   try {
-    const { data: embedRes, error: embedErr } = await supabase.functions.invoke<{
-      embedding: number[];
-    }>("embed-query", { body: { query: trimmed } });
+    const { data: embedRes, error: embedErr } = await Sentry.startSpan(
+      { name: "search.embed", op: "gen_ai.embeddings" },
+      () =>
+        supabase.functions.invoke<{ embedding: number[] }>("embed-query", {
+          body: { query: trimmed },
+        }),
+    );
     if (!embedErr) embedding = embedRes?.embedding ?? null;
   } catch (e) {
     console.error("embed-query failed; degrading to keyword-only:", e);
@@ -31,20 +36,28 @@ export async function searchHomeItems(
   const hasExplicitSort = filters?.sort && filters.sort !== "recommended";
   const fetchLimit = hasExplicitSort ? limit : Math.max(limit, RERANK_POOL);
 
-  const { data, error } = await supabase.rpc("hybrid_search", {
-    p_query: trimmed,
-    p_query_embedding: embedding as unknown as string,
-    p_area_id: areaId ?? undefined,
-    p_limit: fetchLimit,
-    p_open: filters?.open ?? undefined,
-    p_price_min: filters?.priceMin ?? undefined,
-    p_price_max: filters?.priceMax ?? undefined,
-    p_cal_min: filters?.calMin ?? undefined,
-    p_cal_max: filters?.calMax ?? undefined,
-    p_tags: filters?.tags ?? undefined,
-    p_sort: hasExplicitSort ? filters!.sort : undefined,
-    p_dates: filters?.dates ?? undefined,
-  });
+  const { data, error } = await Sentry.startSpan(
+    {
+      name: "search.hybrid",
+      op: "db.rpc",
+      attributes: { rpc: "hybrid_search", embedded: embedding !== null },
+    },
+    () =>
+      supabase.rpc("hybrid_search", {
+        p_query: trimmed,
+        p_query_embedding: embedding as unknown as string,
+        p_area_id: areaId ?? undefined,
+        p_limit: fetchLimit,
+        p_open: filters?.open ?? undefined,
+        p_price_min: filters?.priceMin ?? undefined,
+        p_price_max: filters?.priceMax ?? undefined,
+        p_cal_min: filters?.calMin ?? undefined,
+        p_cal_max: filters?.calMax ?? undefined,
+        p_tags: filters?.tags ?? undefined,
+        p_sort: hasExplicitSort ? filters!.sort : undefined,
+        p_dates: filters?.dates ?? undefined,
+      }),
+  );
   if (error || !data) return [];
 
   const items: HomeItem[] = data.map((row) => ({
@@ -90,9 +103,18 @@ async function rerankItems(
       sodium: i.sodium,
     }));
 
-    const { data, error } = await supabase.functions.invoke<{
-      ranking: Array<{ id: string; score: number }>;
-    }>("rerank-search", { body: { query, candidates } });
+    const { data, error } = await Sentry.startSpan(
+      {
+        name: "search.rerank",
+        op: "gen_ai.rerank",
+        attributes: { candidates: candidates.length },
+      },
+      () =>
+        supabase.functions.invoke<{ ranking: Array<{ id: string; score: number }> }>(
+          "rerank-search",
+          { body: { query, candidates } },
+        ),
+    );
 
     if (error || !data?.ranking?.length) return null;
 

@@ -12,7 +12,11 @@ Sentry.init({
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
 
-  integrations: [Sentry.replayIntegration()],
+  integrations: [
+    Sentry.replayIntegration(),
+    // App-wide "Report a Bug" widget; feedback is attached to the Sentry event
+    Sentry.feedbackIntegration({ colorScheme: "system" }),
+  ],
 });
 
 // Captures App Router navigation transitions as spans
