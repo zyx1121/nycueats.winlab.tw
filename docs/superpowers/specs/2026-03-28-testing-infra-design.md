@@ -46,7 +46,7 @@
 ### 1. 首頁載入 (`e2e/home.spec.ts`)
 - 頁面載入成功
 - 顯示商家列表（至少 1 個商家卡片）
-- Header 顯示 NYCU Eats
+- Header 顯示 TSMC Eats
 
 ### 2. 菜單頁 (`e2e/menu.spec.ts`)
 - 點擊商家 → 進入菜單頁

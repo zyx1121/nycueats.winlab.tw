@@ -1,4 +1,4 @@
-# NYCU Eats — Design System
+# TSMC Eats — Design System
 
 **Status:** Draft v0.1
 **Last updated:** 2026-05-08
@@ -9,7 +9,7 @@
 
 ## Context
 
-NYCU Eats 是 WinLab 為廠區員工打造的訂餐平台，三種角色（員工 / 商家 / 福委）共用同一個 web app。目前 UI 風格已經有雛形：shadcn/ui + Tailwind v4 + Geist Sans + 中性 oklch 灰階 + 扁平無陰影。但這套規則只規範了「怎麼用 Tailwind class」，沒有規範**為什麼**要這樣用、token 系統、頁面節奏、品牌識別。
+TSMC Eats 是 WinLab 為廠區員工打造的訂餐平台，三種角色（員工 / 商家 / 福委）共用同一個 web app。目前 UI 風格已經有雛形：shadcn/ui + Tailwind v4 + Geist Sans + 中性 oklch 灰階 + 扁平無陰影。但這套規則只規範了「怎麼用 Tailwind class」，沒有規範**為什麼**要這樣用、token 系統、頁面節奏、品牌識別。
 
 當頁面數量擴張到 user / vendor / admin 三套後台、各自又有 list / detail / form / dashboard 多種型態時，沒有 design system 會出現以下症狀：
 
@@ -18,7 +18,7 @@ NYCU Eats 是 WinLab 為廠區員工打造的訂餐平台，三種角色（員�
 - 強調色用法浮濫（每個 CTA 都搶眼 = 沒有 CTA 真的搶眼）
 - Photography（餐點、商家照片）跟資訊密度沒有層級規則，照片有時佔滿、有時被壓縮成縮圖
 
-這份文件把 Airbnb 的視覺語言當作參考骨架，重新內化成 NYCU Eats 自己的 design system，讓未來所有頁面 review 都有單一 source of truth。
+這份文件把 Airbnb 的視覺語言當作參考骨架，重新內化成 TSMC Eats 自己的 design system，讓未來所有頁面 review 都有單一 source of truth。
 
 ## Goals
 
@@ -38,7 +38,7 @@ NYCU Eats 是 WinLab 為廠區員工打造的訂餐平台，三種角色（員�
 
 ## Design Overview
 
-> 把 NYCU Eats 想像成貼在白色軟木板上的餐點明信片 —— 純白卡片浮在淡灰畫布上，照片做所有的視覺重活，文字安靜地報價，唯一的暖色像一根圖釘把整個 layout 釘住。
+> 把 TSMC Eats 想像成貼在白色軟木板上的餐點明信片 —— 純白卡片浮在淡灰畫布上，照片做所有的視覺重活，文字安靜地報價，唯一的暖色像一根圖釘把整個 layout 釘住。
 
 四個關鍵特徵：
 
@@ -153,7 +153,7 @@ CTA 沿用 shadcn 的 `--primary`（近黑 `oklch(0.205 0 0)`），不使用 bra
 
 ## Tokens — Shadows & Elevation
 
-NYCU Eats 維持「扁平 + border 區分」的精神，但 elevated container 允許用 layered shadow。
+TSMC Eats 維持「扁平 + border 區分」的精神，但 elevated container 允許用 layered shadow。
 
 | 用途 | 值 | Token |
 |------|-----|-------|
@@ -250,7 +250,7 @@ rounded-badge（4px）
 
 ```
 ┌──────────────────────────────────────┐  ← header 64px sticky，scroll 後加 shadow-sticky
-│  NYCU Eats     [區域]   [後台][單][車][頭] │
+│  TSMC Eats     [區域]   [後台][單][車][頭] │
 ├──────────────────────────────────────┤
 │                                       │  ← 24px top padding
 │  🔥 熱銷排行           →              │  ← heading 20/600
