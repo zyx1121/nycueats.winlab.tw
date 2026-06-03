@@ -2,18 +2,6 @@ import * as Sentry from "@sentry/nextjs";
 import { createClient } from "@/lib/supabase/server";
 import { captureActionError } from "@/lib/observability";
 
-export type RecommendedItem = {
-  id: string;
-  name: string;
-  price: number;
-  description: string | null;
-  tags: string[];
-  calories: number | null;
-  protein: number | null;
-  vendor_id: string;
-  vendor_name: string;
-};
-
 export type HomeItem = {
   id: string;
   name: string;
