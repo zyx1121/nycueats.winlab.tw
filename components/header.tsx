@@ -1,4 +1,5 @@
 import { AreaSelect } from "./area-select";
+import { FeedbackButton } from "./feedback-button";
 import { SearchForm } from "./search-form";
 import { ThemeToggle } from "./theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -78,6 +79,7 @@ export async function Header() {
             <Button variant="outline" size="sm">商家後台</Button>
           </Link>
         )}
+        <FeedbackButton />
         <ThemeToggle />
         {navigation.showOrders && (
           <Link href="/orders">
