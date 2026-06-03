@@ -1,5 +1,7 @@
 # 測試基礎設施 + CI — 設計文件
 
+> **Status:** Shipped — archived design doc. The feature described here has since been implemented; kept as a historical record, not a current spec. See the codebase and `README.md` for as-built behavior.
+
 > Issue #7 | Milestone v1.0.0
 
 ## 目標

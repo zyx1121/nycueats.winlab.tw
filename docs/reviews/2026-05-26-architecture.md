@@ -1,5 +1,7 @@
 # Architecture Review — 2026-05-26
 
+> **Status:** Archived snapshot (2026-05-26). Point-in-time review — many items have been addressed since (see PRs #129–#132 and `git log`); some may still be open. Verify against current code before acting. **Not a live TODO list.**
+
 [METHOD: source-first]
 
 ## Summary

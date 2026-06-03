@@ -1,5 +1,7 @@
 # 測試基礎設施 + CI Implementation Plan
 
+> **Status:** Shipped — archived design doc. The feature described here has since been implemented; kept as a historical record, not a current spec. See the codebase and `README.md` for as-built behavior.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 建立 Playwright e2e 測試 + GitHub Actions CI，讓每個 PR 自動跑 lint + build + test。

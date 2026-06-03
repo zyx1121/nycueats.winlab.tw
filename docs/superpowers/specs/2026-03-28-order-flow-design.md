@@ -1,5 +1,7 @@
 # 訂單流程補完 — 設計文件
 
+> **Status:** Shipped — archived design doc. The feature described here has since been implemented; kept as a historical record, not a current spec. See the codebase and `README.md` for as-built behavior.
+
 > Issue #2 | Milestone v0.2.0
 
 ## 目標

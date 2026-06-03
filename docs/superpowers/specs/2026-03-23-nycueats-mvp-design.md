@@ -1,5 +1,7 @@
 # TSMC Eats MVP Design
 
+> **Status:** Shipped — archived design doc. The feature described here has since been implemented; kept as a historical record, not a current spec. See the codebase and `README.md` for as-built behavior.
+
 Date: 2026-03-23
 
 ## Overview

@@ -1,5 +1,7 @@
 # 管理員後台 — 設計文件
 
+> **Status:** Shipped — archived design doc. The feature described here has since been implemented; kept as a historical record, not a current spec. See the codebase and `README.md` for as-built behavior.
+
 > Issue #8 + #9 | Milestone v0.4.0
 
 ## 目標

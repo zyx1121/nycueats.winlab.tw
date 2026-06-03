@@ -1,5 +1,7 @@
 # Coding Style Review — 2026-05-26
 
+> **Status:** Archived snapshot (2026-05-26). Point-in-time review — many items have been addressed since (see PRs #129–#132 and `git log`); some may still be open. Verify against current code before acting. **Not a live TODO list.**
+
 ## Summary
 
 整體 style 一致性高 — 零 `any` 濫用、零 `for simplicity` antipattern、`'use client'` 使用克制、`useEffect` 只剩兩處合理用例（IntersectionObserver、QR code 生成）。Server Component 優先原則執行得很乾淨。主要扣分在三類重複：(1) shadcn 的兩個 chart 元件 90% 重複只差欄位，(2) 多個 vendor server action 重複 `auth.getUser() → 查 vendors by owner_id` 而沒走 `requireVendor()` helper，(3) 13 個 `as { ... }` 手動 cast supabase join 結果指向同一個型別問題 root cause。另有兩個檔案稍微超過 200 行、一個 dead-code component (`AddMenuItemButton`)、type 引用方式 (`Tables<>` vs `Database["public"]...`) 不統一。
