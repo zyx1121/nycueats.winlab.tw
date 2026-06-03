@@ -37,9 +37,8 @@ export default async function globalSetup() {
 
   const landingPath = new URL(page.url()).pathname;
   if (landingPath.startsWith("/vendor") || landingPath.startsWith("/admin")) {
-    const orderCatalogButton = page.getByRole("button", { name: "點餐目錄" });
-    await orderCatalogButton.click();
-    await page.waitForURL("http://localhost:3000/", { timeout: 30000 });
+    await page.goto("http://localhost:3000/");
+    await page.waitForLoadState("networkidle");
   }
 
   await page.context().storageState({ path: "e2e/.auth/user.json" });
