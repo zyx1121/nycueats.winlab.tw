@@ -24,8 +24,6 @@ export async function fetchReasonsForItems(
   return map;
 }
 
-export type ItemWithReason = HomeItem & { reason: string | null };
-
 export function attachReasons<T extends HomeItem>(
   items: T[],
   reasons: Map<string, string>,
