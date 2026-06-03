@@ -14,8 +14,10 @@ Sentry.init({
 
   integrations: [
     Sentry.replayIntegration(),
-    // App-wide "Report a Bug" widget; feedback is attached to the Sentry event
-    Sentry.feedbackIntegration({ colorScheme: "system" }),
+    // Feedback form wired to a custom Bug button in the header (see
+    // components/feedback-button.tsx); autoInject disables the default
+    // floating bottom-right widget.
+    Sentry.feedbackIntegration({ colorScheme: "system", autoInject: false }),
   ],
 });
 
