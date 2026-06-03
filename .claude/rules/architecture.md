@@ -2,7 +2,7 @@
 
 **Update this file immediately when architecture changes so agents always have the latest info.**
 
-## Current Architecture (2026-05-26)
+## Current Architecture (2026-06-03)
 
 ### Tech Stack
 - Next.js 16 — App Router
@@ -10,6 +10,7 @@
 - shadcn/ui (Radix UI primitives)
 - Supabase — Auth (Google OAuth + Email) + Postgres + RLS + Storage + Edge Functions
 - OpenAI API (`gpt-5.4-mini`) — offline AI tag + description + nutrition fill for menu items
+- Sentry (`@sentry/nextjs`) — error monitoring + tracing + session replay across browser / node / edge runtimes
 
 ### Directory Structure
 ```
@@ -42,6 +43,10 @@ lib/
   supabase/{client,server}.ts  # Browser / SSR clients
   utils.ts
 proxy.ts            # Next.js 16 edge middleware (renamed from middleware.ts)
+instrumentation.ts        # Sentry server/edge register() + onRequestError
+instrumentation-client.ts # Sentry browser init (error + tracing + replay)
+sentry.server.config.ts   # Sentry Node runtime init
+sentry.edge.config.ts     # Sentry edge runtime init (covers proxy.ts)
 types/
   supabase.ts       # Auto-generated DB types
 ```
@@ -108,3 +113,6 @@ types/
 
 ### Slot rollover (auto-provisioning)
 `rollover_daily_slots()` runs nightly (06:00 TPE) and on migration apply. Vendors only need to set `menu_items.default_max_qty` once; pg_cron auto-materialises the next 14 days of daily_slots respecting `vendor.operating_days`. Manual per-date max_qty overrides via the vendor bulk-slot dialog are preserved (`ON CONFLICT DO NOTHING`).
+
+### Observability (Sentry)
+`@sentry/nextjs` initialised across all three runtimes: `instrumentation.ts` dispatches to `sentry.server.config.ts` / `sentry.edge.config.ts` by `NEXT_RUNTIME` and exports `onRequestError` for server request capture; `instrumentation-client.ts` inits the browser SDK (error monitoring + tracing + session replay — 10% of sessions, 100% of sessions with an error). `withSentryConfig` in `next.config.ts` uploads source maps and serves a `/monitoring` tunnel route to bypass ad-blockers — `proxy.ts`'s matcher excludes `/monitoring` so Sentry beacons skip the auth gate instead of redirecting to `/login`. `app/global-error.tsx` and `app/error.tsx` forward exceptions via `Sentry.captureException`. `sendDefaultPii: true` for affected-user attribution (Session Replay masks text/inputs by default). Sentry project `zyx1121/nycueats`; source-map upload needs `SENTRY_AUTH_TOKEN` in CI / Vercel env. Satisfies NFR6 and provides the error / affected-user signals the design doc's autonomous metrics agent (§5.4) is designed to consume.
