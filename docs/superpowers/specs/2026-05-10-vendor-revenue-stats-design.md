@@ -1,5 +1,7 @@
 # 商家營業額統計 — 設計文件
 
+> **Status:** Shipped — archived design doc. The feature described here has since been implemented; kept as a historical record, not a current spec. See the codebase and `README.md` for as-built behavior.
+
 ## Goal
 
 在商家後台新增「營業額統計」頁面，讓商家查看自己店家的月營收與銷售表現。這個頁面概念上接近管理員的營運總覽，但資料範圍只限目前登入商家，不顯示其他商家的營收。

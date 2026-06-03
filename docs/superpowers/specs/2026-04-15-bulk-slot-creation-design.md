@@ -1,5 +1,7 @@
 # 批次名額建立（Bulk Slot Creation）設計文件
 
+> **Status:** Shipped — archived design doc. The feature described here has since been implemented; kept as a historical record, not a current spec. See the codebase and `README.md` for as-built behavior.
+
 ## 問題
 
 商家的 `daily_slots` 只在手動開啟編輯 Dialog 並 blur 輸入框時才會寫入 DB。一旦已建立的 slot 日期全部過期，使用者就無法訂餐，直到商家重新手動設定。這造成每週都需要重複操作，容易遺漏。
