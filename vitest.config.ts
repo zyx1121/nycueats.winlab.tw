@@ -5,7 +5,9 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
-    include: ["**/*.test.ts"],
+    include: ["**/*.test.ts", "**/*.test.tsx"],
+    setupFiles: ["./test/setup.ts"],
+    environmentMatchGlobs: [["**/*.test.tsx", "jsdom"]],
     exclude: ["e2e/**", "node_modules/**", ".next/**"],
     clearMocks: true,
     restoreMocks: true,
