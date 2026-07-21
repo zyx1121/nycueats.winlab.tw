@@ -54,6 +54,60 @@ describe("getCurrentContext", () => {
     });
   });
 
+  it("maps afternoon, evening, and night weather bands", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          current: { temperature_2m: 22, precipitation: 0, time: "2026-05-27T15:30" },
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          current: { temperature_2m: 12, precipitation: 0, time: "2026-05-27T19:30" },
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          current: { temperature_2m: 29, precipitation: 0, time: "2026-05-27T23:30" },
+        }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(getCurrentContext()).resolves.toMatchObject({
+      hourBand: "afternoon",
+      tempBand: "mild",
+      rainy: false,
+    });
+    await expect(getCurrentContext()).resolves.toMatchObject({
+      hourBand: "evening",
+      tempBand: "cold",
+    });
+    await expect(getCurrentContext()).resolves.toMatchObject({
+      hourBand: "night",
+      tempBand: "hot",
+    });
+  });
+
+  it("returns null when weather data is missing or fetch throws", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => ({ current: { precipitation: 0 } }),
+      })),
+    );
+    await expect(getCurrentContext()).resolves.toBeNull();
+
+    vi.stubGlobal("fetch", vi.fn(async () => {
+      throw new Error("network down");
+    }));
+    await expect(getCurrentContext()).resolves.toBeNull();
+  });
+
   it("returns null when weather fetch fails", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false })));
 
@@ -79,6 +133,15 @@ describe("getContextEmbedding", () => {
     expect(invoke).not.toHaveBeenCalled();
   });
 
+  it("uses cached array embeddings without parsing", async () => {
+    const { client, invoke } = makeContextClient({ cached: [0.5, 0.6] });
+
+    await expect(
+      getContextEmbedding(client as never, { hourBand: "morning", tempBand: "mild", rainy: false }),
+    ).resolves.toEqual([0.5, 0.6]);
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
   it("invokes embed-query and caches the result on a cache miss", async () => {
     const { client, invoke, upsert } = makeContextClient({ embedding: [0.3, 0.4] });
 
@@ -99,6 +162,28 @@ describe("getContextEmbedding", () => {
 
     await expect(
       getContextEmbedding(client as never, { hourBand: "night", tempBand: "hot", rainy: true }),
+    ).resolves.toBeNull();
+  });
+
+  it("returns null when the embedding edge function throws", async () => {
+    const maybeSingle = vi.fn(async () => ({ data: null }));
+    const builder = {
+      select: vi.fn(() => builder),
+      eq: vi.fn(() => builder),
+      maybeSingle,
+      upsert: vi.fn(),
+    };
+    const client = {
+      from: vi.fn(() => builder),
+      functions: {
+        invoke: vi.fn(async () => {
+          throw new Error("edge unavailable");
+        }),
+      },
+    };
+
+    await expect(
+      getContextEmbedding(client as never, { hourBand: "evening", tempBand: "cold", rainy: true }),
     ).resolves.toBeNull();
   });
 });

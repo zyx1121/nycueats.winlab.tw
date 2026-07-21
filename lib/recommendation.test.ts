@@ -112,6 +112,46 @@ describe("getTrendingItems", () => {
     expect(menuItemsBuilder.eq).toHaveBeenCalledWith("vendors.vendor_areas.area_id", "area-1");
   });
 
+  it("returns [] when the menu item lookup returns no rows", async () => {
+    const from = vi
+      .fn()
+      .mockReturnValueOnce(makeThenable({ data: [{ menu_item_id: "m1", qty: 1 }] }))
+      .mockReturnValueOnce(makeThenable({ data: null }));
+    createClientMock.mockResolvedValue({ from });
+
+    await expect(getTrendingItems()).resolves.toEqual([]);
+  });
+
+  it("drops missing menu item rows and fills safe vendor defaults", async () => {
+    const from = vi
+      .fn()
+      .mockReturnValueOnce(makeThenable({
+        data: [
+          { menu_item_id: "missing", qty: 3 },
+          { menu_item_id: "m1", qty: 1 },
+        ],
+      }))
+      .mockReturnValueOnce(makeThenable({
+        data: [
+          {
+            ...homeRow({ id: "m1", tags: undefined, ai_tags: undefined }),
+            vendors: null,
+          },
+        ],
+      }));
+    createClientMock.mockResolvedValue({ from });
+
+    await expect(getTrendingItems(2)).resolves.toEqual([
+      expect.objectContaining({
+        id: "m1",
+        tags: [],
+        ai_tags: [],
+        vendor_name: "",
+        vendor_is_open: true,
+      }),
+    ]);
+  });
+
   it("returns [] without querying menu items when there are no recent orders", async () => {
     const from = vi.fn().mockReturnValueOnce(makeThenable({ data: [] }));
     createClientMock.mockResolvedValue({ from });

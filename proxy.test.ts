@@ -48,4 +48,34 @@ describe("proxy", () => {
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toBe("https://example.test/admin");
   });
+
+  it("writes Supabase cookie updates to the request and response", async () => {
+    vi.resetModules();
+
+    vi.doMock("@supabase/ssr", () => ({
+      createServerClient: vi.fn((_url, _key, options) => ({
+        auth: {
+          getUser: vi.fn(async () => {
+            expect(options.cookies.getAll()).toEqual([
+              { name: "sb-session", value: "old" },
+            ]);
+            options.cookies.setAll([
+              { name: "sb-session", value: "fresh", options: { path: "/" } },
+            ]);
+            return { data: { user: null } };
+          }),
+        },
+        from: vi.fn(),
+      })),
+    }));
+    const { proxy: isolatedProxy } = await import("@/proxy");
+    const request = new NextRequest("https://example.test/auth/callback", {
+      headers: { Cookie: "sb-session=old" },
+    });
+
+    const res = await isolatedProxy(request);
+
+    expect(request.cookies.get("sb-session")?.value).toBe("fresh");
+    expect(res.cookies.get("sb-session")?.value).toBe("fresh");
+  });
 });

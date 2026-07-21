@@ -183,6 +183,26 @@ describe("vendor menu actions", () => {
       expect(revalidatePathMock).toHaveBeenCalledWith("/vendor/menu");
     });
 
+    it("runs the scheduled AI tagging callback after creating an item", async () => {
+      const { client } = createSupabaseMock({
+        user: { id: "u1" },
+        expectations: [
+          ...vendorContext("v1"),
+          { table: "menu_items", result: { data: { id: "m1" }, error: null } },
+        ],
+        invokeResult: { data: { results: [{ id: "m1", status: "ok" }] }, error: null },
+      });
+      createClientMock.mockResolvedValue(client);
+
+      await upsertMenuItem({ name: "雞腿飯", price: 120 });
+      const callback = afterMock.mock.calls[0][0] as () => Promise<void>;
+      await callback();
+
+      expect(client.functions.invoke).toHaveBeenCalledWith("generate-menu-item-tags", {
+        body: { menu_item_ids: ["m1"], force: false },
+      });
+    });
+
     it("updates an existing item scoped to the current vendor", async () => {
       const { client, mutations } = createSupabaseMock({
         user: { id: "u1" },

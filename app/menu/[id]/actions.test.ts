@@ -102,6 +102,22 @@ describe("addToOrder", () => {
     expect(result).toEqual({ error: "時段與餐點不符" });
   });
 
+  it("rejects when the daily slot is missing", async () => {
+    const { client } = createSupabaseMock({
+      user: { id: "u1" },
+      expectations: [
+        {
+          table: "daily_slots",
+          result: { data: null },
+        },
+      ],
+    });
+    createClientMock.mockResolvedValue(client);
+
+    const result = await addToOrder("v1", "m1", "s1", "2026-05-27", 1, []);
+    expect(result).toEqual({ error: "找不到此時段" });
+  });
+
   it("rejects when the menu_item does not belong to the vendor (anti-tampering)", async () => {
     const { client } = createSupabaseMock({
       user: { id: "u1" },
@@ -122,6 +138,28 @@ describe("addToOrder", () => {
 
     const result = await addToOrder("v1", "m1", "s1", "2026-05-27", 1, []);
     expect(result).toEqual({ error: "餐點與商家不符" });
+  });
+
+  it("rejects when the menu item is unavailable", async () => {
+    const { client } = createSupabaseMock({
+      user: { id: "u1" },
+      expectations: [
+        {
+          table: "daily_slots",
+          result: { data: { id: "s1", menu_item_id: "m1", date: "2026-05-27" } },
+        },
+        {
+          table: "menu_items",
+          result: {
+            data: { id: "m1", price: 100, is_available: false, vendor_id: "v1" },
+          },
+        },
+      ],
+    });
+    createClientMock.mockResolvedValue(client);
+
+    const result = await addToOrder("v1", "m1", "s1", "2026-05-27", 1, []);
+    expect(result).toEqual({ error: "餐點目前未供應" });
   });
 
   it("computes unit_price from server-fetched price + option deltas, ignoring any client-side number", async () => {
@@ -208,6 +246,83 @@ describe("addToOrder", () => {
 
     const result = await addToOrder("v1", "m1", "s1", "2026-05-27", 1, ["o1"]);
     expect(result).toEqual({ error: "選項不屬於此餐點" });
+  });
+
+  it("rejects when not all selected options can be loaded", async () => {
+    const { client } = createSupabaseMock({
+      user: { id: "u1" },
+      expectations: [
+        {
+          table: "daily_slots",
+          result: { data: { id: "s1", menu_item_id: "m1", date: "2026-05-27" } },
+        },
+        {
+          table: "menu_items",
+          result: {
+            data: { id: "m1", price: 100, is_available: true, vendor_id: "v1" },
+          },
+        },
+        {
+          table: "item_options",
+          result: { data: [] },
+        },
+      ],
+    });
+    createClientMock.mockResolvedValue(client);
+
+    const result = await addToOrder("v1", "m1", "s1", "2026-05-27", 1, ["o1"]);
+    expect(result).toEqual({ error: "選項無效" });
+  });
+
+  it("returns an error when creating a pending order fails", async () => {
+    const { client } = createSupabaseMock({
+      user: { id: "u1" },
+      expectations: [
+        {
+          table: "daily_slots",
+          result: { data: { id: "s1", menu_item_id: "m1", date: "2026-05-27" } },
+        },
+        {
+          table: "menu_items",
+          result: {
+            data: { id: "m1", price: 100, is_available: true, vendor_id: "v1" },
+          },
+        },
+        { table: "orders", result: { data: null } },
+        { table: "orders", result: { data: null, error: { message: "insert failed" } } },
+      ],
+    });
+    createClientMock.mockResolvedValue(client);
+
+    const result = await addToOrder("v1", "m1", "s1", "2026-05-27", 1, []);
+    expect(result).toEqual({ error: "建立訂單失敗" });
+  });
+
+  it("returns a retryable error when inserting the order item fails", async () => {
+    const { client } = createSupabaseMock({
+      user: { id: "u1" },
+      expectations: [
+        {
+          table: "daily_slots",
+          result: { data: { id: "s1", menu_item_id: "m1", date: "2026-05-27" } },
+        },
+        {
+          table: "menu_items",
+          result: {
+            data: { id: "m1", price: 100, is_available: true, vendor_id: "v1" },
+          },
+        },
+        { table: "orders", result: { data: { id: "ord1" } } },
+        {
+          table: "order_items",
+          result: { data: null, error: { code: "XX000", message: "insert failed" } },
+        },
+      ],
+    });
+    createClientMock.mockResolvedValue(client);
+
+    const result = await addToOrder("v1", "m1", "s1", "2026-05-27", 1, []);
+    expect(result).toEqual({ error: "加入失敗，請稍後再試" });
   });
 
   it("translates Postgres CHECK violation (23514) to 此日期已售完", async () => {

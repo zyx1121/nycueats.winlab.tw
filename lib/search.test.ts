@@ -137,6 +137,28 @@ describe("searchHomeItems", () => {
     );
   });
 
+  it("degrades to keyword-only embedding when embed-query throws", async () => {
+    const invoke = vi.fn(async (name: string) => {
+      if (name === "embed-query") throw new Error("edge crashed");
+      return { data: null, error: null };
+    });
+    const rpc = vi.fn(async () => ({ data: [row("a", "A")], error: null }));
+    createClientMock.mockResolvedValue({ functions: { invoke }, rpc });
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await searchHomeItems("拉麵");
+
+    expect(rpc).toHaveBeenCalledWith(
+      "hybrid_search",
+      expect.objectContaining({ p_query_embedding: null }),
+    );
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "embed-query failed; degrading to keyword-only:",
+      expect.any(Error),
+    );
+    consoleSpy.mockRestore();
+  });
+
   it("skips the reranker when there is at most one candidate", async () => {
     const { client, invoke } = makeClient({ rpcData: [row("a", "A")] });
     createClientMock.mockResolvedValue(client);
@@ -189,5 +211,27 @@ describe("searchHomeItems", () => {
     await searchHomeItems("飯", undefined, 10, { sort: "price_asc" });
 
     expect(invoke).not.toHaveBeenCalledWith("rerank-search", expect.anything());
+  });
+
+  it("keeps the RRF order when the reranker throws", async () => {
+    const invoke = vi.fn(async (name: string) => {
+      if (name === "embed-query") return { data: { embedding: [0.1, 0.2] }, error: null };
+      throw new Error("reranker crashed");
+    });
+    const rpc = vi.fn(async () => ({
+      data: [row("a", "A"), row("b", "B")],
+      error: null,
+    }));
+    createClientMock.mockResolvedValue({ functions: { invoke }, rpc });
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const result = await searchHomeItems("牛肉麵");
+
+    expect(result.map((i) => i.id)).toEqual(["a", "b"]);
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "rerank-search failed; keeping RRF order:",
+      expect.any(Error),
+    );
+    consoleSpy.mockRestore();
   });
 });
