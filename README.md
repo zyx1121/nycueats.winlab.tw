@@ -4,7 +4,7 @@
 
 `nextjs` · `supabase` · `typescript` · `tailwindcss`
 
-[![CI](https://github.com/zyx1121/nycueats.winlab.tw/actions/workflows/ci.yml/badge.svg)](https://github.com/zyx1121/nycueats.winlab.tw/actions) &nbsp;[![Live](https://img.shields.io/badge/live-nycueats.winlab.tw-111111)](https://nycueats.winlab.tw) &nbsp;[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](#license)
+[![CI](https://github.com/zyx1121/tsmceats.winlab.tw/actions/workflows/ci.yml/badge.svg)](https://github.com/zyx1121/tsmceats.winlab.tw/actions) &nbsp;[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](#license)
 
 ```
 Employee → /login → pick a factory site → browse menus (live quotas) → cart → pre-order
@@ -21,7 +21,7 @@ Thousands of factory employees eating the same canteen food every day is a real 
 ## Quickstart
 
 ```bash
-git clone https://github.com/zyx1121/nycueats.winlab.tw && cd nycueats.winlab.tw
+git clone https://github.com/zyx1121/tsmceats.winlab.tw && cd tsmceats.winlab.tw
 bun install
 cp .env.example .env   # fill in the keys below
 bun dev
